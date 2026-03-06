@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 const ChatWindow = () => {
     const [messages, setMessages] = useState([
-        { user: 'System', text: 'Welcome to Block-Code-Draw!' },
-        { user: 'Player1', text: 'Is it a square?' }
+        { user: 'BCD AI Bot', text: 'Welcome to Block, Code, Draw! Can I guess what you draw?' },
+        { user: 'You', text: 'Let\'s find out!' }
     ]);
     const [input, setInput] = useState('');
 

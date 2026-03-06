@@ -32,7 +32,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "turn_right",
-        "message0": "turn right %1 degrees",
+        "message0": "turn right ↻ %1 degrees",
         "args0": [{ "type": "field_number", "name": "DEGREES", "value": 90 }],
         "previousStatement": null,
         "nextStatement": null,
@@ -40,7 +40,7 @@ Blockly.defineBlocksWithJsonArray([
     },
     {
         "type": "turn_left",
-        "message0": "turn left %1 degrees",
+        "message0": "turn left ↺ %1 degrees",
         "args0": [{ "type": "field_number", "name": "DEGREES", "value": 90 }],
         "previousStatement": null,
         "nextStatement": null,
@@ -151,7 +151,56 @@ Blockly.defineBlocksWithJsonArray([
         ],
         "previousStatement": null,
         "nextStatement": null,
-        "colour": 340
+        "colour": "#f72585"
+    },
+    {
+        "type": "repeat_times",
+        "message0": "repeat %1 times",
+        "args0": [{ "type": "field_number", "name": "TIMES", "value": 10, "min": 1 }],
+        "message1": "%1",
+        "args1": [{ "type": "input_statement", "name": "DO" }],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#ff9500"
+    },
+    {
+        "type": "if_greater_than",
+        "message0": "if %1 > %2 then",
+        "args0": [
+            { "type": "field_number", "name": "A", "value": 0 },
+            { "type": "field_number", "name": "B", "value": 0 }
+        ],
+        "message1": "%1",
+        "args1": [{ "type": "input_statement", "name": "DO" }],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#e63946"
+    },
+    {
+        "type": "if_less_than",
+        "message0": "if %1 < %2 then",
+        "args0": [
+            { "type": "field_number", "name": "A", "value": 0 },
+            { "type": "field_number", "name": "B", "value": 0 }
+        ],
+        "message1": "%1",
+        "args1": [{ "type": "input_statement", "name": "DO" }],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#e63946"
+    },
+    {
+        "type": "if_equal_to",
+        "message0": "if %1 = %2 then",
+        "args0": [
+            { "type": "field_number", "name": "A", "value": 0 },
+            { "type": "field_number", "name": "B", "value": 0 }
+        ],
+        "message1": "%1",
+        "args1": [{ "type": "input_statement", "name": "DO" }],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#e63946"
     }
 ]);
 
@@ -219,6 +268,37 @@ javascriptGenerator.forBlock['draw_polygon'] = function (block) {
     const sides = block.getFieldValue('SIDES');
     const length = block.getFieldValue('LENGTH');
     return `drawPolygon(${sides}, ${length});\n`;
+};
+javascriptGenerator.forBlock['set_color'] = function (block) {
+    const color = block.getFieldValue('COLOR');
+    return `setColor('${color}');\n`;
+};
+javascriptGenerator.forBlock['draw_circle'] = function (block) {
+    const radius = block.getFieldValue('RADIUS');
+    return `drawCircle(${radius});\n`;
+};
+javascriptGenerator.forBlock['repeat_times'] = function (block) {
+    const times = block.getFieldValue('TIMES');
+    const branch = javascriptGenerator.statementToCode(block, 'DO');
+    return `for (let _i = 0; _i < ${times}; _i++) {\n${branch}}\n`;
+};
+javascriptGenerator.forBlock['if_greater_than'] = function (block) {
+    const a = block.getFieldValue('A');
+    const b = block.getFieldValue('B');
+    const branch = javascriptGenerator.statementToCode(block, 'DO');
+    return `if (${a} > ${b}) {\n${branch}}\n`;
+};
+javascriptGenerator.forBlock['if_less_than'] = function (block) {
+    const a = block.getFieldValue('A');
+    const b = block.getFieldValue('B');
+    const branch = javascriptGenerator.statementToCode(block, 'DO');
+    return `if (${a} < ${b}) {\n${branch}}\n`;
+};
+javascriptGenerator.forBlock['if_equal_to'] = function (block) {
+    const a = block.getFieldValue('A');
+    const b = block.getFieldValue('B');
+    const branch = javascriptGenerator.statementToCode(block, 'DO');
+    return `if (${a} === ${b}) {\n${branch}}\n`;
 };
 
 const BlocklyEditor = ({ onCodeChange, highlightBlockId }) => {
@@ -303,7 +383,17 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId }) => {
                         "name": "Loops",
                         "colour": "#ff9500",
                         "contents": [
-                            { "kind": "block", "type": "controls_repeat_ext" }
+                            { "kind": "block", "type": "repeat_times" }
+                        ]
+                    },
+                    {
+                        "kind": "category",
+                        "name": "Compare",
+                        "colour": "#e63946",
+                        "contents": [
+                            { "kind": "block", "type": "if_greater_than" },
+                            { "kind": "block", "type": "if_less_than" },
+                            { "kind": "block", "type": "if_equal_to" }
                         ]
                     }
                 ]

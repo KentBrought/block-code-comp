@@ -20,24 +20,27 @@ body {
 
 /* ─── Header ─── */
 .app-header {
-  padding: 0 1.5rem;
+  padding: 0 1rem;
   height: 54px;
   background: #ffffff;
   border-bottom: 2px solid #e0e4e8;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
   z-index: 10;
 }
 
+.app-title,
 .app-header h1 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .title-block {
@@ -57,6 +60,95 @@ body {
   font-weight: 400;
 }
 
+/* Centre cluster: word badge + timer */
+.header-centre {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.word-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f0f4ff;
+  border: 1.5px solid #c5d0f8;
+  border-radius: 20px;
+  padding: 0.28rem 0.85rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.word-badge-label {
+  font-size: 0.72rem;
+  color: #6b7db3;
+  font-weight: 500;
+}
+
+.word-badge-word {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #4361ee;
+  text-transform: capitalize;
+}
+
+.game-timer {
+  font-family: 'Inter', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d3436;
+  background: #f0f2f5;
+  border: 1.5px solid #dde1e6;
+  border-radius: 20px;
+  padding: 0.28rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.4s, color 0.4s, border-color 0.4s;
+}
+
+.game-timer--warn {
+  background: #fff3cd;
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.game-timer--danger {
+  background: #fde8e8;
+  border-color: #e63946;
+  color: #c0392b;
+  animation: timerPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.timer-up-tag {
+  background: #e63946;
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* Right-side header actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 /* ─── Run Button ─── */
 .run-button {
   display: inline-flex;
@@ -65,12 +157,11 @@ body {
   background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: #fff;
   border: none;
-  padding: 8px 22px;
+  padding: 7px 18px;
   border-radius: 24px;
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
   cursor: pointer;
   box-shadow: 0 3px 10px rgba(39, 174, 96, 0.35);
   transition: transform 0.1s ease, box-shadow 0.15s ease;
@@ -86,6 +177,35 @@ body {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
 }
+
+/* ─── Exit Button ─── */
+.exit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  color: #e63946;
+  border: 1.5px solid #e63946;
+  padding: 6px 14px;
+  border-radius: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.exit-button:hover {
+  background: #e63946;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.exit-button:active {
+  transform: translateY(0);
+}
+
+
 
 /* ─── Main Layout ─── */
 .main-layout {
