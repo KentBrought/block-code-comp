@@ -1,58 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  background: #f0f2f5;
+  color: #2d3436;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden;
 }
 
+/* ─── Header ─── */
 .app-header {
-  padding: 1rem;
-  background: #252525;
-  border-bottom: 2px solid #333;
-  text-align: center;
+  padding: 0 1.5rem;
+  height: 54px;
+  background: #ffffff;
+  border-bottom: 2px solid #e0e4e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+  z-index: 10;
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.5rem;
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
+.title-block {
+  color: #4361ee;
+}
+
+.title-code {
+  color: #7209b7;
+}
+
+.title-draw {
+  color: #f72585;
+}
+
+.title-comma {
+  color: #adb5bd;
+  font-weight: 400;
+}
+
+/* ─── Run Button ─── */
+.run-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #fff;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(39, 174, 96, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.run-button:hover {
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+  box-shadow: 0 5px 16px rgba(39, 174, 96, 0.45);
+  transform: translateY(-1px);
+}
+
+.run-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+/* ─── Main Layout ─── */
 .main-layout {
-  display: grid;
-  grid-template-columns: 1fr 2fr 300px;
+  display: flex;
   flex: 1;
   overflow: hidden;
-  gap: 10px;
-  padding: 10px;
+  min-height: 0;
 }
 
-.editor-section,
-.canvas-section,
-.chat-section {
-  background: #252525;
-  border-radius: 8px;
-  overflow: hidden;
+/* Blockly takes up the left ~60%: toolbox sidebar + open workspace */
+.editor-section {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  border: 1px solid #333;
+  border-right: 2px solid #dde1e6;
+  overflow: hidden;
+}
+
+/* Right column: canvas above, chat below */
+.right-column {
+  flex: 0 0 380px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .canvas-section {
+  flex: 1 1 0;
+  min-height: 0;
+  background: #fafbfc;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-bottom: 2px solid #dde1e6;
+  overflow: hidden;
 }
 
+.chat-section {
+  flex: 0 0 220px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Chat ─── */
 .chat-window {
   display: flex;
   flex-direction: column;
@@ -61,53 +141,129 @@ body {
 
 .messages {
   flex: 1;
-  padding: 10px;
+  padding: 10px 12px;
   overflow-y: auto;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .message {
-  margin-bottom: 8px;
-  padding: 8px;
-  background: #333;
-  border-radius: 4px;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  background: #f4f6f8;
+  border-radius: 8px;
+  border: 1px solid #ebeef1;
+  line-height: 1.4;
+}
+
+.message strong {
+  color: #4361ee;
 }
 
 .chat-window form {
   display: flex;
-  padding: 10px;
-  border-top: 1px solid #333;
+  padding: 8px;
+  border-top: 1px solid #e0e4e8;
+  background: #fafbfc;
 }
 
 .chat-window input {
   flex: 1;
-  background: #1a1a1a;
-  border: 1px solid #444;
-  color: #fff;
-  padding: 8px;
-  border-radius: 4px 0 0 4px;
+  background: #ffffff;
+  border: 1px solid #d0d5db;
+  color: #2d3436;
+  padding: 7px 10px;
+  border-radius: 6px 0 0 6px;
   outline: none;
+  font-size: 0.85rem;
+  transition: border-color 0.2s;
+}
+
+.chat-window input:focus {
+  border-color: #4361ee;
+}
+
+.chat-window input::placeholder {
+  color: #9ca3af;
 }
 
 .chat-window button {
-  background: #4facfe;
+  background: #4361ee;
   border: none;
   color: white;
-  padding: 8px 16px;
-  border-radius: 0 4px 4px 0;
+  padding: 7px 14px;
+  border-radius: 0 6px 6px 0;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .chat-window button:hover {
-  background: #00f2fe;
+  background: #3451d1;
 }
 
-/* Blockly Customization */
+/* ─── Blockly Overrides ─── */
+
+/* The outer toolbox sidebar (category dots + names) */
 .blocklyToolboxDiv {
-  background-color: #252525 !important;
-  color: #fff !important;
+  background-color: #1e2235 !important;
+  border-right: none !important;
+  min-width: 68px !important;
+}
+
+.blocklyTreeRow {
+  padding: 6px 4px !important;
+  margin: 2px !important;
+  border-radius: 8px !important;
+}
+
+.blocklyTreeRow:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.blocklyTreeSelected {
+  background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 .blocklyTreeLabel {
-  color: #fff !important;
+  color: #cdd3f0 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+}
+
+/* Flyout background */
+.blocklyFlyoutBackground {
+  fill: #ffffff !important;
+  fill-opacity: 1 !important;
+}
+
+/* Category section heading labels inside flyout */
+.blocklyFlyoutLabelText {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  fill: #868e96 !important;
+}
+
+/* Separator lines –– rendered via the blocklyFlyoutSeparatorLabel custom class */
+.blocklyFlyoutSeparatorLabel rect {
+  fill: #e9ecef !important;
+}
+
+/* Main workspace background */
+.blocklyMainBackground {
+  fill: #f8f9fa !important;
+}
+
+.blocklyScrollbarHandle {
+  fill: #ced4da !important;
+}
+
+/* Highlight executing block with a gold outline */
+.blocklySelected>.blocklyPath {
+  stroke: #f59f00 !important;
+  stroke-width: 3px !important;
 }
