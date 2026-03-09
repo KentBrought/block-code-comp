@@ -4,6 +4,7 @@ import DrawingCanvas from './components/DrawingCanvas';
 import ChatWindow from './components/ChatWindow';
 import HomePage from './pages/HomePage';
 import WordModal from './components/WordModal';
+import ResultModal from './components/ResultModal';
 import './App.css';
 
 const GAME_DURATION = 5 * 60; // 5 minutes in seconds
@@ -24,7 +25,11 @@ function App() {
 
   const [commands, setCommands] = useState('');
   const [runSequence, setRunSequence] = useState(0);
+  const [runCount, setRunCount] = useState(0);
   const [highlightBlockId, setHighlightBlockId] = useState(null);
+
+  const [winInfo, setWinInfo] = useState(null); // { word, timeTakenSeconds, status }
+  const [editorResetKey, setEditorResetKey] = useState(0);
 
   const timerRef = useRef(null);
 
@@ -37,6 +42,16 @@ function App() {
             clearInterval(timerRef.current);
             setTimerRunning(false);
             setTimeUp(true);
+            setWinInfo(prev =>
+              prev || (selectedWord
+                ? {
+                    word: selectedWord,
+                    timeTakenSeconds: GAME_DURATION,
+                    status: 'timeout',
+                    runCount,
+                  }
+                : null)
+            );
             return 0;
           }
           return t - 1;
@@ -44,7 +59,7 @@ function App() {
       }, 1000);
     }
     return () => clearInterval(timerRef.current);
-  }, [timerRunning]);
+  }, [timerRunning, selectedWord, runCount]);
 
   const handlePlay = () => {
     setScreen('word-select');
@@ -55,6 +70,8 @@ function App() {
     setTimeLeft(GAME_DURATION);
     setTimeUp(false);
     setTimerRunning(true);
+    setRunCount(0);
+    setWinInfo(null);
     setScreen('game');
   };
 
@@ -66,13 +83,63 @@ function App() {
     setTimeUp(false);
     setCommands('');
     setRunSequence(0);
+    setRunCount(0);
     setHighlightBlockId(null);
+    setWinInfo(null);
     setScreen('home');
   }, []);
 
   const handleRun = () => {
     setRunSequence(s => s + 1);
+    setRunCount(c => c + 1);
   };
+
+  const handleResultPlayAgain = useCallback(() => {
+    clearInterval(timerRef.current);
+    setTimerRunning(false);
+    setCommands('');
+    setRunSequence(0);
+    setHighlightBlockId(null);
+    setWinInfo(null);
+    setRunCount(0);
+    setEditorResetKey((k) => k + 1);
+    setTimeLeft(GAME_DURATION);
+    setTimeUp(false);
+    setSelectedWord(null);
+    setScreen('word-select');
+  }, []);
+
+  const handleGuessComplete = useCallback(
+    ({ guess, categories }) => {
+      if (!selectedWord) return;
+
+      const canonical = (str) =>
+        (str || '')
+          .toString()
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '');
+
+      const target = canonical(selectedWord);
+
+      const allNames = [
+        guess,
+        ...(categories || []).map(
+          (c) =>
+            (c && (c.displayName || c.categoryName)) ? c.displayName || c.categoryName : ''
+        ),
+      ].filter(Boolean);
+
+      const anyMatch = allNames.some((name) => canonical(name) === target);
+
+      if (anyMatch) {
+        setTimerRunning(false);
+        const timeTakenSeconds = GAME_DURATION - timeLeft;
+        setWinInfo({ word: selectedWord, timeTakenSeconds, status: 'win', runCount });
+      }
+    },
+    [selectedWord, timeLeft, runCount]
+  );
 
   const timerClass = timeLeft <= 60
     ? 'game-timer game-timer--danger'
@@ -88,6 +155,17 @@ function App() {
     <div className="app-container">
       {/* Word selection modal when screen === 'word-select' */}
       {screen === 'word-select' && <WordModal onSelect={handleWordSelect} />}
+
+      {winInfo && (
+        <ResultModal
+          word={winInfo.word}
+          timeTakenSeconds={winInfo.timeTakenSeconds}
+          status={winInfo.status}
+          runCount={winInfo.runCount}
+          onPlayAgain={handleResultPlayAgain}
+          onClose={() => setWinInfo(null)}
+        />
+      )}
 
       <header className="app-header">
         {/* Left: title */}
@@ -128,7 +206,11 @@ function App() {
 
       <main className="main-layout">
         <section className="editor-section">
-          <BlocklyEditor onCodeChange={setCommands} highlightBlockId={highlightBlockId} />
+          <BlocklyEditor
+            onCodeChange={setCommands}
+            highlightBlockId={highlightBlockId}
+            resetKey={editorResetKey}
+          />
         </section>
 
         <aside className="right-column">
@@ -137,6 +219,7 @@ function App() {
               commands={commands}
               runSequence={runSequence}
               onHighlight={setHighlightBlockId}
+              onGuessComplete={handleGuessComplete}
             />
           </section>
           <section className="chat-section">
