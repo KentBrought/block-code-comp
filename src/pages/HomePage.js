@@ -84,7 +84,7 @@ function HomePage({ onPlay, onHowToPlay }) {
         <p className='home-tagline'>
           Use colourful code blocks to guide your marker and create art.
           <br />
-          Can your AI bot guess your drawing in under <strong>5 minutes</strong>
+          Can your AI bot guess your drawing in under <strong>15 minutes</strong>
           ?
         </p>
 

@@ -8,7 +8,7 @@ import WordModal from './components/WordModal'
 import ResultModal from './components/ResultModal'
 import './App.css'
 
-const GAME_DURATION = 5 * 60 // 5 minutes in seconds
+const GAME_DURATION = 15 * 60 // 15 minutes in seconds
 
 const TOUR_STEPS = [
   {
@@ -18,7 +18,7 @@ const TOUR_STEPS = [
   },
   {
     selector: '.game-timer',
-    content: 'You have 5 minutes to build your code and draw. Keep an eye on the timer!'
+    content: 'You have 15 minutes to build your code and draw. Keep an eye on the timer!'
   },
   {
     selector: '.editor-section',
@@ -55,6 +55,7 @@ function AppInner() {
 
   const [commands, setCommands] = useState('')
   const [runSequence, setRunSequence] = useState(0)
+  const [stopSequence, setStopSequence] = useState(0)
   const [runCount, setRunCount] = useState(0)
   const [highlightBlockId, setHighlightBlockId] = useState(null)
 
@@ -133,11 +134,16 @@ function AppInner() {
     setTourOpen(false)
     setStartTourAfterWordSelect(false)
     setScreen('home')
-  }, [])
+  }, [setTourOpen])
 
   const handleRun = () => {
     setRunSequence((s) => s + 1)
     setRunCount((c) => c + 1)
+  }
+
+  const handleStop = () => {
+    setStopSequence((s) => s + 1)
+    setHighlightBlockId(null)
   }
 
   const handleResultPlayAgain = useCallback(() => {
@@ -250,17 +256,24 @@ function AppInner() {
           )}
         </div>
 
-        {/* Right: Run + Exit */}
+        {/* Right: Run + Stop + Exit */}
         <div className='header-actions'>
           <button className='run-button' onClick={handleRun}>
-            <span className='run-icon'>▶</span> Run
+            <span className='run-icon'>></span> Run
+          </button>
+          <button
+            className='exit-button'
+            onClick={handleStop}
+            title='Stop current run'
+          >
+            <span>[]</span> Stop
           </button>
           <button
             className='exit-button'
             onClick={handleExit}
             title='Exit to home'
           >
-            <span>✕</span> Exit
+            <span>X</span> Exit
           </button>
         </div>
       </header>
@@ -279,6 +292,7 @@ function AppInner() {
             <DrawingCanvas
               commands={commands}
               runSequence={runSequence}
+              stopSequence={stopSequence}
               onHighlight={setHighlightBlockId}
               onGuessComplete={handleGuessComplete}
             />
@@ -301,3 +315,5 @@ export default function App() {
     </TourProvider>
   )
 }
+
+

@@ -1,14 +1,31 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { classifyCanvas } from '../utils/imageClassifier'
 
-const DrawingCanvas = ({ commands, runSequence, onHighlight, onGuessComplete }) => {
+const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGuessComplete }) => {
   const bgCanvasRef = useRef(null)
   const markerCanvasRef = useRef(null)
   const drawingCanvasRef = useRef(null) // offscreen canvas with drawing only
   const containerRef = useRef(null)
+  const runIdRef = useRef(0)
+  const executedRunSequenceRef = useRef(0)
+  const commandsRef = useRef(commands)
+  const onHighlightRef = useRef(onHighlight)
+  const onGuessCompleteRef = useRef(onGuessComplete)
   const [classifying, setClassifying] = useState(false)
   const [classificationResult, setClassificationResult] = useState(null)
   const [classificationError, setClassificationError] = useState(null)
+
+  useEffect(() => {
+    commandsRef.current = commands
+    onHighlightRef.current = onHighlight
+    onGuessCompleteRef.current = onGuessComplete
+  }, [commands, onHighlight, onGuessComplete])
+
+  useEffect(() => {
+    runIdRef.current += 1
+    setClassifying(false)
+    if (onHighlightRef.current) onHighlightRef.current(null)
+  }, [stopSequence])
 
   // Resize both canvases to match their container whenever container size changes
   useEffect(() => {
@@ -139,6 +156,12 @@ const DrawingCanvas = ({ commands, runSequence, onHighlight, onGuessComplete }) 
   }
 
   useEffect(() => {
+    const runId = ++runIdRef.current
+    const isStale = () => runIdRef.current !== runId
+    const assertActive = () => {
+      if (isStale()) throw new Error('__RUN_CANCELLED__')
+    }
+
     const bgCanvas = bgCanvasRef.current
     const bgCtx = bgCanvas.getContext('2d')
     const markerCanvas = markerCanvasRef.current
@@ -187,189 +210,360 @@ const DrawingCanvas = ({ commands, runSequence, onHighlight, onGuessComplete }) 
     }
 
     const runCommandsAsync = async () => {
+      assertActive()
       resetAndDraw()
       setClassifying(true)
       setClassificationError(null)
       setClassificationResult(null)
 
-      const commandList = commands.split('\n')
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+      const STEP_MS = 300
+      let activeStepStartedAt = Date.now()
+      let activeStepBlockId = null
 
-      for (let cmd of commandList) {
-        if (!cmd || !cmd.trim()) continue
-
-        const match = cmd.trim().match(/^(\w+)\((.*)\);?$/)
-        if (!match) continue
-
-        const action = match[1]
-        const argsStr = match[2]
-        const args = argsStr.split(',').map((arg) => {
-          const trimmed = arg.trim()
-          if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
-            return trimmed.slice(1, -1)
-          }
-          return parseFloat(trimmed)
-        })
-
-        if (action === 'highlightBlock') {
-          const rawId = argsStr.trim()
-          const id = rawId.startsWith("'") ? rawId.slice(1, -1) : rawId
-          if (onHighlight) onHighlight(id)
-          await new Promise((r) => setTimeout(r, 200))
-          continue
-        } else if (action === 'moveForward') {
-          const val = args[0] || 0
-          const rad = (curAngle * Math.PI) / 180
-          curX += Math.cos(rad) * val
-          curY += Math.sin(rad) * val
-          if (curPenDown) bgCtx.lineTo(curX, curY)
-          else bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            if (curPenDown) drawCtx.lineTo(curX, curY)
-            else drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'moveBackward') {
-          const val = args[0] || 0
-          const rad = (curAngle * Math.PI) / 180
-          curX -= Math.cos(rad) * val
-          curY -= Math.sin(rad) * val
-          if (curPenDown) bgCtx.lineTo(curX, curY)
-          else bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            if (curPenDown) drawCtx.lineTo(curX, curY)
-            else drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'turnRight') {
-          curAngle += args[0] || 0
-        } else if (action === 'turnLeft') {
-          curAngle -= args[0] || 0
-        } else if (action === 'setHeading') {
-          curAngle = args[0] || 0
-        } else if (action === 'jumpTo') {
-          curX = bgCanvas.width / 2 + (args[0] || 0)
-          curY = bgCanvas.height / 2 - (args[1] || 0)
-          if (curPenDown) bgCtx.lineTo(curX, curY)
-          else bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            if (curPenDown) drawCtx.lineTo(curX, curY)
-            else drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'goToCenter') {
-          curX = bgCanvas.width / 2
-          curY = bgCanvas.height / 2
-          if (curPenDown) bgCtx.lineTo(curX, curY)
-          else bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            if (curPenDown) drawCtx.lineTo(curX, curY)
-            else drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'penUp') {
-          curPenDown = false
-        } else if (action === 'penDown') {
-          curPenDown = true
-        } else if (action === 'setColor') {
-          const color = args[0] || curColor
-          bgCtx.stroke()
-          bgCtx.beginPath()
-          bgCtx.strokeStyle = color
-          curColor = color
-          bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            drawCtx.stroke()
-            drawCtx.beginPath()
-            drawCtx.strokeStyle = color
-            drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'setPenSize') {
-          bgCtx.stroke()
-          bgCtx.beginPath()
-          bgCtx.lineWidth = args[0] || 3
-          curSize = args[0] || 3
-          bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            drawCtx.stroke()
-            drawCtx.beginPath()
-            drawCtx.lineWidth = args[0] || 3
-            drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'clear') {
-          bgCtx.stroke()
-          resetAndDraw()
-          continue
-        } else if (action === 'setRandomColor') {
-          const randomColor =
-            '#' +
-            Math.floor(Math.random() * 16777215)
-              .toString(16)
-              .padStart(6, '0')
-          bgCtx.stroke()
-          bgCtx.beginPath()
-          bgCtx.strokeStyle = randomColor
-          curColor = randomColor
-          bgCtx.moveTo(curX, curY)
-          if (drawCtx) {
-            drawCtx.stroke()
-            drawCtx.beginPath()
-            drawCtx.strokeStyle = randomColor
-            drawCtx.moveTo(curX, curY)
-          }
-        } else if (action === 'drawCircle') {
-          const radius = args[0] || 50
-          if (curPenDown) {
-            bgCtx.stroke()
-            bgCtx.beginPath()
-            bgCtx.arc(curX, curY, radius, 0, 2 * Math.PI)
-            bgCtx.stroke()
-            bgCtx.beginPath()
-            bgCtx.moveTo(curX, curY)
-            if (drawCtx) {
-              drawCtx.stroke()
-              drawCtx.beginPath()
-              drawCtx.arc(curX, curY, radius, 0, 2 * Math.PI)
-              drawCtx.stroke()
-              drawCtx.beginPath()
-              drawCtx.moveTo(curX, curY)
-            }
-          }
-        } else if (action === 'drawPolygon') {
-          const sides = args[0] || 3
-          const length = args[1] || 50
-          if (curPenDown) {
-            for (let i = 0; i < sides; i++) {
-              const rad = (curAngle * Math.PI) / 180
-              curX += Math.cos(rad) * length
-              curY += Math.sin(rad) * length
-              bgCtx.lineTo(curX, curY)
-              if (drawCtx) {
-                drawCtx.lineTo(curX, curY)
-              }
-              curAngle += 360 / sides
-            }
-          }
-        }
-
+      const syncCanvases = () => {
+        assertActive()
         bgCtx.stroke()
         if (drawCtx) {
           drawCtx.stroke()
         }
-        drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle) // Draw marker in real-time
+        drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle)
       }
 
-      if (onHighlight) onHighlight(null)
+      const moveTo = (x, y) => {
+        if (curPenDown) bgCtx.lineTo(x, y)
+        else bgCtx.moveTo(x, y)
+
+        if (drawCtx) {
+          if (curPenDown) drawCtx.lineTo(x, y)
+          else drawCtx.moveTo(x, y)
+        }
+
+        curX = x
+        curY = y
+        syncCanvases()
+      }
+
+      const animateTo = async (targetX, targetY, targetAngle, animateMove, animateRotate) => {
+        if (!animateMove && !animateRotate) {
+          curX = targetX
+          curY = targetY
+          curAngle = targetAngle
+          bgCtx.moveTo(curX, curY)
+          if (drawCtx) {
+            drawCtx.moveTo(curX, curY)
+          }
+          syncCanvases()
+          return
+        }
+
+        const startX = curX
+        const startY = curY
+        const startAngle = curAngle
+        const durationMs = STEP_MS
+        const steps = 12
+
+        for (let i = 1; i <= steps; i++) {
+          assertActive()
+          const t = i / steps
+          const nextX = animateMove ? startX + (targetX - startX) * t : targetX
+          const nextY = animateMove ? startY + (targetY - startY) * t : targetY
+          const nextAngle = animateRotate
+            ? startAngle + (targetAngle - startAngle) * t
+            : targetAngle
+
+          if (animateMove && curPenDown) {
+            bgCtx.lineTo(nextX, nextY)
+            if (drawCtx) drawCtx.lineTo(nextX, nextY)
+          } else {
+            bgCtx.moveTo(nextX, nextY)
+            if (drawCtx) drawCtx.moveTo(nextX, nextY)
+          }
+
+          curX = nextX
+          curY = nextY
+          curAngle = nextAngle
+          syncCanvases()
+          await sleep(durationMs / steps)
+        }
+
+        bgCtx.moveTo(curX, curY)
+        if (drawCtx) {
+          drawCtx.moveTo(curX, curY)
+        }
+      }
+
+      const recenterPathHeads = () => {
+        bgCtx.moveTo(curX, curY)
+        if (drawCtx) {
+          drawCtx.moveTo(curX, curY)
+        }
+      }
+
+      const finishStep = async () => {
+        const elapsed = Date.now() - activeStepStartedAt
+        const remaining = STEP_MS - elapsed
+        if (remaining > 0) {
+          await sleep(remaining)
+        }
+      }
+
+      const api = {
+        highlightBlock: (id) => {
+          if (onHighlightRef.current) {
+            onHighlightRef.current(id == null ? null : String(id))
+          }
+        },
+        moveForward: async (value = 0) => {
+          assertActive()
+          const rad = (curAngle * Math.PI) / 180
+          const targetX = curX + Math.cos(rad) * value
+          const targetY = curY + Math.sin(rad) * value
+          await animateTo(targetX, targetY, curAngle, true, false)
+          await finishStep()
+        },
+        moveBackward: async (value = 0) => {
+          assertActive()
+          const rad = (curAngle * Math.PI) / 180
+          const targetX = curX - Math.cos(rad) * value
+          const targetY = curY - Math.sin(rad) * value
+          await animateTo(targetX, targetY, curAngle, true, false)
+          await finishStep()
+        },
+        turnRight: async (value = 0) => {
+          assertActive()
+          await animateTo(curX, curY, curAngle + value, false, true)
+          await finishStep()
+        },
+        turnLeft: async (value = 0) => {
+          assertActive()
+          await animateTo(curX, curY, curAngle - value, false, true)
+          await finishStep()
+        },
+        setHeading: async (value = 0) => {
+          assertActive()
+          await animateTo(curX, curY, value, false, true)
+          await finishStep()
+        },
+        jumpTo: async (x = 0, y = 0) => {
+          assertActive()
+          moveTo(bgCanvas.width / 2 + x, bgCanvas.height / 2 - y)
+          await finishStep()
+        },
+        goToCenter: async () => {
+          assertActive()
+          moveTo(bgCanvas.width / 2, bgCanvas.height / 2)
+          await finishStep()
+        },
+        penUp: async () => {
+          assertActive()
+          curPenDown = false
+          recenterPathHeads()
+          syncCanvases()
+          await finishStep()
+        },
+        penDown: async () => {
+          assertActive()
+          curPenDown = true
+          recenterPathHeads()
+          syncCanvases()
+          await finishStep()
+        },
+        setColor: async (color) => {
+          assertActive()
+          const parsedColor =
+            color == null ? curColor : String(color).trim()
+          const nextColor = parsedColor || curColor
+          bgCtx.stroke()
+          bgCtx.beginPath()
+          bgCtx.strokeStyle = nextColor
+          curColor = nextColor
+          bgCtx.moveTo(curX, curY)
+
+          if (drawCtx) {
+            drawCtx.stroke()
+            drawCtx.beginPath()
+            drawCtx.strokeStyle = nextColor
+            drawCtx.moveTo(curX, curY)
+          }
+
+          syncCanvases()
+          await finishStep()
+        },
+        setRandomColor: async () => {
+          assertActive()
+          const randomColor =
+            '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
+          await api.setColor(randomColor)
+        },
+        setPenSize: async (size = 3) => {
+          assertActive()
+          bgCtx.stroke()
+          bgCtx.beginPath()
+          bgCtx.lineWidth = size
+          curSize = size
+          bgCtx.moveTo(curX, curY)
+
+          if (drawCtx) {
+            drawCtx.stroke()
+            drawCtx.beginPath()
+            drawCtx.lineWidth = size
+            drawCtx.moveTo(curX, curY)
+          }
+
+          syncCanvases()
+          await finishStep()
+        },
+        clear: async () => {
+          assertActive()
+          bgCtx.stroke()
+          resetAndDraw()
+          syncCanvases()
+          await finishStep()
+        },
+        drawCircle: async (radius = 50) => {
+          assertActive()
+          if (!curPenDown) return
+
+          bgCtx.stroke()
+          bgCtx.beginPath()
+          bgCtx.arc(curX, curY, radius, 0, 2 * Math.PI)
+          bgCtx.stroke()
+          bgCtx.beginPath()
+          bgCtx.moveTo(curX, curY)
+
+          if (drawCtx) {
+            drawCtx.stroke()
+            drawCtx.beginPath()
+            drawCtx.arc(curX, curY, radius, 0, 2 * Math.PI)
+            drawCtx.stroke()
+            drawCtx.beginPath()
+            drawCtx.moveTo(curX, curY)
+          }
+
+          syncCanvases()
+          await finishStep()
+        },
+        drawPolygon: async (sides = 3, length = 50) => {
+          assertActive()
+          if (!curPenDown) return
+
+          for (let i = 0; i < sides; i++) {
+            const rad = (curAngle * Math.PI) / 180
+            const nextX = curX + Math.cos(rad) * length
+            const nextY = curY + Math.sin(rad) * length
+            await animateTo(nextX, nextY, curAngle, true, false)
+            curAngle += 360 / sides
+            syncCanvases()
+          }
+
+          syncCanvases()
+          await finishStep()
+        },
+        getMarkerX: () => curX - bgCanvas.width / 2,
+        getMarkerY: () => bgCanvas.height / 2 - curY,
+        getMarkerHeading: () => curAngle
+      }
+
+      try {
+        assertActive()
+        const startHandlers = []
+        const eventHandlers = {}
+        const waitSeconds = async (seconds = 0) => {
+          assertActive()
+          await sleep(Math.max(0, Number(seconds) || 0) * 1000)
+        }
+        const __registerStart = (handler) => {
+          startHandlers.push(handler)
+        }
+        const __registerEvent = (name, handler) => {
+          if (!eventHandlers[name]) eventHandlers[name] = []
+          eventHandlers[name].push(handler)
+        }
+        const __emitEvent = async (name) => {
+          assertActive()
+          const handlers = eventHandlers[name] || []
+          for (const handler of handlers) {
+            assertActive()
+            await handler()
+          }
+        }
+        const __step = async (id) => {
+          assertActive()
+          const nextId = id == null ? null : String(id)
+          const now = Date.now()
+
+          // In dev/runtime edge-cases, the same block step can be emitted twice
+          // while one visual action is already in progress. Ignore duplicates so
+          // one block = one highlight window.
+          if (
+            nextId &&
+            activeStepBlockId === nextId &&
+            now - activeStepStartedAt < STEP_MS
+          ) {
+            return
+          }
+
+          activeStepBlockId = nextId
+          activeStepStartedAt = now
+          if (onHighlightRef.current) {
+            onHighlightRef.current(nextId)
+          }
+        }
+
+        const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
+        const argNames = Object.keys(api)
+        const argValues = Object.values(api)
+        const program = new AsyncFunction(
+          ...argNames,
+          '__step',
+          '__registerStart',
+          '__registerEvent',
+          '__emitEvent',
+          'waitSeconds',
+          commandsRef.current || ''
+        )
+        await program(
+          ...argValues,
+          __step,
+          __registerStart,
+          __registerEvent,
+          __emitEvent,
+          waitSeconds
+        )
+
+        for (const startHandler of startHandlers) {
+          assertActive()
+          await startHandler()
+        }
+      } catch (err) {
+        if (!isStale() && err?.message !== '__RUN_CANCELLED__') {
+          setClassificationError(err?.message || 'Program execution failed.')
+        }
+      }
+
+      if (!isStale() && onHighlightRef.current) onHighlightRef.current(null)
+      activeStepBlockId = null
       bgCtx.stroke()
       if (drawCtx) {
         drawCtx.stroke()
       }
 
       try {
+        assertActive()
         const canvasForClassification = drawingCanvas || bgCanvas
         if (!canvasForClassification) {
-          setClassificationError('No canvas available for classification.')
-          setClassificationResult(null)
+          if (!isStale()) {
+            setClassificationError('No canvas available for classification.')
+            setClassificationResult(null)
+          }
         } else {
           const result = await classifyCanvas(canvasForClassification)
-          setClassificationResult(result)
+          if (!isStale()) {
+            setClassificationResult(result)
+          }
 
-          if (onGuessComplete) {
+          if (!isStale() && onGuessCompleteRef.current) {
             const categories =
               result &&
               result.classifications &&
@@ -384,22 +578,35 @@ const DrawingCanvas = ({ commands, runSequence, onHighlight, onGuessComplete }) 
                 ? (primary.displayName || primary.categoryName).toString()
                 : ''
 
-            onGuessComplete({ guess: guessName, result, categories })
+            onGuessCompleteRef.current({ guess: guessName, result, categories })
           }
         }
       } catch (err) {
-        setClassificationError(err?.message || 'Failed to classify drawing.')
-        setClassificationResult(null)
+        if (!isStale()) {
+          setClassificationError(err?.message || 'Failed to classify drawing.')
+          setClassificationResult(null)
+        }
       } finally {
-        setClassifying(false)
+        if (!isStale()) {
+          setClassifying(false)
+        }
       }
     }
 
     if (runSequence > 0) {
+      if (executedRunSequenceRef.current === runSequence) {
+        return () => {
+          runIdRef.current += 1
+        }
+      }
+      executedRunSequenceRef.current = runSequence
       runCommandsAsync()
     } else {
       resetAndDraw()
       drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle)
+    }
+    return () => {
+      runIdRef.current += 1
     }
   }, [runSequence])
 
