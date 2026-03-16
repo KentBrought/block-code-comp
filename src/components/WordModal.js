@@ -1,92 +1,9 @@
 import React, { useState } from 'react'
 import './WordModal.css'
-
-// Large pool of simple, drawable words kids understand
-const SPECIAL_WORD = 'loudspeaker'
-
-const WORD_POOL = [
-  // Animals
-  'cat',
-  'dog',
-  'fish',
-  'bird',
-  'snake',
-  'turtle',
-  'rabbit',
-  'elephant',
-  'spider',
-  'butterfly',
-  'crab',
-  'penguin',
-  'frog',
-  'whale',
-  'bee',
-  // Nature
-  'sun',
-  'moon',
-  'star',
-  'cloud',
-  'rainbow',
-  'lightning',
-  'mountain',
-  'flower',
-  'tree',
-  'leaf',
-  'wave',
-  'island',
-  'river',
-  'lake',
-  'volcano',
-  // Objects
-  'house',
-  'door',
-  'window',
-  'car',
-  'boat',
-  'rocket',
-  'kite',
-  'ladder',
-  'bridge',
-  'umbrella',
-  'key',
-  'hammer',
-  'clock',
-  'bell',
-  'crown',
-  // Food
-  'pizza',
-  'apple',
-  'banana',
-  'cake',
-  'ice cream',
-  'carrot',
-  'cupcake',
-  'lollipop',
-  'cookie',
-  'sandwich',
-  // Shapes / Fun
-  'heart',
-  'spiral',
-  'castle',
-  'sword',
-  'flag',
-  'trophy',
-  'diamond',
-  'arrow',
-  'smiley face',
-  'snowflake'
-]
-
-/** Pick 5 unique random words from the pool */
-function getRandomWords() {
-  const poolWithoutSpecial = WORD_POOL.filter((w) => w !== SPECIAL_WORD)
-  const shuffled = [...poolWithoutSpecial].sort(() => Math.random() - 0.5)
-  const randomSelection = shuffled.slice(0, 4)
-  return [SPECIAL_WORD, ...randomSelection].sort(() => Math.random() - 0.5)
-}
+import { getRandomWordsFromPool } from '../constants/wordPool'
 
 function WordModal({ onSelect }) {
-  const [words] = useState(getRandomWords)
+  const [words] = useState(getRandomWordsFromPool)
 
   return (
     <div className='word-modal-overlay'>

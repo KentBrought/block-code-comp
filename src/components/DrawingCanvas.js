@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { classifyCanvas } from '../utils/imageClassifier'
+import { findMatchingWordFromCandidates, WORD_POOL } from '../constants/wordPool'
 
 const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGuessComplete }) => {
   const bgCanvasRef = useRef(null)
@@ -572,11 +573,18 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
                 ? result.classifications[0].categories
                 : null
 
-            const primary = categories && categories.length > 0 ? categories[0] : null
+            const categoryNames = (categories || [])
+              .map((c) =>
+                c && (c.displayName || c.categoryName)
+                  ? (c.displayName || c.categoryName).toString()
+                  : ''
+              )
+              .filter(Boolean)
+
             const guessName =
-              primary && (primary.displayName || primary.categoryName)
-                ? (primary.displayName || primary.categoryName).toString()
-                : ''
+              categoryNames
+                .map((name) => findMatchingWordFromCandidates(name, WORD_POOL))
+                .find(Boolean) || ''
 
             onGuessCompleteRef.current({ guess: guessName, result, categories })
           }
@@ -617,6 +625,18 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
     classificationResult.classifications[0].categories
       ? classificationResult.classifications[0].categories
       : null
+
+  const topGuessFromWordPool =
+    (topCategories || [])
+      .map((c) =>
+        c && (c.displayName || c.categoryName)
+          ? findMatchingWordFromCandidates(
+              (c.displayName || c.categoryName).toString(),
+              WORD_POOL
+            )
+          : null
+      )
+      .find(Boolean) || null
 
   return (
     <div
@@ -673,10 +693,7 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
             topCategories.length > 0 && (
               <span style={{ color: '#111827' }}>
                 <strong>Top guess:</strong>{' '}
-                {topCategories[0].displayName ||
-                  topCategories[0].categoryName ||
-                  'Unknown'}{' '}
-                ({(topCategories[0].score * 100).toFixed(1)}%)
+                {topGuessFromWordPool || 'No word-list match yet'}
                 {topCategories.length > 1 && (
                   <>
                     {' '}

@@ -6,6 +6,7 @@ import ChatWindow from './components/ChatWindow'
 import HomePage from './pages/HomePage'
 import WordModal from './components/WordModal'
 import ResultModal from './components/ResultModal'
+import { findMatchingWordFromCandidates, WORD_POOL } from './constants/wordPool'
 import './App.css'
 
 const GAME_DURATION = 15 * 60 // 15 minutes in seconds
@@ -165,11 +166,6 @@ function AppInner() {
     ({ guess, categories }) => {
       if (!selectedWord) return
 
-      const canonical = (str) =>
-        (str || '').toString().trim().toLowerCase().replace(/\s+/g, '')
-
-      const target = canonical(selectedWord)
-
       const allNames = [
         guess,
         ...(categories || []).map((c) =>
@@ -179,9 +175,11 @@ function AppInner() {
         )
       ].filter(Boolean)
 
-      const anyMatch = allNames.some((name) => canonical(name) === target)
+      const matchedWord = allNames
+        .map((name) => findMatchingWordFromCandidates(name, WORD_POOL))
+        .find(Boolean)
 
-      if (anyMatch) {
+      if (matchedWord === selectedWord) {
         setTimerRunning(false)
         const timeTakenSeconds = GAME_DURATION - timeLeft
         setWinInfo({
