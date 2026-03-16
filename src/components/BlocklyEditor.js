@@ -301,7 +301,7 @@ javascriptGenerator.forBlock['if_equal_to'] = function (block) {
     return `if (${a} === ${b}) {\n${branch}}\n`;
 };
 
-const BlocklyEditor = ({ onCodeChange, highlightBlockId }) => {
+const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey }) => {
     const blocklyDiv = React.useRef();
     const workspace = React.useRef();
 
@@ -406,7 +406,7 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId }) => {
         });
 
         return () => workspace.current.dispose();
-    }, [onCodeChange]);
+    }, [onCodeChange, resetKey]);
 
     return <div ref={blocklyDiv} style={{ height: '100%', width: '100%' }} />;
 };
