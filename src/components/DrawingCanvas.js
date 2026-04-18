@@ -2,7 +2,17 @@ import React, { useRef, useEffect, useState } from 'react'
 import { classifyCanvas } from '../utils/imageClassifier'
 import { findMatchingWordFromCandidates, WORD_POOL } from '../constants/wordPool'
 
-const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGuessComplete }) => {
+const DrawingCanvas = ({
+  commands,
+  runSequence,
+  stopSequence,
+  onHighlight,
+  onGuessComplete,
+  onRunStateChange,
+  ghostPreview,
+  hintText,
+  showClassification = true
+}) => {
   const bgCanvasRef = useRef(null)
   const markerCanvasRef = useRef(null)
   const drawingCanvasRef = useRef(null) // offscreen canvas with drawing only
@@ -12,6 +22,8 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
   const commandsRef = useRef(commands)
   const onHighlightRef = useRef(onHighlight)
   const onGuessCompleteRef = useRef(onGuessComplete)
+  const onRunStateChangeRef = useRef(onRunStateChange)
+  const ghostPreviewRef = useRef(ghostPreview)
   const [classifying, setClassifying] = useState(false)
   const [classificationResult, setClassificationResult] = useState(null)
   const [classificationError, setClassificationError] = useState(null)
@@ -20,12 +32,15 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
     commandsRef.current = commands
     onHighlightRef.current = onHighlight
     onGuessCompleteRef.current = onGuessComplete
-  }, [commands, onHighlight, onGuessComplete])
+    onRunStateChangeRef.current = onRunStateChange
+    ghostPreviewRef.current = ghostPreview
+  }, [commands, onHighlight, onGuessComplete, onRunStateChange, ghostPreview])
 
   useEffect(() => {
     runIdRef.current += 1
     setClassifying(false)
     if (onHighlightRef.current) onHighlightRef.current(null)
+    if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
   }, [stopSequence])
 
   // Resize both canvases to match their container whenever container size changes
@@ -55,7 +70,9 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
         drawingCtx.fillStyle = '#ffffff'
         drawingCtx.fillRect(0, 0, w, h)
 
-        drawGrid(bgCanvas, bgCanvas.getContext('2d'))
+        const bgCtx = bgCanvas.getContext('2d')
+        drawGrid(bgCanvas, bgCtx)
+        drawGhostPreview(bgCanvas, bgCtx, ghostPreviewRef.current)
         drawMarkerAt(
           markerCanvas,
           markerCanvas.getContext('2d'),
@@ -136,6 +153,46 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
     ctx.restore()
   }
 
+  function drawGhostPreview(canvas, ctx, preview) {
+    if (!preview) return
+    const w = canvas.width
+    const h = canvas.height
+    const toCanvasX = (x) => w / 2 + x
+    const toCanvasY = (y) => h / 2 - y
+
+    ctx.save()
+    ctx.strokeStyle = 'rgba(71, 85, 105, 0.28)'
+    ctx.lineWidth = 4
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.setLineDash([10, 8])
+
+    const lines = preview.lines || []
+    for (const line of lines) {
+      if (!line || !line.points || line.points.length < 2) continue
+      ctx.beginPath()
+      ctx.moveTo(toCanvasX(line.points[0].x), toCanvasY(line.points[0].y))
+      for (let i = 1; i < line.points.length; i += 1) {
+        const p = line.points[i]
+        ctx.lineTo(toCanvasX(p.x), toCanvasY(p.y))
+      }
+      if (line.close) {
+        ctx.closePath()
+      }
+      ctx.stroke()
+    }
+
+    const circles = preview.circles || []
+    for (const circle of circles) {
+      if (!circle || typeof circle.r !== 'number') continue
+      ctx.beginPath()
+      ctx.arc(toCanvasX(circle.x || 0), toCanvasY(circle.y || 0), circle.r, 0, 2 * Math.PI)
+      ctx.stroke()
+    }
+
+    ctx.restore()
+  }
+
   // Draws marker exclusively on the clear overlay canvas
   function drawMarkerAt(canvas, ctx, x, y, angle) {
     ctx.clearRect(0, 0, canvas.width, canvas.height) // clear entire overlay
@@ -181,6 +238,7 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
 
     const resetAndDraw = () => {
       drawGrid(bgCanvas, bgCtx)
+      drawGhostPreview(bgCanvas, bgCtx, ghostPreviewRef.current)
 
       if (drawCtx) {
         drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height)
@@ -211,11 +269,13 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
     }
 
     const runCommandsAsync = async () => {
-      assertActive()
-      resetAndDraw()
-      setClassifying(true)
-      setClassificationError(null)
-      setClassificationResult(null)
+      try {
+        assertActive()
+        resetAndDraw()
+        if (onRunStateChangeRef.current) onRunStateChangeRef.current(true)
+        setClassifying(showClassification)
+        setClassificationError(null)
+        setClassificationResult(null)
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
       const STEP_MS = 300
@@ -550,53 +610,71 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
         drawCtx.stroke()
       }
 
-      try {
-        assertActive()
-        const canvasForClassification = drawingCanvas || bgCanvas
-        if (!canvasForClassification) {
+        if (!showClassification) {
           if (!isStale()) {
-            setClassificationError('No canvas available for classification.')
+            setClassifying(false)
+            setClassificationError(null)
             setClassificationResult(null)
           }
-        } else {
-          const result = await classifyCanvas(canvasForClassification)
-          if (!isStale()) {
-            setClassificationResult(result)
+          return
+        }
+
+        try {
+          assertActive()
+          const canvasForClassification = drawingCanvas || bgCanvas
+          if (!canvasForClassification) {
+            if (!isStale()) {
+              setClassificationError('No canvas available for classification.')
+              setClassificationResult(null)
+            }
+          } else {
+            const result = await classifyCanvas(canvasForClassification)
+            if (!isStale()) {
+              setClassificationResult(result)
+            }
+
+            if (!isStale() && onGuessCompleteRef.current) {
+              const categories =
+                result &&
+                result.classifications &&
+                result.classifications[0] &&
+                result.classifications[0].categories
+                  ? result.classifications[0].categories
+                  : null
+
+              const categoryNames = (categories || [])
+                .map((c) =>
+                  c && (c.displayName || c.categoryName)
+                    ? (c.displayName || c.categoryName).toString()
+                    : ''
+                )
+                .filter(Boolean)
+
+              const guessName =
+                categoryNames
+                  .map((name) => findMatchingWordFromCandidates(name, WORD_POOL))
+                  .find(Boolean) || ''
+
+              onGuessCompleteRef.current({ guess: guessName, result, categories })
+            }
           }
-
-          if (!isStale() && onGuessCompleteRef.current) {
-            const categories =
-              result &&
-              result.classifications &&
-              result.classifications[0] &&
-              result.classifications[0].categories
-                ? result.classifications[0].categories
-                : null
-
-            const categoryNames = (categories || [])
-              .map((c) =>
-                c && (c.displayName || c.categoryName)
-                  ? (c.displayName || c.categoryName).toString()
-                  : ''
-              )
-              .filter(Boolean)
-
-            const guessName =
-              categoryNames
-                .map((name) => findMatchingWordFromCandidates(name, WORD_POOL))
-                .find(Boolean) || ''
-
-            onGuessCompleteRef.current({ guess: guessName, result, categories })
+        } catch (err) {
+          if (!isStale()) {
+            setClassificationError(err?.message || 'Failed to classify drawing.')
+            setClassificationResult(null)
+          }
+        } finally {
+          if (!isStale()) {
+            setClassifying(false)
           }
         }
       } catch (err) {
         if (!isStale()) {
-          setClassificationError(err?.message || 'Failed to classify drawing.')
-          setClassificationResult(null)
+          setClassifying(false)
         }
       } finally {
         if (!isStale()) {
-          setClassifying(false)
+          if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
         }
       }
     }
@@ -612,11 +690,12 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
     } else {
       resetAndDraw()
       drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle)
+      if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
     }
     return () => {
       runIdRef.current += 1
     }
-  }, [runSequence])
+  }, [runSequence, showClassification, ghostPreview])
 
   const topCategories =
     classificationResult &&
@@ -685,10 +764,16 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
-          {classificationError && (
+          {!showClassification && (
+            <span style={{ color: '#111827' }}>
+              <strong>Hint:</strong> {hintText || 'Find and fix the bug in the starter blocks.'}
+            </span>
+          )}
+          {showClassification && classificationError && (
             <span style={{ color: '#b91c1c' }}>{classificationError}</span>
           )}
-          {!classificationError &&
+          {showClassification &&
+            !classificationError &&
             topCategories &&
             topCategories.length > 0 && (
               <span style={{ color: '#111827' }}>
@@ -714,14 +799,15 @@ const DrawingCanvas = ({ commands, runSequence, stopSequence, onHighlight, onGue
                 )}
               </span>
             )}
-          {!classificationError &&
+          {showClassification &&
+            !classificationError &&
             (!topCategories || topCategories.length === 0) &&
             !classifying && (
               <span style={{ color: '#6b7280' }}>
                 Press “Run” to draw and let the AI guess.
               </span>
             )}
-          {classifying && (
+          {showClassification && classifying && (
             <span style={{ color: '#6b7280' }}>Analyzing your drawing…</span>
           )}
         </div>

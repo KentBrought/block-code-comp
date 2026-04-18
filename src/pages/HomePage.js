@@ -3,10 +3,9 @@ import './HomePage.css'
 
 const PARTICLES = 60
 
-function HomePage({ onPlay, onHowToPlay }) {
+function HomePage({ onPlay, onHowToPlay, onChallengeMode }) {
   const canvasRef = useRef(null)
 
-  // Animated floating particle background
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -19,7 +18,6 @@ function HomePage({ onPlay, onHowToPlay }) {
     resize()
     window.addEventListener('resize', resize)
 
-    // Generate particles
     const particles = Array.from({ length: PARTICLES }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -63,13 +61,11 @@ function HomePage({ onPlay, onHowToPlay }) {
     <div className='home-page'>
       <canvas ref={canvasRef} className='home-bg-canvas' />
 
-      {/* Decorative rings */}
       <div className='home-ring home-ring-1' />
       <div className='home-ring home-ring-2' />
       <div className='home-ring home-ring-3' />
 
       <div className='home-content'>
-        {/* Logo / Title */}
         <div className='home-logo-wrap'>
           <div className='home-logo-icon'>🎨</div>
           <h1 className='home-title'>
@@ -82,16 +78,20 @@ function HomePage({ onPlay, onHowToPlay }) {
         </div>
 
         <p className='home-tagline'>
-          Use colourful code blocks to guide your marker and create art.
+          Use colorful code blocks to guide your marker and create art.
           <br />
-          Can your AI bot guess your drawing in under <strong>15 minutes</strong>
-          ?
+          Can your AI bot guess your drawing in under <strong>15 minutes</strong>?
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           <button className='home-play-btn' onClick={onPlay}>
-            <span className='home-play-icon'>▶</span>
-            Play Now
+            <span className='home-play-icon'>⏵️</span>
+            <span className='home-play-label'>Play Now</span>
+          </button>
+
+          <button className='home-play-btn' onClick={onChallengeMode}>
+            <span className='home-play-icon'>🐞</span>
+            <span className='home-play-label'>Challenge Mode</span>
           </button>
 
           <button
@@ -135,7 +135,7 @@ function HomePage({ onPlay, onHowToPlay }) {
         </div>
 
         <p className='home-hint'>
-          Pick a secret word, draw it in blocks, see if the AI can guess!
+          Pick a secret word or try challenge mode to hunt down a drawing bug.
         </p>
       </div>
     </div>

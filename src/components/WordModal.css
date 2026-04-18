@@ -101,3 +101,23 @@
 .word-choice-btn:active {
     transform: scale(0.98);
 }
+
+.word-modal-back-btn {
+    margin-top: 1rem;
+    background: transparent;
+    border: 1.5px solid #94a3b8;
+    color: #334155;
+    padding: 0.7rem 1.2rem;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.word-modal-back-btn:hover {
+    background: #f8fafc;
+    border-color: #64748b;
+    color: #0f172a;
+}

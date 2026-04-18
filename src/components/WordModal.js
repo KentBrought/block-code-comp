@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './WordModal.css'
 import { getRandomWordsFromPool } from '../constants/wordPool'
 
-function WordModal({ onSelect }) {
+function WordModal({ onSelect, onBack }) {
   const [words] = useState(getRandomWordsFromPool)
 
   return (
@@ -27,6 +27,14 @@ function WordModal({ onSelect }) {
             </button>
           ))}
         </div>
+
+        <button
+          type='button'
+          className='word-modal-back-btn'
+          onClick={onBack}
+        >
+          Back
+        </button>
       </div>
     </div>
   )

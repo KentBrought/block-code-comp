@@ -495,6 +495,61 @@ function initBlocks() {
     Number(block.getFieldValue('NUM') || 0).toString(),
     javascriptGenerator.ORDER_ATOMIC
   ]
+
+  // Make Blockly "Functions" compatible with our async runtime.
+  // We intentionally use standalone implementations to avoid HMR wrapper
+  // chains from older generator overrides.
+  const buildProcedureCallExpression = (block, generator) => {
+    const fnName = generator.getProcedureName(block.getFieldValue('NAME'))
+    const args = []
+    const vars = block.getVars ? block.getVars() : []
+    for (let i = 0; i < vars.length; i += 1) {
+      args[i] =
+        generator.valueToCode(block, `ARG${i}`, generator.ORDER_NONE) || 'null'
+    }
+    return `${fnName}(${args.join(', ')})`
+  }
+
+  const defineProcedure = (block, generator, hasReturn) => {
+    const fnName = generator.getProcedureName(block.getFieldValue('NAME'))
+    const args = []
+    const vars = block.getVars ? block.getVars() : []
+    for (let i = 0; i < vars.length; i += 1) {
+      args[i] = generator.getVariableName(vars[i])
+    }
+
+    let body = generator.statementToCode(block, 'STACK') || ''
+    if (hasReturn) {
+      const returnValue =
+        generator.valueToCode(block, 'RETURN', generator.ORDER_NONE) || ''
+      if (returnValue) {
+        body += `${generator.INDENT}return ${returnValue};\n`
+      }
+    }
+
+    const code = `async function ${fnName}(${args.join(', ')}) {\n${body}}\n`
+    if (generator.definitions_) {
+      generator.definitions_[`procedures_${fnName}`] = code
+    }
+    return null
+  }
+
+  javascriptGenerator.forBlock.procedures_defnoreturn = (block, generator) =>
+    defineProcedure(block, generator, false)
+
+  javascriptGenerator.forBlock.procedures_defreturn = (block, generator) =>
+    defineProcedure(block, generator, true)
+
+  javascriptGenerator.forBlock.procedures_callnoreturn = (block, generator) =>
+    `await ${buildProcedureCallExpression(block, generator)};\n`
+
+  javascriptGenerator.forBlock.procedures_callreturn = (block, generator) => {
+    const awaitOrder =
+      typeof generator.ORDER_AWAIT === 'number'
+        ? generator.ORDER_AWAIT
+        : generator.ORDER_NONE
+    return [`await (${buildProcedureCallExpression(block, generator)})`, awaitOrder]
+  }
 }
 
 initBlocks()
@@ -618,7 +673,7 @@ const toolbox = {
   ]
 }
 
-const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey }) => {
+const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml }) => {
   const blocklyDiv = useRef(null)
   const workspace = useRef(null)
 
@@ -641,11 +696,14 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey }) => {
       zoom: { controls: true, wheel: true, startScale: 1, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
     })
 
-    const startXml = Blockly.utils.xml.textToDom(`
+    const startXmlText =
+      initialXml ||
+      `
       <xml xmlns="https://developers.google.com/blockly/xml">
         <block type="when_run_clicked" x="60" y="40"></block>
       </xml>
-    `)
+    `
+    const startXml = Blockly.utils.xml.textToDom(startXmlText)
     Blockly.Xml.domToWorkspace(startXml, workspace.current)
 
     workspace.current.addChangeListener(() => {
@@ -654,7 +712,7 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey }) => {
     onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
 
     return () => workspace.current && workspace.current.dispose()
-  }, [onCodeChange, resetKey])
+  }, [onCodeChange, resetKey, initialXml])
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>

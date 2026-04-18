@@ -150,6 +150,7 @@
 .home-play-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.65rem;
     background: linear-gradient(135deg, #4361ee, #7b2ff7);
     color: #fff;
@@ -166,6 +167,8 @@
     position: relative;
     overflow: hidden;
     margin-top: 0.5rem;
+    min-width: 320px;
+    text-align: center;
 }
 
 .home-play-btn::after {
@@ -192,6 +195,11 @@
 
 .home-play-icon {
     font-size: 1.1rem;
+    line-height: 1;
+}
+
+.home-play-label {
+    text-align: center;
 }
 
 .home-hint {

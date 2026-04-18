@@ -5,11 +5,12 @@ import DrawingCanvas from './components/DrawingCanvas'
 import ChatWindow from './components/ChatWindow'
 import HomePage from './pages/HomePage'
 import WordModal from './components/WordModal'
+import ChallengeModal from './components/ChallengeModal'
 import ResultModal from './components/ResultModal'
 import { findMatchingWordFromCandidates, WORD_POOL } from './constants/wordPool'
 import './App.css'
 
-const GAME_DURATION = 15 * 60 // 15 minutes in seconds
+const GAME_DURATION = 15 * 60
 
 const TOUR_STEPS = [
   {
@@ -47,9 +48,11 @@ function formatTime(seconds) {
 }
 
 function AppInner() {
-  // 'home' | 'word-select' | 'game'
+  // 'home' | 'word-select' | 'challenge-select' | 'game'
   const [screen, setScreen] = useState('home')
+  const [gameMode, setGameMode] = useState('classic') // 'classic' | 'challenge'
   const [selectedWord, setSelectedWord] = useState(null)
+  const [selectedChallenge, setSelectedChallenge] = useState(null)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [timerRunning, setTimerRunning] = useState(false)
   const [timeUp, setTimeUp] = useState(false)
@@ -59,15 +62,15 @@ function AppInner() {
   const [stopSequence, setStopSequence] = useState(0)
   const [runCount, setRunCount] = useState(0)
   const [highlightBlockId, setHighlightBlockId] = useState(null)
+  const [isRunning, setIsRunning] = useState(false)
 
-  const [winInfo, setWinInfo] = useState(null) // { word, timeTakenSeconds, status, runCount }
+  const [winInfo, setWinInfo] = useState(null)
   const [editorResetKey, setEditorResetKey] = useState(0)
   const [startTourAfterWordSelect, setStartTourAfterWordSelect] = useState(false)
 
   const timerRef = useRef(null)
   const { setIsOpen: setTourOpen, setSteps: setTourSteps } = useTour()
 
-  // Start countdown when word is chosen
   useEffect(() => {
     if (timerRunning) {
       timerRef.current = setInterval(() => {
@@ -98,22 +101,34 @@ function AppInner() {
   }, [timerRunning, selectedWord, runCount])
 
   const handlePlay = () => {
+    setGameMode('classic')
     setScreen('word-select')
   }
 
   const handleHowToPlay = () => {
+    setGameMode('classic')
     setStartTourAfterWordSelect(true)
     setScreen('word-select')
   }
 
+  const handleChallengeMode = () => {
+    setGameMode('challenge')
+    setStartTourAfterWordSelect(false)
+    setScreen('challenge-select')
+  }
+
   const handleWordSelect = (word) => {
+    setGameMode('classic')
     setSelectedWord(word)
+    setSelectedChallenge(null)
     setTimeLeft(GAME_DURATION)
     setTimeUp(false)
     setTimerRunning(true)
     setRunCount(0)
     setWinInfo(null)
+    setIsRunning(false)
     setScreen('game')
+    setEditorResetKey((k) => k + 1)
 
     if (startTourAfterWordSelect) {
       setTourOpen(true)
@@ -121,28 +136,51 @@ function AppInner() {
     }
   }
 
+  const handleChallengeSelect = (challenge) => {
+    setGameMode('challenge')
+    setSelectedChallenge(challenge)
+    setSelectedWord(null)
+    setTimeLeft(GAME_DURATION)
+    setTimeUp(false)
+    setTimerRunning(false)
+    setRunCount(0)
+    setCommands('')
+    setRunSequence(0)
+    setStopSequence(0)
+    setHighlightBlockId(null)
+    setIsRunning(false)
+    setWinInfo(null)
+    setEditorResetKey((k) => k + 1)
+    setScreen('game')
+  }
+
   const handleExit = useCallback(() => {
     clearInterval(timerRef.current)
     setTimerRunning(false)
     setSelectedWord(null)
+    setSelectedChallenge(null)
     setTimeLeft(GAME_DURATION)
     setTimeUp(false)
     setCommands('')
     setRunSequence(0)
     setRunCount(0)
     setHighlightBlockId(null)
+    setIsRunning(false)
     setWinInfo(null)
     setTourOpen(false)
     setStartTourAfterWordSelect(false)
+    setGameMode('classic')
     setScreen('home')
   }, [setTourOpen])
 
   const handleRun = () => {
+    if (isRunning) return
     setRunSequence((s) => s + 1)
     setRunCount((c) => c + 1)
   }
 
   const handleStop = () => {
+    setIsRunning(false)
     setStopSequence((s) => s + 1)
     setHighlightBlockId(null)
   }
@@ -153,6 +191,7 @@ function AppInner() {
     setCommands('')
     setRunSequence(0)
     setHighlightBlockId(null)
+    setIsRunning(false)
     setWinInfo(null)
     setRunCount(0)
     setEditorResetKey((k) => k + 1)
@@ -164,6 +203,7 @@ function AppInner() {
 
   const handleGuessComplete = useCallback(
     ({ guess, categories }) => {
+      if (gameMode !== 'classic') return
       if (!selectedWord) return
 
       const allNames = [
@@ -190,7 +230,7 @@ function AppInner() {
         })
       }
     },
-    [selectedWord, timeLeft, runCount]
+    [gameMode, selectedWord, timeLeft, runCount]
   )
 
   const timerClass =
@@ -205,13 +245,29 @@ function AppInner() {
   }, [setTourSteps])
 
   if (screen === 'home') {
-    return <HomePage onPlay={handlePlay} onHowToPlay={handleHowToPlay} />
+    return (
+      <HomePage
+        onPlay={handlePlay}
+        onHowToPlay={handleHowToPlay}
+        onChallengeMode={handleChallengeMode}
+      />
+    )
   }
 
   return (
     <div className='app-container'>
-      {/* Word selection modal when screen === 'word-select' */}
-      {screen === 'word-select' && <WordModal onSelect={handleWordSelect} />}
+      {screen === 'word-select' && (
+        <WordModal
+          onSelect={handleWordSelect}
+          onBack={handleExit}
+        />
+      )}
+      {screen === 'challenge-select' && (
+        <ChallengeModal
+          onSelect={handleChallengeSelect}
+          onBack={handleExit}
+        />
+      )}
 
       {winInfo && (
         <ResultModal
@@ -225,7 +281,6 @@ function AppInner() {
       )}
 
       <header className='app-header'>
-        {/* Left: title */}
         <h1
           className='app-title'
           onClick={handleExit}
@@ -238,34 +293,42 @@ function AppInner() {
           <span className='title-draw'>Draw!</span>
         </h1>
 
-        {/* Centre: word + timer */}
         <div className='header-centre'>
-          {selectedWord && (
+          {selectedWord && gameMode === 'classic' && (
             <div className='word-badge'>
               <span className='word-badge-label'>Drawing:</span>
               <span className='word-badge-word'>{selectedWord}</span>
             </div>
           )}
-          {selectedWord && (
+          {selectedChallenge && gameMode === 'challenge' && (
+            <div className='word-badge word-badge--challenge'>
+              <span className='word-badge-label'>Challenge:</span>
+              <span className='word-badge-word'>{selectedChallenge.title}</span>
+            </div>
+          )}
+          {selectedWord && gameMode === 'classic' && (
             <div className={timerClass}>
-              ⏱ {formatTime(timeLeft)}
-              {timeUp && <span className='timer-up-tag'>Time's up!</span>}
+              {formatTime(timeLeft)}
+              {timeUp && <span className='timer-up-tag'>Time&apos;s up!</span>}
             </div>
           )}
         </div>
 
-        {/* Right: Run + Stop + Exit */}
         <div className='header-actions'>
-          <button className='run-button' onClick={handleRun}>
-            <span className='run-icon'>></span> Run
-          </button>
-          <button
-            className='exit-button'
-            onClick={handleStop}
-            title='Stop current run'
-          >
-            <span>[]</span> Stop
-          </button>
+          {!isRunning && (
+            <button className='run-button' onClick={handleRun}>
+              <span className='run-icon'>&gt;</span> Run
+            </button>
+          )}
+          {isRunning && (
+            <button
+              className='stop-button'
+              onClick={handleStop}
+              title='Stop current run'
+            >
+              <span>[]</span> Stop
+            </button>
+          )}
           <button
             className='exit-button'
             onClick={handleExit}
@@ -282,6 +345,7 @@ function AppInner() {
             onCodeChange={setCommands}
             highlightBlockId={highlightBlockId}
             resetKey={editorResetKey}
+            initialXml={selectedChallenge ? selectedChallenge.starterXml : null}
           />
         </section>
 
@@ -293,6 +357,10 @@ function AppInner() {
               stopSequence={stopSequence}
               onHighlight={setHighlightBlockId}
               onGuessComplete={handleGuessComplete}
+              onRunStateChange={setIsRunning}
+              ghostPreview={selectedChallenge ? selectedChallenge.ghostPreview : null}
+              hintText={selectedChallenge ? selectedChallenge.hint : null}
+              showClassification={gameMode === 'classic'}
             />
           </section>
           <section className='chat-section'>
@@ -305,7 +373,7 @@ function AppInner() {
 }
 
 export default function App() {
-  const steps = [] // initial; AppInner will set actual steps via setSteps
+  const steps = []
 
   return (
     <TourProvider steps={steps} accentColor='#4f46e5'>
@@ -313,5 +381,3 @@ export default function App() {
     </TourProvider>
   )
 }
-
-
