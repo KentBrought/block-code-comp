@@ -10,8 +10,8 @@ const DrawingCanvas = ({
   onGuessComplete,
   onRunStateChange,
   ghostPreview,
-  hintText,
-  showClassification = true
+  showClassification = true,
+  showGuessPanel = true
 }) => {
   const bgCanvasRef = useRef(null)
   const markerCanvasRef = useRef(null)
@@ -764,15 +764,11 @@ const DrawingCanvas = ({
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
-          {!showClassification && (
-            <span style={{ color: '#111827' }}>
-              <strong>Hint:</strong> {hintText || 'Find and fix the bug in the starter blocks.'}
-            </span>
-          )}
           {showClassification && classificationError && (
             <span style={{ color: '#b91c1c' }}>{classificationError}</span>
           )}
           {showClassification &&
+            showGuessPanel &&
             !classificationError &&
             topCategories &&
             topCategories.length > 0 && (
@@ -800,15 +796,16 @@ const DrawingCanvas = ({
               </span>
             )}
           {showClassification &&
+            showGuessPanel &&
             !classificationError &&
             (!topCategories || topCategories.length === 0) &&
             !classifying && (
               <span style={{ color: '#6b7280' }}>
-                Press “Run” to draw and let the AI guess.
+                Press "Run" to draw and let the AI guess.
               </span>
             )}
           {showClassification && classifying && (
-            <span style={{ color: '#6b7280' }}>Analyzing your drawing…</span>
+            <span style={{ color: '#6b7280' }}>Analyzing your drawing...</span>
           )}
         </div>
       </div>

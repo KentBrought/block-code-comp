@@ -6,7 +6,6 @@ import ChatWindow from './components/ChatWindow'
 import HomePage from './pages/HomePage'
 import WordModal from './components/WordModal'
 import ChallengeModal from './components/ChallengeModal'
-import ResultModal from './components/ResultModal'
 import { findMatchingWordFromCandidates, WORD_POOL } from './constants/wordPool'
 import './App.css'
 
@@ -48,6 +47,14 @@ function formatTime(seconds) {
 }
 
 function AppInner() {
+  const defaultChat = useCallback(
+    () => [
+      { user: 'BCD AI Bot', text: 'Welcome to Block, Code, Draw! Can I guess what you draw?' },
+      { user: 'You', text: "Let's find out!" }
+    ],
+    []
+  )
+
   // 'home' | 'word-select' | 'challenge-select' | 'game'
   const [screen, setScreen] = useState('home')
   const [gameMode, setGameMode] = useState('classic') // 'classic' | 'challenge'
@@ -63,8 +70,11 @@ function AppInner() {
   const [runCount, setRunCount] = useState(0)
   const [highlightBlockId, setHighlightBlockId] = useState(null)
   const [isRunning, setIsRunning] = useState(false)
+  const [chatMessages, setChatMessages] = useState(defaultChat)
+  const [guessRound, setGuessRound] = useState(0)
+  const [guessedSuccessfully, setGuessedSuccessfully] = useState(false)
+  const [challengeHintIndex, setChallengeHintIndex] = useState(0)
 
-  const [winInfo, setWinInfo] = useState(null)
   const [editorResetKey, setEditorResetKey] = useState(0)
   const [startTourAfterWordSelect, setStartTourAfterWordSelect] = useState(false)
 
@@ -79,18 +89,15 @@ function AppInner() {
             clearInterval(timerRef.current)
             setTimerRunning(false)
             setTimeUp(true)
-            setWinInfo(
-              (prev) =>
-                prev ||
-                (selectedWord
-                  ? {
-                      word: selectedWord,
-                      timeTakenSeconds: GAME_DURATION,
-                      status: 'timeout',
-                      runCount
-                    }
-                  : null)
-            )
+            if (selectedWord) {
+              setChatMessages((prev) => [
+                ...prev,
+                {
+                  user: 'BCD AI Bot',
+                  text: `Time is up. The word was "${selectedWord}". Pick a new word to try again.`
+                }
+              ])
+            }
             return 0
           }
           return t - 1
@@ -125,8 +132,13 @@ function AppInner() {
     setTimeUp(false)
     setTimerRunning(true)
     setRunCount(0)
-    setWinInfo(null)
     setIsRunning(false)
+    setGuessRound(0)
+    setGuessedSuccessfully(false)
+    setChallengeHintIndex(0)
+    setChatMessages([
+      { user: 'BCD AI Bot', text: "Awesome! I'll try to guess what your word is every time you click Run." }
+    ])
     setScreen('game')
     setEditorResetKey((k) => k + 1)
 
@@ -149,7 +161,11 @@ function AppInner() {
     setStopSequence(0)
     setHighlightBlockId(null)
     setIsRunning(false)
-    setWinInfo(null)
+    setGuessedSuccessfully(false)
+    setChallengeHintIndex(0)
+    setChatMessages([
+      { user: 'BCD AI Bot', text: 'Challenge mode is on. Match the gray outline drawing.' }
+    ])
     setEditorResetKey((k) => k + 1)
     setScreen('game')
   }
@@ -166,15 +182,48 @@ function AppInner() {
     setRunCount(0)
     setHighlightBlockId(null)
     setIsRunning(false)
-    setWinInfo(null)
+    setGuessRound(0)
+    setGuessedSuccessfully(false)
+    setChallengeHintIndex(0)
+    setChatMessages(defaultChat())
     setTourOpen(false)
     setStartTourAfterWordSelect(false)
     setGameMode('classic')
     setScreen('home')
-  }, [setTourOpen])
+  }, [defaultChat, setTourOpen])
 
   const handleRun = () => {
     if (isRunning) return
+    if (guessedSuccessfully) return
+
+    if (gameMode === 'challenge') {
+      const challengeHints = selectedChallenge
+        ? [
+            selectedChallenge.hint,
+            'Tip: compare where your lines start and end against the gray outline.',
+            'Tip: adjust repeat counts and turn angles in small steps.'
+          ].filter(Boolean)
+        : []
+
+      if (challengeHints.length === 0) {
+        setChatMessages((prev) => [
+          ...prev,
+          { user: 'BCD AI Bot', text: 'All hints are used.' }
+        ])
+      } else if (challengeHintIndex < challengeHints.length) {
+        setChatMessages((prev) => [
+          ...prev,
+          { user: 'BCD AI Bot', text: challengeHints[challengeHintIndex] }
+        ])
+        setChallengeHintIndex((n) => n + 1)
+      } else {
+        setChatMessages((prev) => [
+          ...prev,
+          { user: 'BCD AI Bot', text: 'All hints are used.' }
+        ])
+      }
+    }
+
     setRunSequence((s) => s + 1)
     setRunCount((c) => c + 1)
   }
@@ -185,52 +234,123 @@ function AppInner() {
     setHighlightBlockId(null)
   }
 
-  const handleResultPlayAgain = useCallback(() => {
+  const handleChooseNewWord = useCallback(() => {
     clearInterval(timerRef.current)
     setTimerRunning(false)
     setCommands('')
     setRunSequence(0)
     setHighlightBlockId(null)
     setIsRunning(false)
-    setWinInfo(null)
     setRunCount(0)
+    setGuessRound(0)
+    setGuessedSuccessfully(false)
+    setChatMessages(defaultChat())
     setEditorResetKey((k) => k + 1)
     setTimeLeft(GAME_DURATION)
     setTimeUp(false)
     setSelectedWord(null)
     setScreen('word-select')
-  }, [])
+  }, [defaultChat])
+
+  const formatConfidencePercent = (value) => {
+    if (!Number.isFinite(value)) return '0%'
+    const clamped = Math.max(0, Math.min(100, value))
+    return `${clamped.toFixed(clamped >= 10 ? 1 : 2)}%`
+  }
+
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+  const toReadableConfidence = (selected) => {
+    const raw = selected.map((c) => Number(c?.score || 0))
+    const safe = raw.every((v) => Number.isFinite(v) && v >= 0) ? raw : []
+    const total = safe.reduce((sum, v) => sum + v, 0)
+
+    if (total > 0) {
+      return safe.map((v) => (v / total) * 100)
+    }
+
+    const equal = selected.length > 0 ? 100 / selected.length : 0
+    return selected.map(() => equal)
+  }
 
   const handleGuessComplete = useCallback(
-    ({ guess, categories }) => {
+    async ({ categories }) => {
       if (gameMode !== 'classic') return
       if (!selectedWord) return
+      if (guessedSuccessfully) return
 
-      const allNames = [
-        guess,
-        ...(categories || []).map((c) =>
-          c && (c.displayName || c.categoryName)
-            ? c.displayName || c.categoryName
-            : ''
-        )
-      ].filter(Boolean)
+      const allCategories = Array.isArray(categories) ? categories : []
+      if (allCategories.length === 0) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            user: 'BCD AI Bot',
+            text: "Hmm, I couldn't read that drawing. Please redraw it and click Run again."
+          }
+        ])
+        return
+      }
 
-      const matchedWord = allNames
+      const offset = (guessRound * 3) % allCategories.length
+      const picked = []
+      for (let i = 0; i < Math.min(3, allCategories.length); i += 1) {
+        picked.push(allCategories[(offset + i) % allCategories.length])
+      }
+
+      const confidenceList = toReadableConfidence(picked)
+      const guesses = picked.map((category, idx) => {
+        const name = category?.displayName || category?.categoryName || 'Unknown'
+        const matched = findMatchingWordFromCandidates(name, WORD_POOL)
+        return {
+          name,
+          confidence: formatConfidencePercent(confidenceList[idx] || 0),
+          isCorrect: matched === selectedWord
+        }
+      })
+
+      for (const guess of guesses) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            user: 'BCD AI Bot',
+            prefix: "I guess it's a ",
+            bold: guess.name,
+            boldColor: guess.isCorrect ? '#16a34a' : '#000000',
+            suffix: ` with ${guess.confidence} confidence.`
+          }
+        ])
+        await wait(550)
+      }
+
+      const matchedWord = guesses
+        .map((item) => item.name)
         .map((name) => findMatchingWordFromCandidates(name, WORD_POOL))
         .find(Boolean)
 
       if (matchedWord === selectedWord) {
         setTimerRunning(false)
-        const timeTakenSeconds = GAME_DURATION - timeLeft
-        setWinInfo({
-          word: selectedWord,
-          timeTakenSeconds,
-          status: 'win',
-          runCount
-        })
+        setGuessedSuccessfully(true)
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            user: 'BCD AI Bot',
+            prefix: 'Awesome! I got it. Your drawing is ',
+            bold: selectedWord,
+            suffix: '! Click "Choose New Word" to play again.'
+          }
+        ])
+      } else {
+        setGuessRound((n) => n + 1)
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            user: 'BCD AI Bot',
+            text: "Not quite yet. Please redraw and click Run again. I'll try 3 different guesses next time."
+          }
+        ])
       }
     },
-    [gameMode, selectedWord, timeLeft, runCount]
+    [gameMode, guessRound, guessedSuccessfully, selectedWord]
   )
 
   const timerClass =
@@ -266,17 +386,6 @@ function AppInner() {
         <ChallengeModal
           onSelect={handleChallengeSelect}
           onBack={handleExit}
-        />
-      )}
-
-      {winInfo && (
-        <ResultModal
-          word={winInfo.word}
-          timeTakenSeconds={winInfo.timeTakenSeconds}
-          status={winInfo.status}
-          runCount={winInfo.runCount}
-          onPlayAgain={handleResultPlayAgain}
-          onClose={() => setWinInfo(null)}
         />
       )}
 
@@ -329,6 +438,15 @@ function AppInner() {
               <span>[]</span> Stop
             </button>
           )}
+          {gameMode === 'classic' && guessedSuccessfully && (
+            <button
+              className='run-button'
+              onClick={handleChooseNewWord}
+              title='Pick a new word'
+            >
+              Choose New Word
+            </button>
+          )}
           <button
             className='exit-button'
             onClick={handleExit}
@@ -359,12 +477,17 @@ function AppInner() {
               onGuessComplete={handleGuessComplete}
               onRunStateChange={setIsRunning}
               ghostPreview={selectedChallenge ? selectedChallenge.ghostPreview : null}
-              hintText={selectedChallenge ? selectedChallenge.hint : null}
               showClassification={gameMode === 'classic'}
+              showGuessPanel={gameMode !== 'classic'}
             />
           </section>
           <section className='chat-section'>
-            <ChatWindow />
+            <ChatWindow
+              messages={chatMessages}
+              onSend={(text) =>
+                setChatMessages((prev) => [...prev, { user: 'You', text }])
+              }
+            />
           </section>
         </aside>
       </main>

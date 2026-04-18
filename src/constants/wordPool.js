@@ -1,77 +1,6 @@
-export const SPECIAL_WORD = 'loudspeaker'
+import { MODEL_LABELS } from './modelLabels'
 
-export const WORD_POOL = [
-  // Animals
-  'cat',
-  'dog',
-  'fish',
-  'bird',
-  'snake',
-  'turtle',
-  'rabbit',
-  'elephant',
-  'spider',
-  'butterfly',
-  'crab',
-  'penguin',
-  'frog',
-  'whale',
-  'bee',
-  // Nature
-  'sun',
-  'moon',
-  'star',
-  'cloud',
-  'rainbow',
-  'lightning',
-  'mountain',
-  'flower',
-  'tree',
-  'leaf',
-  'wave',
-  'island',
-  'river',
-  'lake',
-  'volcano',
-  // Objects
-  'house',
-  'door',
-  'window',
-  'car',
-  'boat',
-  'rocket',
-  'kite',
-  'ladder',
-  'bridge',
-  'umbrella',
-  'key',
-  'hammer',
-  'clock',
-  'bell',
-  'crown',
-  // Food
-  'pizza',
-  'apple',
-  'banana',
-  'cake',
-  'ice cream',
-  'carrot',
-  'cupcake',
-  'lollipop',
-  'cookie',
-  'sandwich',
-  // Shapes / Fun
-  'heart',
-  'spiral',
-  'castle',
-  'sword',
-  'flag',
-  'trophy',
-  'diamond',
-  'arrow',
-  'smiley face',
-  'snowflake'
-]
+export const WORD_POOL = [...MODEL_LABELS]
 
 export function normalizeWord(value) {
   return (value || '')
@@ -116,8 +45,6 @@ export function findMatchingWordFromCandidates(rawGuess, candidates = WORD_POOL)
 }
 
 export function getRandomWordsFromPool() {
-  const poolWithoutSpecial = WORD_POOL.filter((w) => w !== SPECIAL_WORD)
-  const shuffled = [...poolWithoutSpecial].sort(() => Math.random() - 0.5)
-  const randomSelection = shuffled.slice(0, 4)
-  return [SPECIAL_WORD, ...randomSelection].sort(() => Math.random() - 0.5)
+  const shuffled = [...WORD_POOL].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, 5)
 }

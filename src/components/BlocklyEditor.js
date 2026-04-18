@@ -2,10 +2,8 @@ import React, { useEffect, useRef } from 'react'
 import * as Blockly from 'blockly'
 import 'blockly/blocks'
 import { javascriptGenerator } from 'blockly/javascript'
-import { registerContinuousToolbox } from '@blockly/continuous-toolbox'
 import { FieldColour, registerFieldColour } from '@blockly/field-colour'
 
-registerContinuousToolbox()
 registerFieldColour()
 
 const EVENT_NEW = '__NEW_MESSAGE__'
@@ -686,11 +684,6 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
     workspace.current = Blockly.inject(blocklyDiv.current, {
       renderer: 'zelos',
       theme: customTheme,
-      plugins: {
-        toolbox: 'ContinuousToolbox',
-        flyoutsVerticalToolbox: 'ContinuousFlyout',
-        metricsManager: 'ContinuousMetrics'
-      },
       toolbox,
       move: { scrollbars: true, drag: true, wheel: true },
       zoom: { controls: true, wheel: true, startScale: 1, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
