@@ -4,6 +4,7 @@ import BlocklyEditor from './components/BlocklyEditor'
 import DrawingCanvas from './components/DrawingCanvas'
 import ChatWindow from './components/ChatWindow'
 import HomePage from './pages/HomePage'
+import AboutPage from './pages/AboutPage'
 import WordModal from './components/WordModal'
 import ChallengeModal from './components/ChallengeModal'
 import { findMatchingWordFromCandidates, WORD_POOL } from './constants/wordPool'
@@ -55,7 +56,7 @@ function AppInner() {
     []
   )
 
-  // 'home' | 'word-select' | 'challenge-select' | 'game'
+  // 'home' | 'about' | 'word-select' | 'challenge-select' | 'game'
   const [screen, setScreen] = useState('home')
   const [gameMode, setGameMode] = useState('classic') // 'classic' | 'challenge'
   const [selectedWord, setSelectedWord] = useState(null)
@@ -122,6 +123,10 @@ function AppInner() {
     setGameMode('challenge')
     setStartTourAfterWordSelect(false)
     setScreen('challenge-select')
+  }
+
+  const handleAbout = () => {
+    setScreen('about')
   }
 
   const handleWordSelect = (word) => {
@@ -370,8 +375,13 @@ function AppInner() {
         onPlay={handlePlay}
         onHowToPlay={handleHowToPlay}
         onChallengeMode={handleChallengeMode}
+        onAbout={handleAbout}
       />
     )
+  }
+
+  if (screen === 'about') {
+    return <AboutPage onBack={() => setScreen('home')} />
   }
 
   return (

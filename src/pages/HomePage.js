@@ -3,7 +3,7 @@ import './HomePage.css'
 
 const PARTICLES = 60
 
-function HomePage({ onPlay, onHowToPlay, onChallengeMode }) {
+function HomePage({ onPlay, onHowToPlay, onChallengeMode, onAbout }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -97,36 +97,10 @@ function HomePage({ onPlay, onHowToPlay, onChallengeMode }) {
           <button
             type='button'
             onClick={onHowToPlay}
-            style={{
-              alignSelf: 'center',
-              padding: '0.6rem 1.4rem',
-              borderRadius: 999,
-              border: '1.5px solid #6366f1',
-              background: 'rgba(129,140,248,0.06)',
-              color: '#3730a3',
-              fontFamily: 'Inter, system-ui, sans-serif',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(79,70,229,0.15)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem'
-            }}
+            className='home-secondary-btn'
           >
             <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 20,
-                height: 20,
-                borderRadius: '999px',
-                backgroundColor: '#ffffff',
-                color: '#4f46e5',
-                fontSize: '0.9rem',
-                boxShadow: '0 1px 3px rgba(15,23,42,0.25)'
-              }}
+              className='home-secondary-icon'
             >
               ?
             </span>
@@ -137,6 +111,9 @@ function HomePage({ onPlay, onHowToPlay, onChallengeMode }) {
         <p className='home-hint'>
           Pick a secret word or try challenge mode to hunt down a drawing bug.
         </p>
+        <button type='button' onClick={onAbout} className='home-about-link'>
+          About this project
+        </button>
       </div>
     </div>
   )

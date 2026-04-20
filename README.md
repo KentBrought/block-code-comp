@@ -1,70 +1,90 @@
-# Getting Started with Create React App
+# Block, Code, Draw
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![Block, Code, Draw demo](public/media/block-code-draw-demo.gif)
 
-## Available Scripts
+Block, Code, Draw is a playful block-based coding game where learners build drawing programs and get AI feedback on what they created.
 
-In the project directory, you can run:
+Live demo: https://kentbrought.github.io/block-code-comp
 
-### `npm start`
+Created by Kent, Shreya, Terry, and Teresa for CMS.594 at MIT.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## What It Does
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Lets players build drawing logic with Blockly blocks.
+- Runs code on a canvas to generate line art and shapes.
+- Uses an on-device image classifier pipeline to guess what the player drew.
+- Includes a timed classic mode where players try to make the AI guess a secret word.
+- Includes challenge mode with intentionally bugged starter code and ghost/reference drawing overlays.
+- Includes a guided "How to Play" tour for onboarding.
 
-### `npm test`
+## Why We Built It
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This project explores how generative/AI-assisted learning tools can support beginner programming confidence. The design goal is to keep the interaction creative and low-friction while still teaching core computational ideas like sequence, loops, conditions, and debugging.
 
-### `npm run build`
+## Core Learning Ideas
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Code runs in sequence.
+- Loops create patterns efficiently.
+- Conditionals enable rules and branching behavior.
+- Variables track changing state.
+- Debugging is a creative, repeatable process.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Tech Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- React (Create React App)
+- Blockly + custom blocks/toolbox
+- TensorFlow.js + `tfjs-tflite`
+- MediaPipe Tasks Vision utilities
+- Reactour for the onboarding tour
 
-### `npm run eject`
+## Project Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `src/App.js`: main game flow, screen state, timer, run/stop behavior.
+- `src/components/BlocklyEditor.js`: Blockly workspace and block definitions.
+- `src/components/DrawingCanvas.js`: drawing runtime and classifier integration.
+- `src/components/ChatWindow.js`: in-game feedback/chat panel.
+- `src/pages/HomePage.js`: landing screen and primary entry points.
+- `src/pages/AboutPage.js`: project context, demo, and curriculum framing.
+- `src/constants/challenges.js`: challenge-mode starter programs and hints.
+- `src/model/`: local model files and metadata.
+- `public/media/block-code-draw-demo.gif`: gameplay demo asset.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Run Locally
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Prerequisites:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Node.js 18+ recommended
+- npm
 
-## Learn More
+Install dependencies:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm install
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Start development server:
 
-### Code Splitting
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Build for production:
 
-### Analyzing the Bundle Size
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Deployment
 
-### Making a Progressive Web App
+This repo is configured for GitHub Pages deployment using the `homepage` field and `gh-pages` script.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Deploy command:
 
-### Advanced Configuration
+```bash
+npm run deploy
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Notes
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- This is an educational prototype and active class project.
+- Model behavior and guesses are imperfect by design and used as part of the learning loop.
