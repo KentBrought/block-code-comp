@@ -3,9 +3,9 @@
   "name": "Block, Code, Draw!",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
     }
   ],
   "start_url": ".",
