@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { TourProvider, useTour } from '@reactour/tour'
+import twemoji from 'twemoji'
 import BlocklyEditor from './components/BlocklyEditor'
 import DrawingCanvas from './components/DrawingCanvas'
 import ChatWindow from './components/ChatWindow'
@@ -82,6 +83,37 @@ function AppInner() {
 
   const timerRef = useRef(null)
   const { setIsOpen: setTourOpen, setSteps: setTourSteps } = useTour()
+
+  useEffect(() => {
+    const parseNode = (node) => {
+      if (!(node instanceof Element || node instanceof Document || node instanceof DocumentFragment)) return
+      twemoji.parse(node, {
+        folder: 'svg',
+        ext: '.svg',
+        className: 'twemoji-emoji'
+      })
+    }
+
+    parseNode(document.body)
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'characterData') {
+          if (mutation.target?.parentElement) parseNode(mutation.target.parentElement)
+          return
+        }
+        mutation.addedNodes.forEach((node) => parseNode(node))
+      })
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (timerRunning) {

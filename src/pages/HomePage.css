@@ -218,6 +218,7 @@
     overflow: hidden;
     margin-top: 0.5rem;
     min-width: 320px;
+    width: 320px;
     min-height: 64px;
     text-align: center;
 }
@@ -257,16 +258,20 @@
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    align-items: center;
 }
 
 .home-primary-row {
-    display: flex;
+    position: relative;
+    width: 320px;
+    display: block;
     align-items: center;
-    gap: 0.6rem;
 }
 
 .home-primary-row .home-play-btn {
     margin-top: 0;
+    width: 100%;
+    min-width: 0;
 }
 
 .home-help-circle {
@@ -280,7 +285,10 @@
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(79, 70, 229, 0.18);
-    position: relative;
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;

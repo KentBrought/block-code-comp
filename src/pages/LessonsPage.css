@@ -137,7 +137,7 @@
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.55rem;
+  gap: 0.72rem;
 }
 
 .catalog-card {
@@ -145,12 +145,30 @@
   border: 1px solid #dbe7ff;
   background: #f8fbff;
   border-radius: 12px;
-  padding: 0.6rem 0.65rem;
+  padding: 0.72rem 0.72rem 0.68rem;
   cursor: pointer;
+  min-height: 208px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background 0.14s ease;
 }
 
 .catalog-card:hover {
   background: #f2f7ff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(67, 97, 238, 0.12);
+}
+
+.catalog-card.is-opened {
+  border-color: #bfdbfe;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+}
+
+.catalog-card.is-done {
+  border-color: #86efac;
+  background: linear-gradient(180deg, #f5fffa 0%, #ecfdf5 100%);
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.12);
 }
 
 .catalog-card-top {
@@ -161,6 +179,54 @@
   color: #334155;
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.catalog-lesson-index {
+  letter-spacing: 0.01em;
+}
+
+.catalog-status-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.catalog-card-visual-wrap {
+  min-height: 66px;
+  padding: 0.34rem 0.42rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #eef5ff 0%, #e6efff 100%);
+  border: 1px solid #d5e4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catalog-card.is-done .catalog-card-visual-wrap {
+  background: linear-gradient(180deg, #eafcf2 0%, #ddf9e9 100%);
+  border-color: #bbf7d0;
+}
+
+.catalog-card-block-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.catalog-card-block-preview svg {
+  max-width: 100%;
+  height: 52px;
+}
+
+.catalog-card-block-preview svg .blocklyText,
+.catalog-card-block-preview svg text {
+  fill: #ffffff !important;
+}
+
+.catalog-card-fallback {
+  font-size: 1.9rem;
+  line-height: 1;
 }
 
 .catalog-card h3 {
@@ -191,6 +257,13 @@
 .lesson-pill.done {
   background: #dcfce7;
   color: #166534;
+  border: 1px solid #86efac;
+}
+
+.lesson-pill.opened {
+  background: #e0ecff;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
 }
 
 .lesson-detail-page {

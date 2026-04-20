@@ -6,6 +6,7 @@ import DrawingCanvas from '../components/DrawingCanvas'
 import './LessonsPage.css'
 
 const STORAGE_KEY = 'bcd_lesson_progress_v3'
+const OPENED_STORAGE_KEY = 'bcd_lesson_opened_v1'
 
 const LEVEL_TITLES = {
   1: 'Make It Move',
@@ -436,11 +437,11 @@ const LESSONS_ENRICHED = LESSONS_WITH_NUMBERS.map((lesson) => ({
 
 const LESSON_ID_SET = new Set(LESSONS_ENRICHED.map((lesson) => lesson.id))
 
-function sanitizeCompleted(completedRaw) {
-  if (!Array.isArray(completedRaw)) return []
+function sanitizeLessonIds(rawIds) {
+  if (!Array.isArray(rawIds)) return []
   const uniqueValid = []
   const seen = new Set()
-  completedRaw.forEach((id) => {
+  rawIds.forEach((id) => {
     if (typeof id !== 'string') return
     if (!LESSON_ID_SET.has(id)) return
     if (seen.has(id)) return
@@ -454,7 +455,17 @@ function getCompletedFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     const parsed = raw ? JSON.parse(raw) : []
-    return sanitizeCompleted(parsed)
+    return sanitizeLessonIds(parsed)
+  } catch (error) {
+    return []
+  }
+}
+
+function getOpenedFromStorage() {
+  try {
+    const raw = localStorage.getItem(OPENED_STORAGE_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return sanitizeLessonIds(parsed)
   } catch (error) {
     return []
   }
@@ -651,6 +662,20 @@ function blockUsagePrompt(type) {
   }
 }
 
+function lessonFallbackVisual(level) {
+  const byLevel = {
+    1: '🚀',
+    2: '🔁',
+    3: '🧠',
+    4: '📦',
+    5: '🧭',
+    6: '🛠️',
+    7: '🐞',
+    8: '🎨'
+  }
+  return byLevel[level] || '✨'
+}
+
 function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onPrev, canPrev, canNext }) {
   const mountRef = useRef(null)
   const workspaceRef = useRef(null)
@@ -838,10 +863,12 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
 
 export default function LessonsPage({ onBack }) {
   const [completed, setCompleted] = useState(getCompletedFromStorage)
+  const [openedLessonIds, setOpenedLessonIds] = useState(getOpenedFromStorage)
   const [selectedLessonId, setSelectedLessonId] = useState(null)
+  const [catalogVisuals, setCatalogVisuals] = useState({})
 
   useEffect(() => {
-    const cleaned = sanitizeCompleted(completed)
+    const cleaned = sanitizeLessonIds(completed)
     if (cleaned.length !== completed.length || cleaned.some((id, index) => id !== completed[index])) {
       setCompleted(cleaned)
       return
@@ -849,8 +876,65 @@ export default function LessonsPage({ onBack }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
   }, [completed])
 
+  useEffect(() => {
+    const cleaned = sanitizeLessonIds(openedLessonIds)
+    if (cleaned.length !== openedLessonIds.length || cleaned.some((id, index) => id !== openedLessonIds[index])) {
+      setOpenedLessonIds(cleaned)
+      return
+    }
+    localStorage.setItem(OPENED_STORAGE_KEY, JSON.stringify(cleaned))
+  }, [openedLessonIds])
+
+  useEffect(() => {
+    if (!selectedLessonId) return
+    setOpenedLessonIds((prev) => (prev.includes(selectedLessonId) ? prev : [...prev, selectedLessonId]))
+  }, [selectedLessonId])
+
+  useEffect(() => {
+    initBlocks()
+    const host = document.createElement('div')
+    host.style.position = 'fixed'
+    host.style.left = '-10000px'
+    host.style.top = '-10000px'
+    host.style.width = '1px'
+    host.style.height = '1px'
+    host.style.opacity = '0'
+    document.body.appendChild(host)
+
+    const workspace = Blockly.inject(host, {
+      renderer: 'zelos',
+      theme: customTheme,
+      toolbox: { kind: 'flyoutToolbox', contents: [] },
+      move: { scrollbars: false, drag: false, wheel: false },
+      zoom: { controls: false, wheel: false, startScale: 1, maxScale: 1, minScale: 1 }
+    })
+
+    const previews = {}
+    LESSONS_ENRICHED.forEach((lesson) => {
+      const type = lesson.focusBlocks.find((blockType) => Blockly.Blocks[blockType])
+      if (!type) return
+      try {
+        const block = workspace.newBlock(type)
+        block.initSvg()
+        block.render()
+        const markup = buildBlockSvgMarkup(block)
+        if (markup) previews[lesson.id] = markup
+        block.dispose(false)
+      } catch (error) {
+        // Keep catalog resilient if a preview block fails.
+      }
+    })
+    setCatalogVisuals(previews)
+
+    return () => {
+      workspace.dispose()
+      host.remove()
+    }
+  }, [])
+
   const completedCount = completed.length
   const completedSet = useMemo(() => new Set(completed), [completed])
+  const openedSet = useMemo(() => new Set(openedLessonIds), [openedLessonIds])
   const progressPercent = Math.round((completedCount / LESSONS_ENRICHED.length) * 100)
   const selectedIndex = LESSONS_ENRICHED.findIndex((lesson) => lesson.id === selectedLessonId)
   const selectedLesson = selectedIndex >= 0 ? LESSONS_ENRICHED[selectedIndex] : null
@@ -910,11 +994,31 @@ export default function LessonsPage({ onBack }) {
                 <div className='catalog-grid'>
                   {lessons.map((lesson) => {
                     const done = completedSet.has(lesson.id)
+                    const opened = openedSet.has(lesson.id)
                     return (
-                      <button key={lesson.id} type='button' className='catalog-card' onClick={() => setSelectedLessonId(lesson.id)}>
+                      <button
+                        key={lesson.id}
+                        type='button'
+                        className={`catalog-card ${done ? 'is-done' : ''} ${opened ? 'is-opened' : ''}`}
+                        onClick={() => setSelectedLessonId(lesson.id)}
+                      >
                         <div className='catalog-card-top'>
-                          <span>Lesson {lesson.lessonNumber}</span>
-                          <span className={`lesson-pill ${done ? 'done' : 'todo'}`}>{done ? 'Done' : 'Start'}</span>
+                          <span className='catalog-lesson-index'>Lesson {lesson.lessonNumber}</span>
+                          <span className='catalog-status-pills'>
+                            {done ? (
+                              <span className='lesson-pill done'>✅ Done</span>
+                            ) : (
+                              <span className='lesson-pill todo'>▶️ Start</span>
+                            )}
+                            {opened && <span className='lesson-pill opened'>👀 Opened</span>}
+                          </span>
+                        </div>
+                        <div className='catalog-card-visual-wrap'>
+                          {catalogVisuals[lesson.id] ? (
+                            <span className='catalog-card-block-preview' dangerouslySetInnerHTML={{ __html: catalogVisuals[lesson.id] }} />
+                          ) : (
+                            <span className='catalog-card-fallback'>{lessonFallbackVisual(lesson.level)}</span>
+                          )}
                         </div>
                         <h3>{lesson.title}</h3>
                         <p>{lesson.goal}</p>
