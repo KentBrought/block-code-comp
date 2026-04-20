@@ -365,41 +365,112 @@ body {
 /* ─── Blockly Overrides ─── */
 
 /* The outer toolbox sidebar (category dots + names) */
-.blocklyToolboxDiv {
-  background-color: #f2f2f2 !important;
-  border-right: 1px solid #dadada !important;
+.editor-section .blocklyToolboxDiv {
+  width: 78px !important;
+  min-width: 78px !important;
+  background-color: #c9c9c9 !important;
+  border-right: 1px solid #b8bcc2 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-.blocklyTreeRow {
-  padding: 6px 4px !important;
-  margin: 2px !important;
+.editor-section .blocklyToolboxContents {
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 !important;
+}
+
+/* Blockly 2024+ toolbox category classes */
+.editor-section .blocklyToolboxCategoryGroup {
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.editor-section .blocklyToolboxCategory {
+  min-height: 48px !important;
+  margin: 0 !important;
   border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
 }
 
-.blocklyTreeRow:hover {
-  background-color: #d9d9d9 !important;
+.editor-section .blocklyToolboxCategory:hover {
+  background-color: #8f8f8f !important;
 }
 
-.blocklyTreeSelected {
-  background-color: #bdbdbd !important;
+.editor-section .blocklyToolboxSelected {
+  background-color: #7d7d7d !important;
 }
 
-.blocklyTreeLabel {
-  color: #1f2937 !important;
+.editor-section .blocklyToolboxCategoryLabel {
+  color: #17212b !important;
   font-family: 'Inter', sans-serif !important;
-  font-size: 10px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
-  text-align: left !important;
+  text-align: center !important;
+  line-height: 1.1 !important;
+}
+
+.editor-section .blocklyToolboxCategoryIcon {
+  margin: 0 !important;
+  transform: scale(1.06);
+  transform-origin: center;
+}
+
+.editor-section .blocklyTreeRow {
+  min-height: 48px !important;
+  padding: 6px 6px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+}
+
+.editor-section .blocklyTreeRow:hover {
+  background-color: #8f8f8f !important;
+}
+
+.editor-section .blocklyTreeSelected {
+  background-color: #7d7d7d !important;
+}
+
+.editor-section .blocklyTreeIcon {
+  margin: 0 !important;
+  transform: scale(1.06);
+  transform-origin: center;
+}
+
+.editor-section .blocklyTreeLabel {
+  color: #17212b !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  line-height: 1.1 !important;
 }
 
 /* Flyout background */
-.blocklyFlyoutBackground {
-  fill: #f5f5f5 !important;
+.editor-section .blocklyFlyoutBackground {
+  fill: #f3f4f6 !important;
   fill-opacity: 1 !important;
 }
 
+.editor-section .blocklyFlyout {
+  width: 430px !important;
+  overflow-y: auto !important;
+}
+
 /* Category section heading labels inside flyout */
-.blocklyFlyoutLabelText {
+.editor-section .blocklyFlyoutLabelText {
   font-family: 'Inter', sans-serif !important;
   font-size: 11px !important;
   font-weight: 800 !important;
@@ -409,21 +480,21 @@ body {
 }
 
 /* Separator lines –– rendered via the blocklyFlyoutSeparatorLabel custom class */
-.blocklyFlyoutSeparatorLabel rect {
+.editor-section .blocklyFlyoutSeparatorLabel rect {
   fill: #e9ecef !important;
 }
 
 /* Main workspace background */
-.blocklyMainBackground {
+.editor-section .blocklyMainBackground {
   fill: #f8f9fa !important;
 }
 
-.blocklyScrollbarHandle {
+.editor-section .blocklyScrollbarHandle {
   fill: #ced4da !important;
 }
 
 /* Highlight executing block with a gold outline */
-.blocklySelected>.blocklyPath {
+.editor-section .blocklySelected>.blocklyPath {
   stroke: #f59f00 !important;
   stroke-width: 3px !important;
 }

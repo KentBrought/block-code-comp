@@ -5,6 +5,7 @@ import DrawingCanvas from './components/DrawingCanvas'
 import ChatWindow from './components/ChatWindow'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
+import LessonsPage from './pages/LessonsPage'
 import WordModal from './components/WordModal'
 import ChallengeModal from './components/ChallengeModal'
 import { findMatchingWordFromCandidates, WORD_POOL } from './constants/wordPool'
@@ -56,7 +57,7 @@ function AppInner() {
     []
   )
 
-  // 'home' | 'about' | 'word-select' | 'challenge-select' | 'game'
+  // 'home' | 'about' | 'lessons' | 'word-select' | 'challenge-select' | 'game'
   const [screen, setScreen] = useState('home')
   const [gameMode, setGameMode] = useState('classic') // 'classic' | 'challenge'
   const [selectedWord, setSelectedWord] = useState(null)
@@ -127,6 +128,10 @@ function AppInner() {
 
   const handleAbout = () => {
     setScreen('about')
+  }
+
+  const handleLessons = () => {
+    setScreen('lessons')
   }
 
   const handleWordSelect = (word) => {
@@ -376,12 +381,17 @@ function AppInner() {
         onHowToPlay={handleHowToPlay}
         onChallengeMode={handleChallengeMode}
         onAbout={handleAbout}
+        onLessons={handleLessons}
       />
     )
   }
 
   if (screen === 'about') {
     return <AboutPage onBack={() => setScreen('home')} />
+  }
+
+  if (screen === 'lessons') {
+    return <LessonsPage onBack={() => setScreen('home')} />
   }
 
   return (

@@ -3,14 +3,18 @@ import * as Blockly from 'blockly'
 import 'blockly/blocks'
 import { javascriptGenerator } from 'blockly/javascript'
 import { FieldColour, registerFieldColour } from '@blockly/field-colour'
+import {
+  registerContinuousToolbox
+} from '@blockly/continuous-toolbox'
 
 registerFieldColour()
 
 const EVENT_NEW = '__NEW_MESSAGE__'
 const eventMessages = ['A']
 let initialized = false
+let continuousRegistered = false
 
-const customTheme = Blockly.Theme.defineTheme('blockCodeTheme', {
+export const customTheme = Blockly.Theme.defineTheme('blockCodeTheme', {
   base: Blockly.Themes.Classic,
   blockStyles: {
     variable_blocks: {
@@ -47,7 +51,12 @@ function handleEventSelection(newValue) {
   return clean
 }
 
-function initBlocks() {
+export function initBlocks() {
+  if (!continuousRegistered) {
+    registerContinuousToolbox()
+    continuousRegistered = true
+  }
+
   if (initialized) return
   initialized = true
 
@@ -552,7 +561,7 @@ function initBlocks() {
 
 initBlocks()
 
-const toolbox = {
+export const defaultToolbox = {
   kind: 'categoryToolbox',
   contents: [
     {
@@ -684,7 +693,12 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
     workspace.current = Blockly.inject(blocklyDiv.current, {
       renderer: 'zelos',
       theme: customTheme,
-      toolbox,
+      toolbox: defaultToolbox,
+      plugins: {
+        toolbox: 'ContinuousToolbox',
+        flyoutsVerticalToolbox: 'ContinuousFlyout',
+        metricsManager: 'ContinuousMetrics'
+      },
       move: { scrollbars: true, drag: true, wheel: true },
       zoom: { controls: true, wheel: true, startScale: 1, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
     })
@@ -728,6 +742,78 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
       </div>
     </div>
   )
+}
+
+export function buildLessonToolbox(allowedTypes = []) {
+  const allowed = new Set(allowedTypes)
+  const includeVariables = allowed.has('__VARIABLES__')
+  const includeFunctions = allowed.has('__PROCEDURES__')
+  const baseCategories = (defaultToolbox?.contents || []).filter((cat) => Array.isArray(cat.contents))
+
+  const lessonCategories = baseCategories
+    .map((cat) => ({
+      ...cat,
+      contents: cat.contents.filter((item) => item?.kind === 'block' && allowed.has(item.type))
+    }))
+    .filter((cat) => cat.contents.length > 0)
+
+  const customCategories = (defaultToolbox?.contents || []).filter(
+    (cat) =>
+      (includeVariables && cat.custom === 'VARIABLE') ||
+      (includeFunctions && cat.custom === 'PROCEDURE')
+  )
+
+  return {
+    kind: 'categoryToolbox',
+    contents: [...lessonCategories, ...customCategories]
+  }
+}
+
+export function buildLessonFlyoutToolbox(allowedTypes = []) {
+  const allowed = new Set(allowedTypes)
+  const baseCategories = (defaultToolbox?.contents || []).filter((cat) => Array.isArray(cat.contents))
+  const blockMap = new Map()
+
+  baseCategories.forEach((cat) => {
+    cat.contents.forEach((item) => {
+      if (item?.kind === 'block' && item.type) {
+        blockMap.set(item.type, item)
+      }
+    })
+  })
+
+  const contents = []
+  allowedTypes.forEach((type) => {
+    if (type === '__VARIABLES__') {
+      contents.push(
+        { kind: 'label', text: 'Variables' },
+        { kind: 'block', type: 'variables_set' },
+        { kind: 'block', type: 'math_change' },
+        { kind: 'block', type: 'variables_get' },
+        { kind: 'sep', gap: '8' }
+      )
+      return
+    }
+
+    if (type === '__PROCEDURES__') {
+      contents.push(
+        { kind: 'label', text: 'Functions' },
+        { kind: 'block', type: 'procedures_defnoreturn' },
+        { kind: 'block', type: 'procedures_callnoreturn' },
+        { kind: 'sep', gap: '8' }
+      )
+      return
+    }
+
+    if (!allowed.has(type)) return
+    const item = blockMap.get(type) || { kind: 'block', type }
+    contents.push(item)
+  })
+
+  return {
+    kind: 'flyoutToolbox',
+    contents
+  }
 }
 
 export default BlocklyEditor
