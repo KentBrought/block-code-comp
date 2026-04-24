@@ -11,6 +11,13 @@ body {
   color: #2d3436;
 }
 
+.twemoji-emoji {
+  width: 1em;
+  height: 1em;
+  margin: 0 0.08em;
+  vertical-align: -0.12em;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
@@ -90,6 +97,19 @@ body {
   font-weight: 700;
   color: #4361ee;
   text-transform: capitalize;
+}
+
+.word-badge--challenge {
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.word-badge--challenge .word-badge-label {
+  color: #15803d;
+}
+
+.word-badge--challenge .word-badge-word {
+  color: #166534;
 }
 
 .game-timer {
@@ -176,6 +196,34 @@ body {
 .run-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+.stop-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 7px 18px;
+  border-radius: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.stop-button:hover {
+  background: #b91c1c;
+  box-shadow: 0 5px 16px rgba(185, 28, 28, 0.45);
+  transform: translateY(-1px);
+}
+
+.stop-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.3);
 }
 
 /* ─── Exit Button ─── */
@@ -446,42 +494,112 @@ body {
 /* ─── Blockly Overrides ─── */
 
 /* The outer toolbox sidebar (category dots + names) */
-.blocklyToolboxDiv {
-  background-color: #1e2235 !important;
-  border-right: none !important;
-  min-width: 68px !important;
+.editor-section .blocklyToolboxDiv {
+  width: 78px !important;
+  min-width: 78px !important;
+  background-color: #c9c9c9 !important;
+  border-right: 1px solid #b8bcc2 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-.blocklyTreeRow {
-  padding: 6px 4px !important;
-  margin: 2px !important;
-  border-radius: 8px !important;
+.editor-section .blocklyToolboxContents {
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 !important;
 }
 
-.blocklyTreeRow:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+/* Blockly 2024+ toolbox category classes */
+.editor-section .blocklyToolboxCategoryGroup {
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-.blocklyTreeSelected {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+.editor-section .blocklyToolboxCategory {
+  min-height: 48px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
 }
 
-.blocklyTreeLabel {
-  color: #cdd3f0 !important;
+.editor-section .blocklyToolboxCategory:hover {
+  background-color: #8f8f8f !important;
+}
+
+.editor-section .blocklyToolboxSelected {
+  background-color: #7d7d7d !important;
+}
+
+.editor-section .blocklyToolboxCategoryLabel {
+  color: #17212b !important;
   font-family: 'Inter', sans-serif !important;
-  font-size: 10px !important;
-  font-weight: 600 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
   text-align: center !important;
+  line-height: 1.1 !important;
+}
+
+.editor-section .blocklyToolboxCategoryIcon {
+  margin: 0 !important;
+  transform: scale(1.06);
+  transform-origin: center;
+}
+
+.editor-section .blocklyTreeRow {
+  min-height: 48px !important;
+  padding: 6px 6px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+}
+
+.editor-section .blocklyTreeRow:hover {
+  background-color: #8f8f8f !important;
+}
+
+.editor-section .blocklyTreeSelected {
+  background-color: #7d7d7d !important;
+}
+
+.editor-section .blocklyTreeIcon {
+  margin: 0 !important;
+  transform: scale(1.06);
+  transform-origin: center;
+}
+
+.editor-section .blocklyTreeLabel {
+  color: #17212b !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  line-height: 1.1 !important;
 }
 
 /* Flyout background */
-.blocklyFlyoutBackground {
-  fill: #ffffff !important;
+.editor-section .blocklyFlyoutBackground {
+  fill: #f3f4f6 !important;
   fill-opacity: 1 !important;
 }
 
+.editor-section .blocklyFlyout {
+  width: 430px !important;
+  overflow-y: auto !important;
+}
+
 /* Category section heading labels inside flyout */
-.blocklyFlyoutLabelText {
+.editor-section .blocklyFlyoutLabelText {
   font-family: 'Inter', sans-serif !important;
   font-size: 11px !important;
   font-weight: 800 !important;
@@ -491,21 +609,21 @@ body {
 }
 
 /* Separator lines –– rendered via the blocklyFlyoutSeparatorLabel custom class */
-.blocklyFlyoutSeparatorLabel rect {
+.editor-section .blocklyFlyoutSeparatorLabel rect {
   fill: #e9ecef !important;
 }
 
 /* Main workspace background */
-.blocklyMainBackground {
+.editor-section .blocklyMainBackground {
   fill: #f8f9fa !important;
 }
 
-.blocklyScrollbarHandle {
+.editor-section .blocklyScrollbarHandle {
   fill: #ced4da !important;
 }
 
 /* Highlight executing block with a gold outline */
-.blocklySelected>.blocklyPath {
+.editor-section .blocklySelected>.blocklyPath {
   stroke: #f59f00 !important;
   stroke-width: 3px !important;
 }
