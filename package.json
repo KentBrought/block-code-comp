@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@blockly/continuous-toolbox": "^7.0.8",
+    "@huggingface/transformers": "^4.2.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
