@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { classifyCanvas } from '../utils/imageClassifier'
 import { findMatchingWordFromCandidates, WORD_POOL } from '../constants/wordPool'
+import { scoreDrawingAgainstGhost } from '../utils/challengeScorer'
 
 const DrawingCanvas = ({
   commands,
@@ -8,6 +9,7 @@ const DrawingCanvas = ({
   stopSequence,
   onHighlight,
   onGuessComplete,
+  onChallengeScore,
   onRunStateChange,
   ghostPreview,
   showClassification = true,
@@ -22,6 +24,7 @@ const DrawingCanvas = ({
   const commandsRef = useRef(commands)
   const onHighlightRef = useRef(onHighlight)
   const onGuessCompleteRef = useRef(onGuessComplete)
+  const onChallengeScoreRef = useRef(onChallengeScore)
   const onRunStateChangeRef = useRef(onRunStateChange)
   const ghostPreviewRef = useRef(ghostPreview)
   const [classifying, setClassifying] = useState(false)
@@ -32,9 +35,10 @@ const DrawingCanvas = ({
     commandsRef.current = commands
     onHighlightRef.current = onHighlight
     onGuessCompleteRef.current = onGuessComplete
+    onChallengeScoreRef.current = onChallengeScore
     onRunStateChangeRef.current = onRunStateChange
     ghostPreviewRef.current = ghostPreview
-  }, [commands, onHighlight, onGuessComplete, onRunStateChange, ghostPreview])
+  }, [commands, onHighlight, onGuessComplete, onChallengeScore, onRunStateChange, ghostPreview])
 
   useEffect(() => {
     runIdRef.current += 1
@@ -615,6 +619,11 @@ const DrawingCanvas = ({
             setClassifying(false)
             setClassificationError(null)
             setClassificationResult(null)
+
+            if (onChallengeScoreRef.current && ghostPreviewRef.current && drawingCanvas) {
+              const result = scoreDrawingAgainstGhost(drawingCanvas, ghostPreviewRef.current)
+              onChallengeScoreRef.current(result)
+            }
           }
           return
         }

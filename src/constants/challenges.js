@@ -143,14 +143,16 @@ export const CHALLENGES = [
     hint:
       'One turn angle is slightly wrong. A square uses the same right angle every side.',
     starterXml: SQUARE_BUG_XML,
+    // Matches actual marker path: start at center (0,0), move_forward(140)
+    // rightward, turn_right(90°) × 4. Canvas angle 0 = right, 90 = down.
     ghostPreview: {
       lines: [
         {
           points: [
-            { x: -70, y: 70 },
-            { x: 70, y: 70 },
-            { x: 70, y: -70 },
-            { x: -70, y: -70 }
+            { x: 0, y: 0 },
+            { x: 140, y: 0 },
+            { x: 140, y: -140 },
+            { x: 0, y: -140 }
           ],
           close: true
         }
@@ -163,13 +165,15 @@ export const CHALLENGES = [
     hint:
       'The rotation is correct for a triangle. Check how many times the loop repeats.',
     starterXml: TRIANGLE_BUG_XML,
+    // Matches actual marker path: start at center (0,0), move_forward(170)
+    // at angle 0, turn_right(120°) × 3. Vertices derived from turtle geometry.
     ghostPreview: {
       lines: [
         {
           points: [
-            { x: 0, y: 95 },
-            { x: 90, y: -60 },
-            { x: -90, y: -60 }
+            { x: 0, y: 0 },
+            { x: 170, y: 0 },
+            { x: 85, y: -147 }
           ],
           close: true
         }

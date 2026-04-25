@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { TourProvider, useTour } from '@reactour/tour'
+import confetti from 'canvas-confetti'
 import twemoji from 'twemoji'
 import BlocklyEditor from './components/BlocklyEditor'
 import DrawingCanvas from './components/DrawingCanvas'
@@ -76,6 +77,7 @@ function AppInner() {
   const [chatMessages, setChatMessages] = useState(defaultChat)
   const [guessRound, setGuessRound] = useState(0)
   const [guessedSuccessfully, setGuessedSuccessfully] = useState(false)
+  const [challengeComplete, setChallengeComplete] = useState(false)
   const [challengeHintIndex, setChallengeHintIndex] = useState(0)
 
   const [editorResetKey, setEditorResetKey] = useState(0)
@@ -204,6 +206,7 @@ function AppInner() {
     setHighlightBlockId(null)
     setIsRunning(false)
     setGuessedSuccessfully(false)
+    setChallengeComplete(false)
     setChallengeHintIndex(0)
     setChatMessages([
       { user: 'BCD AI Bot', text: 'Challenge mode is on. Match the gray outline drawing.' }
@@ -226,6 +229,7 @@ function AppInner() {
     setIsRunning(false)
     setGuessRound(0)
     setGuessedSuccessfully(false)
+    setChallengeComplete(false)
     setChallengeHintIndex(0)
     setChatMessages(defaultChat())
     setTourOpen(false)
@@ -234,9 +238,39 @@ function AppInner() {
     setScreen('home')
   }, [defaultChat, setTourOpen])
 
+  const handleChallengeScore = useCallback(
+    ({ score, pass }) => {
+      if (!pass || challengeComplete) return
+      setChallengeComplete(true)
+    },
+    [challengeComplete]
+  )
+
+  // Fire confetti the moment a challenge is solved.
+  useEffect(() => {
+    if (!challengeComplete) return
+    confetti({ particleCount: 160, spread: 80, origin: { y: 0.55 } })
+  }, [challengeComplete])
+
+  // Properly tears down active game state before showing the challenge picker.
+  const handleNewChallenge = useCallback(() => {
+    setStopSequence((s) => s + 1) // cancel any in-flight animation
+    setIsRunning(false)
+    setCommands('')
+    setRunSequence(0)
+    setRunCount(0)
+    setHighlightBlockId(null)
+    setSelectedChallenge(null)
+    setChallengeComplete(false)
+    setChallengeHintIndex(0)
+    setEditorResetKey((k) => k + 1)
+    setScreen('challenge-select')
+  }, [])
+
   const handleRun = () => {
     if (isRunning) return
     if (guessedSuccessfully) return
+    if (challengeComplete) return
 
     if (gameMode === 'challenge') {
       const challengeHints = selectedChallenge
@@ -461,9 +495,15 @@ function AppInner() {
               <span className='word-badge-word'>{selectedWord}</span>
             </div>
           )}
-          {selectedChallenge && gameMode === 'challenge' && (
+          {selectedChallenge && gameMode === 'challenge' && !challengeComplete && (
             <div className='word-badge word-badge--challenge'>
               <span className='word-badge-label'>Challenge:</span>
+              <span className='word-badge-word'>{selectedChallenge.title}</span>
+            </div>
+          )}
+          {selectedChallenge && gameMode === 'challenge' && challengeComplete && (
+            <div className='word-badge word-badge--solved'>
+              <span className='word-badge-label'>Solved:</span>
               <span className='word-badge-word'>{selectedChallenge.title}</span>
             </div>
           )}
@@ -476,9 +516,14 @@ function AppInner() {
         </div>
 
         <div className='header-actions'>
-          {!isRunning && (
+          {!isRunning && !challengeComplete && (
             <button className='run-button' onClick={handleRun}>
               <span className='run-icon'>&gt;</span> Run
+            </button>
+          )}
+          {gameMode === 'challenge' && challengeComplete && (
+            <button className='run-button' onClick={handleNewChallenge}>
+              New Challenge
             </button>
           )}
           {isRunning && (
@@ -527,6 +572,7 @@ function AppInner() {
               stopSequence={stopSequence}
               onHighlight={setHighlightBlockId}
               onGuessComplete={handleGuessComplete}
+              onChallengeScore={handleChallengeScore}
               onRunStateChange={setIsRunning}
               ghostPreview={selectedChallenge ? selectedChallenge.ghostPreview : null}
               showClassification={gameMode === 'classic'}

@@ -112,6 +112,25 @@ body {
   color: #166534;
 }
 
+.word-badge--solved {
+  background: #fefce8;
+  border-color: #fbbf24;
+  animation: solvedPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.word-badge--solved .word-badge-label {
+  color: #92400e;
+}
+
+.word-badge--solved .word-badge-word {
+  color: #78350f;
+}
+
+@keyframes solvedPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 .game-timer {
   font-family: 'Inter', monospace;
   font-size: 0.95rem;
