@@ -1,15 +1,19 @@
 {
   "files": {
-    "main.css": "/block-code-comp/static/css/main.d074af87.css",
-    "main.js": "/block-code-comp/static/js/main.1e127748.js",
+    "main.css": "/block-code-comp/static/css/main.1d6affe9.css",
+    "main.js": "/block-code-comp/static/js/main.8b9e557a.js",
+    "static/js/803.32054733.chunk.js": "/block-code-comp/static/js/803.32054733.chunk.js",
     "static/js/206.bc6d4574.chunk.js": "/block-code-comp/static/js/206.bc6d4574.chunk.js",
+    "static/js/291.b4450421.chunk.js": "/block-code-comp/static/js/291.b4450421.chunk.js",
+    "static/media/ort-wasm-simd-threaded.asyncify.wasm": "/block-code-comp/static/media/ort-wasm-simd-threaded.asyncify.bb191ad2bb217f542c38.wasm",
     "static/media/quickdraw_model.tflite": "/block-code-comp/static/media/quickdraw_model.d1b9b166e22981e287ab.tflite",
     "static/media/quickdraw_model_int8.tflite": "/block-code-comp/static/media/quickdraw_model_int8.975dda76a1af678c1bfa.tflite",
-    "static/media/labels.txt": "/block-code-comp/static/media/labels.b5b1f3fae47f3b0b916a.txt",
+    "static/media/ort.webgpu.bundle.min.mjs": "/block-code-comp/static/media/ort.webgpu.bundle.min.5690f4ea153458070eac.mjs",
+    "static/media/labels.txt": "/block-code-comp/static/media/labels.c443eb07fd3a24ae4edb.txt",
     "index.html": "/block-code-comp/index.html"
   },
   "entrypoints": [
-    "static/css/main.d074af87.css",
-    "static/js/main.1e127748.js"
+    "static/css/main.1d6affe9.css",
+    "static/js/main.8b9e557a.js"
   ]
 }
