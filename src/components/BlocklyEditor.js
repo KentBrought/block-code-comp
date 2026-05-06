@@ -234,6 +234,127 @@ export function initBlocks() {
       colour: '#f72585'
     },
     {
+      type: 'draw_line',
+      message0: 'draw line length %1',
+      args0: [{ type: 'input_value', name: 'LENGTH', check: 'Number' }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#f72585'
+    },
+    {
+      type: 'draw_rectangle',
+      message0: 'draw rectangle width %1 height %2',
+      args0: [
+        { type: 'input_value', name: 'WIDTH', check: 'Number' },
+        { type: 'input_value', name: 'HEIGHT', check: 'Number' }
+      ],
+      inputsInline: true,
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#f72585'
+    },
+    {
+      type: 'array_create',
+      message0: 'make list named %1',
+      args0: [{ type: 'field_input', name: 'NAME', text: 'myList' }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#5d5fef'
+    },
+    {
+      type: 'array_get',
+      message0: 'item %1 of list named %2',
+      args0: [
+        { type: 'input_value', name: 'INDEX', check: 'Number' },
+        { type: 'input_value', name: 'LIST_NAME', check: 'String' }
+      ],
+      inputsInline: true,
+      output: null,
+      colour: '#5d5fef'
+    },
+    {
+      type: 'array_add_item',
+      message0: 'add item %1 to list named %2',
+      args0: [
+        { type: 'input_value', name: 'ITEM' },
+        { type: 'input_value', name: 'LIST_NAME', check: 'String' }
+      ],
+      inputsInline: true,
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#5d5fef'
+    },
+    {
+      type: 'object_create',
+      message0: 'make object named %1',
+      args0: [{ type: 'field_input', name: 'NAME', text: 'myObject' }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#3f8a6b'
+    },
+    {
+      type: 'object_get',
+      message0: 'get key %1 from object named %2',
+      args0: [
+        { type: 'input_value', name: 'KEY', check: 'String' },
+        { type: 'input_value', name: 'OBJECT_NAME', check: 'String' }
+      ],
+      inputsInline: true,
+      output: null,
+      colour: '#3f8a6b'
+    },
+    {
+      type: 'object_set',
+      message0: 'set key %1 of object named %2 to %3',
+      args0: [
+        { type: 'input_value', name: 'KEY', check: 'String' },
+        { type: 'input_value', name: 'OBJECT_NAME', check: 'String' },
+        { type: 'input_value', name: 'VALUE' }
+      ],
+      inputsInline: true,
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#3f8a6b'
+    },
+    {
+      type: 'note_comment',
+      message0: 'note %1',
+      args0: [{ type: 'field_input', name: 'TEXT', text: 'type note here' }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#9aa3ad'
+    },
+    {
+      type: 'canvas_zoom_in',
+      message0: 'zoom in by %1 %',
+      args0: [{ type: 'input_value', name: 'AMOUNT', check: 'Number' }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#577590'
+    },
+    {
+      type: 'canvas_zoom_out',
+      message0: 'zoom out by %1 %',
+      args0: [{ type: 'input_value', name: 'AMOUNT', check: 'Number' }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#577590'
+    },
+    {
+      type: 'canvas_reset_zoom',
+      message0: 'reset zoom',
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#577590'
+    },
+    {
+      type: 'canvas_toggle_grid',
+      message0: 'toggle grid',
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#577590'
+    },
+    {
       type: 'wait_seconds',
       message0: 'wait %1 seconds',
       args0: [{ type: 'input_value', name: 'SECONDS', check: 'Number' }],
@@ -378,6 +499,13 @@ export function initBlocks() {
       args0: [{ type: 'field_number', name: 'NUM', value: 0 }],
       output: 'Number',
       colour: '#ef476f'
+    },
+    {
+      type: 'op_string',
+      message0: '%1',
+      args0: [{ type: 'field_input', name: 'TEXT', text: 'text' }],
+      output: 'String',
+      colour: '#ef476f'
     }
   ])
 
@@ -441,6 +569,9 @@ export function initBlocks() {
   javascriptGenerator.forBlock.draw_circle = (block) => `await drawCircle(${num(block, 'RADIUS', '50')});\n`
   javascriptGenerator.forBlock.draw_polygon = (block) =>
     `await drawPolygon(${num(block, 'SIDES', '5')}, ${num(block, 'LENGTH', '50')});\n`
+  javascriptGenerator.forBlock.draw_line = (block) => `await drawLine(${num(block, 'LENGTH', '50')});\n`
+  javascriptGenerator.forBlock.draw_rectangle = (block) =>
+    `await drawRectangle(${num(block, 'WIDTH', '80')}, ${num(block, 'HEIGHT', '50')});\n`
   javascriptGenerator.forBlock.color_value = (block) => [`'${block.getFieldValue('COLOR')}'`, javascriptGenerator.ORDER_ATOMIC]
   javascriptGenerator.forBlock.set_color = (block) => {
     const color = javascriptGenerator.valueToCode(block, 'COLOR', javascriptGenerator.ORDER_NONE) || "'#f03e3e'"
@@ -502,6 +633,44 @@ export function initBlocks() {
     Number(block.getFieldValue('NUM') || 0).toString(),
     javascriptGenerator.ORDER_ATOMIC
   ]
+  javascriptGenerator.forBlock.op_string = (block) => [
+    JSON.stringify(String(block.getFieldValue('TEXT') || '')),
+    javascriptGenerator.ORDER_ATOMIC
+  ]
+  javascriptGenerator.forBlock.array_create = (block) => {
+    const name = JSON.stringify((block.getFieldValue('NAME') || 'myList').trim() || 'myList')
+    return `(globalThis.__bcdLists ||= {})[${name}] = (globalThis.__bcdLists ||= {})[${name}] || [];\n`
+  }
+  javascriptGenerator.forBlock.array_get = (block) => {
+    const listName = javascriptGenerator.valueToCode(block, 'LIST_NAME', javascriptGenerator.ORDER_NONE) || "'myList'"
+    const index = num(block, 'INDEX', '0')
+    return [`(((globalThis.__bcdLists ||= {})[${listName}] ||= [])[${index}])`, javascriptGenerator.ORDER_MEMBER]
+  }
+  javascriptGenerator.forBlock.array_add_item = (block) => {
+    const listName = javascriptGenerator.valueToCode(block, 'LIST_NAME', javascriptGenerator.ORDER_NONE) || "'myList'"
+    const item = javascriptGenerator.valueToCode(block, 'ITEM', javascriptGenerator.ORDER_NONE) || 'null'
+    return `(((globalThis.__bcdLists ||= {})[${listName}] ||= [])).push(${item});\n`
+  }
+  javascriptGenerator.forBlock.object_create = (block) => {
+    const name = JSON.stringify((block.getFieldValue('NAME') || 'myObject').trim() || 'myObject')
+    return `(globalThis.__bcdObjects ||= {})[${name}] = (globalThis.__bcdObjects ||= {})[${name}] || {};\n`
+  }
+  javascriptGenerator.forBlock.object_get = (block) => {
+    const objectName = javascriptGenerator.valueToCode(block, 'OBJECT_NAME', javascriptGenerator.ORDER_NONE) || "'myObject'"
+    const keyExpr = javascriptGenerator.valueToCode(block, 'KEY', javascriptGenerator.ORDER_NONE) || "''"
+    return [`(((globalThis.__bcdObjects ||= {})[${objectName}] ||= {})[${keyExpr}])`, javascriptGenerator.ORDER_MEMBER]
+  }
+  javascriptGenerator.forBlock.object_set = (block) => {
+    const objectName = javascriptGenerator.valueToCode(block, 'OBJECT_NAME', javascriptGenerator.ORDER_NONE) || "'myObject'"
+    const keyExpr = javascriptGenerator.valueToCode(block, 'KEY', javascriptGenerator.ORDER_NONE) || "''"
+    const valueExpr = javascriptGenerator.valueToCode(block, 'VALUE', javascriptGenerator.ORDER_NONE) || 'null'
+    return `(((globalThis.__bcdObjects ||= {})[${objectName}] ||= {}))[${keyExpr}] = ${valueExpr};\n`
+  }
+  javascriptGenerator.forBlock.note_comment = (block) => `// ${String(block.getFieldValue('TEXT') || '').replace(/\r?\n/g, ' ')}\n`
+  javascriptGenerator.forBlock.canvas_zoom_in = (block) => `await canvasZoomIn(${num(block, 'AMOUNT', '10')});\n`
+  javascriptGenerator.forBlock.canvas_zoom_out = (block) => `await canvasZoomOut(${num(block, 'AMOUNT', '10')});\n`
+  javascriptGenerator.forBlock.canvas_reset_zoom = () => 'await canvasResetZoom();\n'
+  javascriptGenerator.forBlock.canvas_toggle_grid = () => 'await canvasToggleGrid();\n'
 
   // Make Blockly "Functions" compatible with our async runtime.
   // We intentionally use standalone implementations to avoid HMR wrapper
@@ -625,6 +794,15 @@ export const defaultToolbox = {
             SIDES: { shadow: { type: 'op_number', fields: { NUM: 5 } } },
             LENGTH: { shadow: { type: 'op_number', fields: { NUM: 50 } } }
           }
+        },
+        { kind: 'block', type: 'draw_line', inputs: { LENGTH: { shadow: { type: 'op_number', fields: { NUM: 50 } } } } },
+        {
+          kind: 'block',
+          type: 'draw_rectangle',
+          inputs: {
+            WIDTH: { shadow: { type: 'op_number', fields: { NUM: 80 } } },
+            HEIGHT: { shadow: { type: 'op_number', fields: { NUM: 50 } } }
+          }
         }
       ]
     },
@@ -639,6 +817,72 @@ export const defaultToolbox = {
         { kind: 'block', type: 'repeat_until' },
         { kind: 'block', type: 'wait_until' },
         { kind: 'block', type: 'if_condition' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: 'Arrays',
+      colour: '#5d5fef',
+      contents: [
+        { kind: 'block', type: 'array_create' },
+        {
+          kind: 'block',
+          type: 'array_get',
+          inputs: {
+            INDEX: { shadow: { type: 'op_number', fields: { NUM: 0 } } },
+            LIST_NAME: { shadow: { type: 'op_string', fields: { TEXT: 'myList' } } }
+          }
+        },
+        {
+          kind: 'block',
+          type: 'array_add_item',
+          inputs: {
+            ITEM: { shadow: { type: 'op_number', fields: { NUM: 1 } } },
+            LIST_NAME: { shadow: { type: 'op_string', fields: { TEXT: 'myList' } } }
+          }
+        }
+      ]
+    },
+    {
+      kind: 'category',
+      name: 'Objects',
+      colour: '#3f8a6b',
+      contents: [
+        { kind: 'block', type: 'object_create' },
+        {
+          kind: 'block',
+          type: 'object_get',
+          inputs: {
+            KEY: { shadow: { type: 'op_string', fields: { TEXT: 'x' } } },
+            OBJECT_NAME: { shadow: { type: 'op_string', fields: { TEXT: 'myObject' } } }
+          }
+        },
+        {
+          kind: 'block',
+          type: 'object_set',
+          inputs: {
+            KEY: { shadow: { type: 'op_string', fields: { TEXT: 'x' } } },
+            OBJECT_NAME: { shadow: { type: 'op_string', fields: { TEXT: 'myObject' } } },
+            VALUE: { shadow: { type: 'op_number', fields: { NUM: 1 } } }
+          }
+        }
+      ]
+    },
+    {
+      kind: 'category',
+      name: 'Comments',
+      colour: '#9aa3ad',
+      contents: [{ kind: 'block', type: 'note_comment' }]
+    },
+    {
+      kind: 'category',
+      name: 'Canvas',
+      colour: '#577590',
+      contents: [
+        { kind: 'block', type: 'canvas_zoom_in', inputs: { AMOUNT: { shadow: { type: 'op_number', fields: { NUM: 10 } } } } },
+        { kind: 'block', type: 'canvas_zoom_out', inputs: { AMOUNT: { shadow: { type: 'op_number', fields: { NUM: 10 } } } } },
+        { kind: 'block', type: 'canvas_reset_zoom' },
+        { kind: 'block', type: 'canvas_toggle_grid' }
       ]
     },
     {
@@ -672,7 +916,8 @@ export const defaultToolbox = {
           }
         },
         { kind: 'block', type: 'op_number' },
-        { kind: 'block', type: 'op_boolean' }
+        { kind: 'block', type: 'op_boolean' },
+        { kind: 'block', type: 'op_string' }
       ]
     },
     { kind: 'category', name: 'Variables', custom: 'VARIABLE', categorystyle: 'variable_category' },

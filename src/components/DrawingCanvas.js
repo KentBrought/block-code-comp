@@ -30,6 +30,8 @@ const DrawingCanvas = ({
   const [classifying, setClassifying] = useState(false)
   const [classificationResult, setClassificationResult] = useState(null)
   const [classificationError, setClassificationError] = useState(null)
+  const gridVisibleRef = useRef(true)
+  const viewScaleRef = useRef(1)
 
   useEffect(() => {
     commandsRef.current = commands
@@ -84,6 +86,7 @@ const DrawingCanvas = ({
           h / 2,
           0
         )
+        applyViewScale()
       }
     }
     const ro = new ResizeObserver(resize)
@@ -99,6 +102,7 @@ const DrawingCanvas = ({
     ctx.clearRect(0, 0, w, h)
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, w, h)
+    if (!gridVisibleRef.current) return
 
     const step = 50
     const cx = Math.round(w / 2)
@@ -155,6 +159,20 @@ const DrawingCanvas = ({
     }
 
     ctx.restore()
+  }
+
+  function applyViewScale() {
+    const scale = viewScaleRef.current
+    const transform = `scale(${scale})`
+    const origin = '50% 50%'
+    if (bgCanvasRef.current) {
+      bgCanvasRef.current.style.transform = transform
+      bgCanvasRef.current.style.transformOrigin = origin
+    }
+    if (markerCanvasRef.current) {
+      markerCanvasRef.current.style.transform = transform
+      markerCanvasRef.current.style.transformOrigin = origin
+    }
   }
 
   function drawGhostPreview(canvas, ctx, preview) {
@@ -373,6 +391,14 @@ const DrawingCanvas = ({
         }
       }
 
+      const redrawComposite = () => {
+        drawGrid(bgCanvas, bgCtx)
+        drawGhostPreview(bgCanvas, bgCtx, ghostPreviewRef.current)
+        if (drawingCanvas) {
+          bgCtx.drawImage(drawingCanvas, 0, 0)
+        }
+      }
+
       const api = {
         highlightBlock: (id) => {
           if (onHighlightRef.current) {
@@ -522,6 +548,58 @@ const DrawingCanvas = ({
             syncCanvases()
           }
 
+          syncCanvases()
+          await finishStep()
+        },
+        drawLine: async (length = 50) => {
+          assertActive()
+          const rad = (curAngle * Math.PI) / 180
+          const targetX = curX + Math.cos(rad) * length
+          const targetY = curY + Math.sin(rad) * length
+          await animateTo(targetX, targetY, curAngle, true, false)
+          await finishStep()
+        },
+        drawRectangle: async (width = 80, height = 50) => {
+          assertActive()
+          if (!curPenDown) return
+          const rectW = Number(width) || 0
+          const rectH = Number(height) || 0
+          const corners = [
+            [curX + rectW, curY],
+            [curX + rectW, curY + rectH],
+            [curX, curY + rectH],
+            [curX, curY]
+          ]
+          for (const [nextX, nextY] of corners) {
+            await animateTo(nextX, nextY, curAngle, true, false)
+          }
+          syncCanvases()
+          await finishStep()
+        },
+        canvasZoomIn: async (amount = 10) => {
+          assertActive()
+          const step = Math.max(0, Number(amount) || 0) / 100
+          viewScaleRef.current = Math.min(2, Number((viewScaleRef.current + step).toFixed(2)))
+          applyViewScale()
+          await finishStep()
+        },
+        canvasZoomOut: async (amount = 10) => {
+          assertActive()
+          const step = Math.max(0, Number(amount) || 0) / 100
+          viewScaleRef.current = Math.max(0.5, Number((viewScaleRef.current - step).toFixed(2)))
+          applyViewScale()
+          await finishStep()
+        },
+        canvasResetZoom: async () => {
+          assertActive()
+          viewScaleRef.current = 1
+          applyViewScale()
+          await finishStep()
+        },
+        canvasToggleGrid: async () => {
+          assertActive()
+          gridVisibleRef.current = !gridVisibleRef.current
+          redrawComposite()
           syncCanvases()
           await finishStep()
         },

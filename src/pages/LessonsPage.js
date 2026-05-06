@@ -9,6 +9,7 @@ const STORAGE_KEY = 'bcd_lesson_progress_v3'
 const OPENED_STORAGE_KEY = 'bcd_lesson_opened_v1'
 
 const LEVEL_TITLES = {
+  0: 'Welcome Studio',
   1: 'Make It Move',
   2: 'Repeat Magic',
   3: 'Smart Choices',
@@ -80,6 +81,22 @@ const BLOCK_TEACHING = {
 }
 
 const LESSONS = [
+  {
+    id: 'l0',
+    level: 0,
+    title: 'Welcome: What Blocks and Coding Are',
+    goal: 'Understand what blocks are and run your first tiny program in the studio.',
+    intention: 'Coding is a way to turn ideas into repeatable instructions that computers can follow.',
+    task: 'Use when Run clicked + move forward, then press Run + Check Lesson.',
+    steps: [
+      'Read the quick intro below.',
+      'Drag move forward under when Run clicked.',
+      'Press Run + Check Lesson to test your first block program.'
+    ],
+    toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'pen_down', 'clear_screen', 'op_number'],
+    focusBlocks: ['when_run_clicked', 'move_forward'],
+    rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true }
+  },
   { id: 'l1', level: 1, title: 'Run Your First Program', goal: 'Make the marker do one action when you press Run.', intention: 'Programs need a start point.', task: 'Connect move forward under when Run clicked.', steps: ['Drag the green start block.', 'Snap one move block below it.', 'Press Check Lesson.'], toolbox: ['when_run_clicked', 'move_forward'], focusBlocks: ['when_run_clicked', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true } },
   { id: 'l2', level: 1, title: 'Two Steps in Order', goal: 'Make your marker do two actions in order.', intention: 'Computers follow instructions from top to bottom.', task: 'Use start, move, then turn.', steps: ['Place start block first.', 'Add move forward.', 'Add turn right after move.'], toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'turn_left'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'move_forward', 'turn_right'], requireStartLinked: true } },
   { id: 'l3', level: 1, title: 'Pen Up, Pen Down', goal: 'Control when the marker draws lines.', intention: 'Creators decide when to draw and when to move silently.', task: 'Use pen down before moving.', steps: ['Start your script.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'pen_down', 'pen_up', 'move_forward'], focusBlocks: ['pen_down', 'pen_up', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'pen_down', 'move_forward'], requireStartLinked: true } },
@@ -114,7 +131,9 @@ const LESSONS = [
 
 const LESSONS_WITH_NUMBERS = LESSONS.map((lesson, index) => ({
   ...lesson,
-  lessonNumber: index + 1
+  lessonNumber: Number.isFinite(Number(String(lesson.id || '').replace(/^l/, '')))
+    ? Number(String(lesson.id || '').replace(/^l/, ''))
+    : index + 1
 }))
 
 function getLessonBlueprint(lessonNumber, level) {
@@ -686,6 +705,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
   const [runSequence, setRunSequence] = useState(0)
   const [stopSequence, setStopSequence] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const isIntroLesson = lesson.id === 'l0'
 
   useEffect(() => {
     initBlocks()
@@ -764,6 +784,19 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
       <p className='lesson-level-label'>Level {lesson.level}: {LEVEL_TITLES[lesson.level]}</p>
       <h2>Lesson {lesson.lessonNumber}: {lesson.title}</h2>
 
+      {isIntroLesson && (
+        <>
+          <p className='lesson-long-text'>
+            Blocks are visual code pieces you snap together like puzzle parts. Each block is one instruction.
+            When you connect them, you create a program the computer can run.
+          </p>
+          <p className='lesson-long-text'>
+            Coding is used to build apps, games, websites, robots, AI features, and automations. In Block, Code, Draw,
+            coding lets you build drawing behavior: shapes, patterns, mini animations, and creative art systems.
+          </p>
+        </>
+      )}
+
       <p className='lesson-long-text'>
         In this lesson, your goal is to <strong>{lesson.goal.toLowerCase()}</strong>. We are doing this because
         {` ${lesson.intention.toLowerCase()}`}. Think of this as practice for real projects where your code needs
@@ -779,6 +812,43 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         number values. That keeps you from trying to fix five problems at once.
       </p>
 
+      {isIntroLesson && (
+        <div className='studio-shell'>
+          <div className='studio-toolbar'>
+            <p><strong>Interactive Mini Studio:</strong> start here and run your first block program.</p>
+            <button type='button' className='check-cta-btn' onClick={handleRunAndCheck} disabled={checking}>
+              {checking ? 'Running + Checking...' : 'Run + Check Lesson'}
+            </button>
+          </div>
+          <div className='studio-mission'>
+            <p><strong>Build target:</strong> {getBuildTargetText(lesson)}</p>
+            <ol className='lesson-steps'>
+              {getInstructionSteps(lesson).map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </div>
+          <div className='studio-pane'>
+            <div ref={mountRef} className='lesson-blockly-mount' />
+          </div>
+          <div className='studio-pane'>
+            <div className='lesson-mini-canvas'>
+              <DrawingCanvas
+                commands={commands}
+                runSequence={runSequence}
+                stopSequence={stopSequence}
+                onHighlight={() => {}}
+                onGuessComplete={() => {}}
+                onRunStateChange={setIsRunning}
+                ghostPreview={lesson.ghostPreview}
+                showClassification={false}
+                showGuessPanel={false}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className='lesson-block-focus-grid'>
         {lesson.focusBlocks.map((type) => (
           <article key={type} className='lesson-block-focus-item'>
@@ -791,7 +861,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         ))}
       </section>
 
-      <div className='studio-shell'>
+      {!isIntroLesson && <div className='studio-shell'>
         <div className='studio-toolbar'>
           <p><strong>Interactive Mini Studio:</strong> drag blocks, snap them, run, and watch the canvas update.</p>
           <button type='button' className='check-cta-btn' onClick={handleRunAndCheck} disabled={checking}>
@@ -824,7 +894,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
             />
           </div>
         </div>
-      </div>
+      </div>}
       <p className={`lesson-status-message ${isDone ? 'done' : ''}`}>{message}</p>
       <p className='lesson-long-text'>{lessonChallengeText(lesson)}</p>
       <hr className='lesson-divider' />
@@ -960,10 +1030,10 @@ export default function LessonsPage({ onBack }) {
             <button type='button' className='home-back-btn' onClick={onBack}>Back to Home</button>
             {selectedLesson && (
               <button type='button' className='catalog-back-btn' onClick={() => setSelectedLessonId(null)}>
-                Back to All 30 Lessons
+                Back to All {LESSONS_ENRICHED.length} Lessons
               </button>
             )}
-            <p className='hero-progress'>{completedCount}/30 complete</p>
+            <p className='hero-progress'>{completedCount}/{LESSONS_ENRICHED.length} complete</p>
           </div>
           <div className='hero-title-row'>
             <h1
@@ -976,7 +1046,7 @@ export default function LessonsPage({ onBack }) {
               <span className='logo-d'>D</span> Lessons
             </h1>
           </div>
-          <p className='hero-sub'>Block, Code, Draw learning path with 30 lessons.</p>
+          <p className='hero-sub'>Block, Code, Draw learning path with {LESSONS_ENRICHED.length} lessons.</p>
           <div className='lessons-progress-wrap'>
             <div className='lessons-progress-bar'><div style={{ width: `${progressPercent}%` }} /></div>
             <span>{progressPercent}% progress</span>

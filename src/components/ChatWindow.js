@@ -4,12 +4,13 @@ import { useTextGeneration } from '../ai/useTextGeneration'
 const SYSTEM_PROMPT =
   'You are BCD AI Bot, a helpful coding assistant for a visual block-coding drawing app. ' +
   'The user arranges Blockly blocks to control a marker on a canvas. ' +
-  'Available blocks: move_forward, move_backward, turn_left, turn_right, set_heading, jump_to, go_to_center, ' +
-  'pen_up, pen_down, set_color, set_pen_size, set_random_color, clear_screen, ' +
-  'draw_circle, draw_polygon, repeat_times, if_greater_than, if_less_than, if_equal_to, ' +
-  'get_x, get_y, get_heading. ' +
+  'Available blocks include: move_forward, move_backward, turn_left, turn_right, set_heading, jump_to, go_to_center, ' +
+  'pen_up, pen_down, set_color, set_pen_size, set_random_color, clear_screen, draw_circle, draw_polygon, draw_line, draw_rectangle, ' +
+  'repeat_times, forever_loop, repeat_until, wait_until, if_condition, op_compare, op_logic, op_not, op_math, op_number, op_boolean, ' +
+  'get_x, get_y, get_heading, array_create, array_get, array_push, object_create, object_get, object_set, note_comment, ' +
+  'canvas_zoom_in, canvas_zoom_out, canvas_reset_zoom, canvas_toggle_grid. ' +
   'Help the user figure out which blocks to use and how to combine them to draw their target shape. ' +
-  'Keep replies concise (2–4 sentences). Be friendly and encouraging.'
+  'Keep replies concise (2-4 sentences). Be friendly and encouraging.'
 
 const INITIAL_MESSAGES = [
   {
@@ -20,32 +21,54 @@ const INITIAL_MESSAGES = [
 ]
 
 const STATUS_LABEL = {
-  idle: 'Starting…',
+  idle: 'Starting...',
   loading: 'Loading AI',
   ready: 'Online',
-  generating: 'Thinking…',
+  generating: 'Thinking...',
   error: 'Error'
 }
 
-function ChatWindow() {
+function toRoleBasedMessages(items = []) {
+  return items.map((msg) => {
+    if (msg && typeof msg === 'object' && 'role' in msg) return msg
+
+    const role = msg?.user === 'BCD AI Bot' ? 'assistant' : 'user'
+    const prefix = msg?.prefix || ''
+    const bold = msg?.bold || ''
+    const suffix = msg?.suffix || ''
+    const text = msg?.text || `${prefix}${bold}${suffix}` || ''
+    return { role, content: text, raw: msg }
+  })
+}
+
+function ChatWindow({ messages: externalMessages = null, onSend = null }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
   const bottomRef = useRef(null)
   const { status, loadProgress, generate } = useTextGeneration()
 
+  const usingExternalMessages = Array.isArray(externalMessages)
+  const displayedMessages = usingExternalMessages ? externalMessages : messages
+  const normalizedMessages = toRoleBasedMessages(displayedMessages)
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, status])
+  }, [displayedMessages, status])
 
   const handleSend = async (e) => {
     e.preventDefault()
     const text = input.trim()
     if (!text || status !== 'ready') return
 
-    const userMsg = { role: 'user', content: text }
-    const history = [...messages, userMsg]
-    setMessages(history)
+    const userMsg = { role: 'user', content: text, user: 'You', text }
+    const history = [...normalizedMessages, userMsg]
     setInput('')
+
+    if (onSend) {
+      onSend(text, { from: 'user' })
+    } else {
+      setMessages(history)
+    }
 
     try {
       const chatPayload = [
@@ -53,15 +76,26 @@ function ChatWindow() {
         ...history
       ]
       const reply = await generate(chatPayload)
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: reply || 'Hmm, let me think…' }
-      ])
+      const botText = reply || 'Hmm, let me think...'
+
+      if (onSend) {
+        onSend(botText, { from: 'assistant' })
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: botText }
+        ])
+      }
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Oops! Something went wrong. Try again!' }
-      ])
+      const errText = 'Oops! Something went wrong. Try again!'
+      if (onSend) {
+        onSend(errText, { from: 'assistant' })
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: errText }
+        ])
+      }
     }
   }
 
@@ -80,12 +114,26 @@ function ChatWindow() {
       </div>
 
       <div className='chat-messages'>
-        {messages.map((msg, i) => (
+        {normalizedMessages.map((msg, i) => (
           <div key={i} className={`chat-bubble chat-bubble--${msg.role}`}>
             {msg.role === 'assistant' && (
               <span className='chat-bubble-label'>Bot</span>
             )}
-            <p>{msg.content}</p>
+            {msg.raw?.prefix || msg.raw?.bold || msg.raw?.suffix
+              ? (
+                <p>
+                  {msg.raw?.prefix || ''}
+                  {msg.raw?.bold
+                    ? (
+                      <strong style={msg.raw?.boldColor ? { color: msg.raw.boldColor } : undefined}>
+                        {msg.raw.bold}
+                      </strong>
+                      )
+                    : null}
+                  {msg.raw?.suffix || ''}
+                </p>
+                )
+              : <p>{msg.content}</p>}
           </div>
         ))}
 
@@ -108,7 +156,7 @@ function ChatWindow() {
           type='text'
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isReady ? 'Give me a hint…' : statusLabel}
+          placeholder={isReady ? 'Give me a hint...' : statusLabel}
           disabled={!isReady}
         />
         <button type='submit' disabled={!isReady || !input.trim()}>

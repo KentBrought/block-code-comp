@@ -28,7 +28,7 @@ const TOUR_STEPS = [
   {
     selector: '.editor-section',
     content:
-      'On the left is the Blockly workspace. Drag blocks from the toolbox to build a program.'
+      'On the left is the Blockly workspace. Drag blocks from sections like Motion, Pen, Shapes, Arrays, Objects, Comments, and Canvas to build a program.'
   },
   {
     selector: '.run-button',
@@ -582,8 +582,11 @@ function AppInner() {
           <section className='chat-section'>
             <ChatWindow
               messages={chatMessages}
-              onSend={(text) =>
-                setChatMessages((prev) => [...prev, { user: 'You', text }])
+              onSend={(text, meta) =>
+                setChatMessages((prev) => [
+                  ...prev,
+                  { user: meta?.from === 'assistant' ? 'BCD AI Bot' : 'You', text }
+                ])
               }
             />
           </section>
