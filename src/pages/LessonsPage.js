@@ -84,15 +84,26 @@ const LESSONS = [
   {
     id: 'l0',
     level: 0,
-    title: 'Welcome: What Blocks and Coding Are',
-    goal: 'Understand what blocks are and run your first tiny program in the studio.',
-    intention: 'Coding is a way to turn ideas into repeatable instructions that computers can follow.',
-    task: 'Use when Run clicked + move forward, then press Run + Check Lesson.',
+    title: 'Welcome - What Blocks and Coding Are',
+    goal: 'Run your first tiny block program and see your marker draw a line.',
+    intention: 'Coding means giving clear instructions that run from top to bottom.',
+    task: 'Snap move forward under when Run clicked, press Run, then Check Lesson.',
     steps: [
-      'Read the quick intro below.',
       'Drag move forward under when Run clicked.',
       'Press Run + Check Lesson to test your first block program.'
     ],
+    media: {
+      miniStudio1: {
+        src: '/media/block-code-draw-demo.gif',
+        caption: 'Snap move forward under the start block, then press Run.',
+        alt: 'Move forward snapped under when Run clicked, then Run is pressed.'
+      },
+      miniStudio2: {
+        src: '/media/block-code-draw-demo.gif',
+        caption: 'Change the number in move forward to make shorter or longer lines.',
+        alt: 'Move forward value changes and the line length changes.'
+      }
+    },
     toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'pen_down', 'clear_screen', 'op_number'],
     focusBlocks: ['when_run_clicked', 'move_forward'],
     rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true }
@@ -580,6 +591,33 @@ function InlineBlockToken({ type, svg }) {
   )
 }
 
+function LessonGif({ src, caption, alt }) {
+  const baseUrl = process.env.PUBLIC_URL || ''
+  const fallbackSrc = `${baseUrl}/media/block-code-draw-demo.gif`
+  const initialSrc = src && /^https?:\/\//i.test(src)
+    ? src
+    : `${baseUrl}${String(src || '').startsWith('/') ? String(src || '') : `/${String(src || '')}`}`
+  const [imgSrc, setImgSrc] = useState(initialSrc || fallbackSrc)
+  useEffect(() => {
+    setImgSrc(initialSrc || fallbackSrc)
+  }, [initialSrc, fallbackSrc])
+
+  return (
+    <figure className='lesson-gif-callout'>
+      <img
+        className='lesson-gif-image'
+        src={imgSrc}
+        alt={alt || caption || 'Lesson animation preview'}
+        loading='lazy'
+        onError={() => {
+          if (imgSrc !== fallbackSrc) setImgSrc(fallbackSrc)
+        }}
+      />
+      {caption && <figcaption className='lesson-gif-caption'>{caption}</figcaption>}
+    </figure>
+  )
+}
+
 function lessonChallengeText(lesson) {
   if (lesson.level <= 2) {
     return 'Try this after passing: change one number and predict how the drawing will change before you run again.'
@@ -786,67 +824,115 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
 
       {isIntroLesson && (
         <>
+          <h3 className='lesson-mini-title'>What Are Blocks?</h3>
           <p className='lesson-long-text'>
-            Blocks are visual code pieces you snap together like puzzle parts. Each block is one instruction.
-            When you connect them, you create a program the computer can run.
+            Blocks are visual pieces of code. Each block gives one instruction, and snapping blocks together creates
+            a program.
+          </p>
+          <h3 className='lesson-mini-title'>What Is Coding?</h3>
+          <p className='lesson-long-text'>
+            Coding means giving clear instructions to a computer. In this lesson, your program starts at the top
+            block and runs down.
           </p>
           <p className='lesson-long-text'>
-            Coding is used to build apps, games, websites, robots, AI features, and automations. In Block, Code, Draw,
-            coding lets you build drawing behavior: shapes, patterns, mini animations, and creative art systems.
+            By the end of this lesson, you will make your drawing character move forward and draw its first line.
           </p>
         </>
       )}
 
-      <p className='lesson-long-text'>
-        In this lesson, your goal is to <strong>{lesson.goal.toLowerCase()}</strong>. We are doing this because
-        {` ${lesson.intention.toLowerCase()}`}. Think of this as practice for real projects where your code needs
-        to be clear, repeatable, and easy to improve when something goes wrong.
-      </p>
-      <p className='lesson-long-text'>
-        Mission for this lesson: <strong>{lesson.task}</strong>. Start with a small version that works,
-        then improve it one edit at a time. If something breaks, undo one change and test again so
-        you can tell exactly what caused the change.
-      </p>
-      <p className='lesson-long-text'>
-        A reliable strategy is to debug in this order: first sequence, then loops/conditions, then
-        number values. That keeps you from trying to fix five problems at once.
-      </p>
+      {isIntroLesson ? (
+        <>
+          <h3 className='lesson-mini-title'>Lesson Goal</h3>
+          <p className='lesson-long-text'>In this lesson, you will run your first tiny block program.</p>
+          <ul className='lesson-steps'>
+            <li>Blocks are pieces of code you can snap together.</li>
+            <li>Coding means giving clear instructions to a computer.</li>
+            <li>A program runs from the top block down.</li>
+            <li>Small changes in code can change what appears on the canvas.</li>
+          </ul>
+          <h3 className='lesson-mini-title'>Today&apos;s Mission</h3>
+          <p className='lesson-long-text'>
+            Build this tiny program: <strong>when Run clicked</strong> then <strong>move forward</strong>.
+          </p>
+          <p className='lesson-long-text'>
+            Press Run and your character should move forward and draw a line.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className='lesson-long-text'>
+            In this lesson, your goal is to <strong>{lesson.goal.toLowerCase()}</strong>. We are doing this because
+            {` ${lesson.intention.toLowerCase()}`}.
+          </p>
+          <p className='lesson-long-text'>
+            Mission for this lesson: <strong>{lesson.task}</strong>.
+          </p>
+        </>
+      )}
 
       {isIntroLesson && (
-        <div className='studio-shell'>
-          <div className='studio-toolbar'>
-            <p><strong>Interactive Mini Studio:</strong> start here and run your first block program.</p>
-            <button type='button' className='check-cta-btn' onClick={handleRunAndCheck} disabled={checking}>
-              {checking ? 'Running + Checking...' : 'Run + Check Lesson'}
-            </button>
-          </div>
-          <div className='studio-mission'>
-            <p><strong>Build target:</strong> {getBuildTargetText(lesson)}</p>
-            <ol className='lesson-steps'>
-              {getInstructionSteps(lesson).map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-          </div>
-          <div className='studio-pane'>
-            <div ref={mountRef} className='lesson-blockly-mount' />
-          </div>
-          <div className='studio-pane'>
-            <div className='lesson-mini-canvas'>
-              <DrawingCanvas
-                commands={commands}
-                runSequence={runSequence}
-                stopSequence={stopSequence}
-                onHighlight={() => {}}
-                onGuessComplete={() => {}}
-                onRunStateChange={setIsRunning}
-                ghostPreview={lesson.ghostPreview}
-                showClassification={false}
-                showGuessPanel={false}
-              />
+        <>
+          <section className='lesson-mini-section'>
+            <h3 className='lesson-mini-title'>Mini Studio 1: Run Your First Program</h3>
+            <LessonGif
+              src={lesson.media?.miniStudio1?.src}
+              caption={lesson.media?.miniStudio1?.caption}
+              alt={lesson.media?.miniStudio1?.alt}
+            />
+          </section>
+          <div className='studio-shell'>
+            <div className='studio-toolbar'>
+              <p><strong>Interactive Mini Studio:</strong> start here and run your first block program.</p>
+              <button type='button' className='check-cta-btn' onClick={handleRunAndCheck} disabled={checking}>
+                {checking ? 'Running + Checking...' : 'Run + Check Lesson'}
+              </button>
+            </div>
+            <div className='studio-mission'>
+              <p><strong>Build target:</strong> {getBuildTargetText(lesson)}</p>
+              <ol className='lesson-steps'>
+                {getInstructionSteps(lesson).map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </div>
+            <div className='studio-pane'>
+              <div ref={mountRef} className='lesson-blockly-mount' />
+            </div>
+            <div className='studio-pane'>
+              <div className='lesson-mini-canvas'>
+                <DrawingCanvas
+                  commands={commands}
+                  runSequence={runSequence}
+                  stopSequence={stopSequence}
+                  onHighlight={() => {}}
+                  onGuessComplete={() => {}}
+                  onRunStateChange={setIsRunning}
+                  ghostPreview={lesson.ghostPreview}
+                  showClassification={false}
+                  showGuessPanel={false}
+                />
+              </div>
             </div>
           </div>
-        </div>
+          <section className='lesson-mini-section'>
+            <h3 className='lesson-mini-title'>Mini Studio 2: Change One Thing</h3>
+            <LessonGif
+              src={lesson.media?.miniStudio2?.src}
+              caption={lesson.media?.miniStudio2?.caption}
+              alt={lesson.media?.miniStudio2?.alt}
+            />
+            <p className='lesson-long-text'>
+              Change the number in <strong>move forward</strong>, predict if the line will be shorter or longer,
+              then press Run again.
+            </p>
+            <p className='lesson-long-text'>
+              Coding idea: small changes in code can create different results.
+            </p>
+            <p className='lesson-long-text'>
+              Try changing the value to 50, then 120. Run each time and compare line length.
+            </p>
+          </section>
+        </>
       )}
 
       <section className='lesson-block-focus-grid'>
@@ -860,6 +946,18 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
           </article>
         ))}
       </section>
+
+      {isIntroLesson && (
+        <section className='lesson-mini-section'>
+          <h3 className='lesson-mini-title'>Debugging Help</h3>
+          <ul className='lesson-steps'>
+            <li>Make sure move forward is snapped under when Run clicked.</li>
+            <li>Press Run after making changes.</li>
+            <li>If the line is tiny, increase the move number.</li>
+            <li>If move forward is missing, drag it from the block menu again.</li>
+          </ul>
+        </section>
+      )}
 
       {!isIntroLesson && <div className='studio-shell'>
         <div className='studio-toolbar'>
@@ -1047,7 +1145,6 @@ export default function LessonsPage({ onBack }) {
           </div>
 
           <div className='header-actions lessons-header-actions'>
-            <button type='button' className='home-back-btn' onClick={onBack}>Back to Home</button>
             {selectedLesson && (
               <button type='button' className='catalog-back-btn' onClick={() => setSelectedLessonId(null)}>
                 Back to All {LESSONS_ENRICHED.length} Lessons

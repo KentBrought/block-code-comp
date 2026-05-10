@@ -338,6 +338,48 @@
   gap: 0.55rem;
 }
 
+.lesson-mini-section {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.lesson-mini-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.lesson-gif-callout {
+  margin: 0;
+  border: 1px solid #d5e4ff;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+}
+
+.lesson-gif-image {
+  width: 100%;
+  max-height: 230px;
+  object-fit: cover;
+  display: block;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(67, 97, 238, 0.08),
+    rgba(67, 97, 238, 0.08) 10px,
+    rgba(67, 97, 238, 0.04) 10px,
+    rgba(67, 97, 238, 0.04) 20px
+  );
+}
+
+.lesson-gif-caption {
+  margin: 0;
+  padding: 0.5rem 0.62rem 0.58rem;
+  font-size: 0.84rem;
+  color: #334155;
+  border-top: 1px solid #dbe7ff;
+  background: rgba(255, 255, 255, 0.9);
+}
+
 .lesson-block-focus-item {
   padding: 0.1rem 0;
 }

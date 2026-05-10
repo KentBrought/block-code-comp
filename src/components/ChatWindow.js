@@ -37,11 +37,12 @@ function toRoleBasedMessages(items = []) {
   })
 }
 
-function ChatWindow({ messages: externalMessages = null, onSend = null }) {
+function ChatWindow({ messages: externalMessages = null, onSend = null, onModelStatusChange = null }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
   const [introTyping, setIntroTyping] = useState(false)
   const [introShown, setIntroShown] = useState(false)
+  const [streamingText, setStreamingText] = useState('')
   const bottomRef = useRef(null)
   const messagesRef = useRef(null)
   const { status, loadProgress, generate } = useTextGeneration()
@@ -51,12 +52,17 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
   const normalizedMessages = toRoleBasedMessages(displayedMessages)
 
   useEffect(() => {
+    if (!onModelStatusChange) return
+    onModelStatusChange(status)
+  }, [status, onModelStatusChange])
+
+  useEffect(() => {
     const el = messagesRef.current
     if (el) {
       el.scrollTop = el.scrollHeight
     }
     bottomRef.current?.scrollIntoView({ behavior: 'auto' })
-  }, [normalizedMessages.length, status, introTyping])
+  }, [normalizedMessages.length, status, introTyping, streamingText])
 
   useEffect(() => {
     if (!usingExternalMessages) return
@@ -67,16 +73,31 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
       return
     }
 
+    if (status !== 'ready') {
+      setIntroShown(false)
+      setIntroTyping(false)
+      return
+    }
+
     setIntroShown(false)
     setIntroTyping(true)
     const timer = setTimeout(() => {
       onSend(INTRO_MESSAGE, { from: 'assistant' })
       setIntroShown(true)
       setIntroTyping(false)
-    }, 1000)
+    }, 900)
 
     return () => clearTimeout(timer)
-  }, [usingExternalMessages, onSend, normalizedMessages.length])
+  }, [usingExternalMessages, onSend, normalizedMessages.length, status])
+
+  const streamReply = async (text) => {
+    setStreamingText('')
+    for (let i = 1; i <= text.length; i += 2) {
+      setStreamingText(text.slice(0, i))
+      await new Promise((resolve) => setTimeout(resolve, 12))
+    }
+    setStreamingText('')
+  }
 
   const handleSend = async (e) => {
     e.preventDefault()
@@ -100,6 +121,7 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
       ]
       const reply = await generate(chatPayload)
       const botText = reply || 'Hmm, let me think...'
+      await streamReply(botText)
 
       if (onSend) {
         onSend(botText, { from: 'assistant' })
@@ -110,6 +132,7 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
         ])
       }
     } catch {
+      setStreamingText('')
       const errText = 'Oops! Something went wrong. Try again!'
       if (onSend) {
         onSend(errText, { from: 'assistant' })
@@ -157,21 +180,25 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
           </div>
         ))}
 
-        {status === 'loading' && introShown && (
+        {status === 'loading' && (
           <div className='chat-bubble chat-bubble--assistant'>
             <span className='chat-bubble-label'>🤖 Bot</span>
-            <p>Getting ready... {loadProgress}%</p>
+            <p>Loading AI... {loadProgress}%</p>
           </div>
         )}
 
-        {(status === 'generating' || introTyping) && (
+        {(status === 'generating' || introTyping || streamingText) && (
           <div className='chat-bubble chat-bubble--assistant'>
             <span className='chat-bubble-label'>🤖 Bot</span>
-            <p className='chat-typing'>
-              <span />
-              <span />
-              <span />
-            </p>
+            {streamingText
+              ? <p>{streamingText}</p>
+              : (
+                <p className='chat-typing'>
+                  <span />
+                  <span />
+                  <span />
+                </p>
+                )}
           </div>
         )}
 
@@ -183,18 +210,13 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
           type='text'
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isReady ? 'Give me a hint...' : 'Please wait... Bot is getting ready'}
+          placeholder={isReady ? 'Give me a hint...' : 'Loading AI helper...'}
           disabled={!isReady}
         />
         <button type='submit' disabled={!isReady || !input.trim()}>
           Send
         </button>
       </form>
-      {!isReady && (
-        <div className='chat-loading-note'>
-          Please wait for the bot to finish loading before typing.
-        </div>
-      )}
     </div>
   )
 }

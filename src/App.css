@@ -188,6 +188,60 @@ body {
   justify-content: flex-end;
 }
 
+.ghost-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  padding: 5px 10px;
+  border-radius: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ghost-toggle-label {
+  line-height: 1;
+}
+
+.ghost-toggle-switch {
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.ghost-toggle-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.24);
+  transform: translateX(0);
+  transition: transform 0.2s ease;
+}
+
+.ghost-toggle-btn.is-on {
+  border-color: #60a5fa;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.ghost-toggle-btn.is-on .ghost-toggle-switch {
+  background: #60a5fa;
+}
+
+.ghost-toggle-btn.is-on .ghost-toggle-knob {
+  transform: translateX(18px);
+}
+
 /* ─── Run Button ─── */
 .run-button {
   display: inline-flex;
@@ -215,6 +269,13 @@ body {
 .run-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+.run-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .stop-button {
@@ -633,8 +694,8 @@ body {
 }
 
 .editor-section .blocklyFlyoutButton .blocklyFlyoutButtonBackground {
-  fill: #2563eb !important;
-  stroke: #1d4ed8 !important;
+  fill: #ffb703 !important;
+  stroke: #f28f00 !important;
   stroke-width: 1px !important;
 }
 
@@ -644,7 +705,7 @@ body {
 }
 
 .editor-section .blocklyFlyoutButton:hover .blocklyFlyoutButtonBackground {
-  fill: #1d4ed8 !important;
+  fill: #f28f00 !important;
 }
 
 /* Category section heading labels inside flyout */

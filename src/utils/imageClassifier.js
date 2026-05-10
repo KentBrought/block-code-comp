@@ -9,16 +9,7 @@ const MAX_RESULTS = 10
 const PUBLIC_BASE = (process.env.PUBLIC_URL || '').replace(/\/$/, '')
 
 function getRuntimeBasePath() {
-  if (PUBLIC_BASE) return PUBLIC_BASE
-  if (typeof window !== 'undefined' && window.location?.pathname) {
-    const pathname = window.location.pathname
-    const marker = '/block-code-comp/'
-    const markerIndex = pathname.indexOf(marker)
-    if (markerIndex >= 0) {
-      return '/block-code-comp'
-    }
-  }
-  return ''
+  return PUBLIC_BASE || ''
 }
 
 const DEPLOY_BASE = getRuntimeBasePath()

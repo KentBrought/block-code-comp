@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { TourProvider, useTour } from '@reactour/tour'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import confetti from 'canvas-confetti'
 import twemoji from 'twemoji'
 import BlocklyEditor from './components/BlocklyEditor'
@@ -11,6 +12,7 @@ import LessonsPage from './pages/LessonsPage'
 import WordModal from './components/WordModal'
 import ChallengeModal from './components/ChallengeModal'
 import { findMatchingWordFromCandidates, WORD_POOL } from './constants/wordPool'
+import { drawingToGhostPreview, fetchQuickDrawExamples } from './utils/quickDraw'
 import './App.css'
 
 const GAME_DURATION = 15 * 60
@@ -56,11 +58,14 @@ function AppInner() {
     []
   )
 
-  // 'home' | 'about' | 'lessons' | 'word-select' | 'challenge-select' | 'game'
-  const [screen, setScreen] = useState('home')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const currentPath = location.pathname.replace(/\/+$/, '') || '/'
   const [gameMode, setGameMode] = useState('classic') // 'classic' | 'challenge'
   const [selectedWord, setSelectedWord] = useState(null)
   const [selectedChallenge, setSelectedChallenge] = useState(null)
+  const [ghostAssistEnabled, setGhostAssistEnabled] = useState(false)
+  const [classicGhostPreview, setClassicGhostPreview] = useState(null)
   const [timerEnabled, setTimerEnabled] = useState(false)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [timerRunning, setTimerRunning] = useState(false)
@@ -77,6 +82,8 @@ function AppInner() {
   const [guessedSuccessfully, setGuessedSuccessfully] = useState(false)
   const [challengeComplete, setChallengeComplete] = useState(false)
   const [challengeHintIndex, setChallengeHintIndex] = useState(0)
+  const [aiModelStatus, setAiModelStatus] = useState('idle')
+  const [queuedRunAfterModelReady, setQueuedRunAfterModelReady] = useState(false)
 
   const [editorResetKey, setEditorResetKey] = useState(0)
   const [startTourAfterWordSelect, setStartTourAfterWordSelect] = useState(false)
@@ -143,27 +150,27 @@ function AppInner() {
 
   const handlePlay = () => {
     setGameMode('classic')
-    setScreen('word-select')
+    navigate('/play')
   }
 
   const handleHowToPlay = () => {
     setGameMode('classic')
     setStartTourAfterWordSelect(true)
-    setScreen('word-select')
+    navigate('/play')
   }
 
   const handleChallengeMode = () => {
     setGameMode('challenge')
     setStartTourAfterWordSelect(false)
-    setScreen('challenge-select')
+    navigate('/challenge')
   }
 
   const handleAbout = () => {
-    setScreen('about')
+    navigate('/about')
   }
 
   const handleLessons = () => {
-    setScreen('lessons')
+    navigate('/lessons')
   }
 
   const handleWordSelect = (word) => {
@@ -179,7 +186,9 @@ function AppInner() {
     setGuessedSuccessfully(false)
     setChallengeHintIndex(0)
     setChatMessages([])
-    setScreen('game')
+    setGhostAssistEnabled(false)
+    setClassicGhostPreview(null)
+    navigate('/game')
     setEditorResetKey((k) => k + 1)
 
     if (startTourAfterWordSelect) {
@@ -205,8 +214,10 @@ function AppInner() {
     setChallengeComplete(false)
     setChallengeHintIndex(0)
     setChatMessages([])
+    setGhostAssistEnabled(true)
+    setClassicGhostPreview(null)
     setEditorResetKey((k) => k + 1)
-    setScreen('game')
+    navigate('/game')
   }
 
   const handleExit = useCallback(() => {
@@ -229,15 +240,60 @@ function AppInner() {
     setTourOpen(false)
     setStartTourAfterWordSelect(false)
     setGameMode('classic')
-    setScreen('home')
-  }, [defaultChat, setTourOpen])
+    setGhostAssistEnabled(false)
+    setClassicGhostPreview(null)
+    navigate('/')
+  }, [defaultChat, navigate, setTourOpen])
+
+  useEffect(() => {
+    let active = true
+    if (gameMode !== 'classic' || !selectedWord) {
+      setClassicGhostPreview(null)
+      return () => {
+        active = false
+      }
+    }
+
+    fetchQuickDrawExamples(selectedWord, 1)
+      .then((examples) => {
+        if (!active) return
+        const preview = drawingToGhostPreview(examples?.[0], { size: 240, tolerance: 2.8 })
+        setClassicGhostPreview(preview)
+      })
+      .catch(() => {
+        if (!active) return
+        setClassicGhostPreview(null)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [gameMode, selectedWord])
 
   const handleChallengeScore = useCallback(
     ({ score, pass }) => {
-      if (!pass || challengeComplete) return
-      setChallengeComplete(true)
+      if (!pass) return
+      if (gameMode === 'challenge') {
+        if (challengeComplete) return
+        setChallengeComplete(true)
+        return
+      }
+      if (gameMode === 'classic') {
+        if (guessedSuccessfully || !selectedWord) return
+        setTimerRunning(false)
+        setGuessedSuccessfully(true)
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            user: 'BCD AI Bot',
+            prefix: 'Nice work! You matched the ghost outline for ',
+            bold: selectedWord,
+            suffix: '. You win! Click "Choose New Word" to play again.'
+          }
+        ])
+      }
     },
-    [challengeComplete]
+    [challengeComplete, gameMode, guessedSuccessfully, selectedWord]
   )
 
   // Fire confetti the moment a challenge is solved.
@@ -258,10 +314,14 @@ function AppInner() {
     setChallengeComplete(false)
     setChallengeHintIndex(0)
     setEditorResetKey((k) => k + 1)
-    setScreen('challenge-select')
-  }, [])
+    navigate('/challenge')
+  }, [navigate])
 
   const handleRun = () => {
+    if (gameMode === 'classic' && aiModelStatus !== 'ready') {
+      setQueuedRunAfterModelReady(true)
+      return
+    }
     if (isRunning) return
     if (guessedSuccessfully) return
     if (challengeComplete) return
@@ -298,6 +358,20 @@ function AppInner() {
     setRunCount((c) => c + 1)
   }
 
+  useEffect(() => {
+    if (!queuedRunAfterModelReady) return
+    if (gameMode !== 'classic') {
+      setQueuedRunAfterModelReady(false)
+      return
+    }
+    if (aiModelStatus !== 'ready') return
+    if (isRunning || guessedSuccessfully || challengeComplete) return
+
+    setQueuedRunAfterModelReady(false)
+    setRunSequence((s) => s + 1)
+    setRunCount((c) => c + 1)
+  }, [queuedRunAfterModelReady, aiModelStatus, gameMode, isRunning, guessedSuccessfully, challengeComplete])
+
   const handleStop = () => {
     setIsRunning(false)
     setStopSequence((s) => s + 1)
@@ -319,8 +393,8 @@ function AppInner() {
     setTimeLeft(GAME_DURATION)
     setTimeUp(false)
     setSelectedWord(null)
-    setScreen('word-select')
-  }, [defaultChat])
+    navigate('/play')
+  }, [defaultChat, navigate])
 
   const formatConfidencePercent = (value) => {
     if (!Number.isFinite(value)) return '0%'
@@ -329,6 +403,19 @@ function AppInner() {
   }
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  const streamAssistantMessage = useCallback(async (text) => {
+    setChatMessages((prev) => [...prev, { user: 'BCD AI Bot', text: '' }])
+    for (let i = 1; i <= text.length; i += 2) {
+      const slice = text.slice(0, i)
+      setChatMessages((prev) => {
+        if (!prev.length) return prev
+        const next = [...prev]
+        next[next.length - 1] = { ...next[next.length - 1], text: slice }
+        return next
+      })
+      await wait(10)
+    }
+  }, [])
 
   const toReadableConfidence = (selected) => {
     const raw = selected.map((c) => Number(c?.score || 0))
@@ -379,17 +466,9 @@ function AppInner() {
       })
 
       for (const guess of guesses) {
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            user: 'BCD AI Bot',
-            prefix: "I guess it's a ",
-            bold: guess.name,
-            boldColor: guess.isCorrect ? '#16a34a' : '#000000',
-            suffix: ` with ${guess.confidence} confidence.`
-          }
-        ])
-        await wait(550)
+        const line = `I guess it's a ${guess.name} with ${guess.confidence} confidence.`
+        await streamAssistantMessage(line)
+        await wait(320)
       }
 
       const matchedWord = guesses
@@ -400,27 +479,13 @@ function AppInner() {
       if (matchedWord === selectedWord) {
         setTimerRunning(false)
         setGuessedSuccessfully(true)
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            user: 'BCD AI Bot',
-            prefix: 'Awesome! I got it. Your drawing is ',
-            bold: selectedWord,
-            suffix: '! Click "Choose New Word" to play again.'
-          }
-        ])
+        await streamAssistantMessage(`Awesome! I got it. Your drawing is ${selectedWord}! Click "Choose New Word" to play again.`)
       } else {
         setGuessRound((n) => n + 1)
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            user: 'BCD AI Bot',
-            text: "Not quite yet. Please redraw and click Run again. I'll try 3 different guesses next time."
-          }
-        ])
+        await streamAssistantMessage("Not quite yet. Please redraw and click Run again. I'll try 3 different guesses next time.")
       }
     },
-    [gameMode, guessRound, guessedSuccessfully, selectedWord]
+    [gameMode, guessRound, guessedSuccessfully, selectedWord, streamAssistantMessage]
   )
 
   const timerClass =
@@ -429,12 +494,16 @@ function AppInner() {
       : timeLeft <= 120
         ? 'game-timer game-timer--warn'
         : 'game-timer'
+  const activeGhostPreview =
+    gameMode === 'challenge'
+      ? (selectedChallenge?.ghostPreview || null)
+      : (classicGhostPreview || null)
 
   useEffect(() => {
     setTourSteps(TOUR_STEPS)
   }, [setTourSteps])
 
-  if (screen === 'home') {
+  if (currentPath === '/') {
     return (
       <HomePage
         onPlay={handlePlay}
@@ -446,17 +515,25 @@ function AppInner() {
     )
   }
 
-  if (screen === 'about') {
-    return <AboutPage onBack={() => setScreen('home')} />
+  if (currentPath === '/about') {
+    return <AboutPage onBack={() => navigate('/')} />
   }
 
-  if (screen === 'lessons') {
-    return <LessonsPage onBack={() => setScreen('home')} />
+  if (currentPath === '/lessons') {
+    return <LessonsPage onBack={() => navigate('/')} />
+  }
+
+  if (!['/play', '/challenge', '/game'].includes(currentPath)) {
+    return <Navigate to='/' replace />
+  }
+
+  if (currentPath === '/game' && !selectedWord && !selectedChallenge) {
+    return <Navigate to='/' replace />
   }
 
   return (
     <div className='app-container'>
-      {screen === 'word-select' && (
+      {currentPath === '/play' && (
         <WordModal
           onSelect={handleWordSelect}
           timerEnabled={timerEnabled}
@@ -464,7 +541,7 @@ function AppInner() {
           onBack={handleExit}
         />
       )}
-      {screen === 'challenge-select' && (
+      {currentPath === '/challenge' && (
         <ChallengeModal
           onSelect={handleChallengeSelect}
           onBack={handleExit}
@@ -512,8 +589,26 @@ function AppInner() {
         </div>
 
         <div className='header-actions'>
+          {currentPath === '/game' && (gameMode === 'classic' || gameMode === 'challenge') && (
+            <button
+              className={`ghost-toggle-btn ${ghostAssistEnabled ? 'is-on' : 'is-off'}`}
+              onClick={() => setGhostAssistEnabled((v) => !v)}
+              title='Toggle ghost outline overlay'
+              aria-pressed={ghostAssistEnabled}
+            >
+              <span className='ghost-toggle-label'>Ghost View</span>
+              <span className='ghost-toggle-switch'>
+                <span className='ghost-toggle-knob' />
+              </span>
+            </button>
+          )}
           {!isRunning && !challengeComplete && (
-            <button className='run-button' onClick={handleRun}>
+            <button
+              className='run-button'
+              onClick={handleRun}
+              disabled={gameMode === 'classic' && aiModelStatus !== 'ready'}
+              title={gameMode === 'classic' && aiModelStatus !== 'ready' ? 'Loading AI model...' : 'Run program'}
+            >
               <span className='run-icon'>&gt;</span> Run
             </button>
           )}
@@ -570,7 +665,8 @@ function AppInner() {
               onGuessComplete={handleGuessComplete}
               onChallengeScore={handleChallengeScore}
               onRunStateChange={setIsRunning}
-              ghostPreview={selectedChallenge ? selectedChallenge.ghostPreview : null}
+              ghostPreview={ghostAssistEnabled ? activeGhostPreview : null}
+              scoreGhostPreview={ghostAssistEnabled ? activeGhostPreview : null}
               showClassification={gameMode === 'classic'}
               showGuessPanel={gameMode !== 'classic'}
             />
@@ -578,6 +674,7 @@ function AppInner() {
           <section className='chat-section'>
             <ChatWindow
               messages={chatMessages}
+              onModelStatusChange={setAiModelStatus}
               onSend={(text, meta) =>
                 setChatMessages((prev) => [
                   ...prev,

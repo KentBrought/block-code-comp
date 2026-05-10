@@ -26,13 +26,15 @@ function ChallengeModal({ onSelect, onBack }) {
           ))}
         </div>
 
-        <button
-          type='button'
-          className='word-modal-back-btn'
-          onClick={onBack}
-        >
-          Back
-        </button>
+        <div className='challenge-modal-footer'>
+          <button
+            type='button'
+            className='word-modal-back-btn'
+            onClick={onBack}
+          >
+            ← Back
+          </button>
+        </div>
       </div>
     </div>
   )

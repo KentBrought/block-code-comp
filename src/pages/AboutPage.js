@@ -2,6 +2,17 @@ import React from 'react'
 import './AboutPage.css'
 
 const TEAM_MEMBERS = ['Kent', 'Shreya', 'Terry', 'Teresa']
+const githubIcon = (
+  <svg
+    aria-hidden='true'
+    width='16'
+    height='16'
+    viewBox='0 0 24 24'
+    fill='currentColor'
+  >
+    <path d='M12 .5A12 12 0 0 0 0 12.7c0 5.4 3.4 10 8.2 11.6.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.3-1.8-1.3-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.4-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.9 1.2 2 1.2 3.2 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12.2 12.2 0 0 0 24 12.7 12.2 12.2 0 0 0 12 .5Z' />
+  </svg>
+)
 
 function AboutPage({ onBack }) {
   return (
@@ -10,6 +21,34 @@ function AboutPage({ onBack }) {
       <div className='about-glow about-glow-2' />
 
       <main className='about-shell'>
+        <header className='app-header about-app-header'>
+          <h1
+            className='app-title'
+            onClick={onBack}
+            style={{ cursor: 'pointer' }}
+            title='Back to home'
+          >
+            <span className='title-block'>Block</span>
+            <span className='title-comma'>,</span>{' '}
+            <span className='title-code'>Code</span>
+            <span className='title-comma'>,</span>{' '}
+            <span className='title-draw'>Draw!</span>
+          </h1>
+
+          <div className='header-centre about-header-centre' />
+
+          <div className='header-actions about-header-actions'>
+            <a
+              className='about-github-link about-github-link--top'
+              href='https://github.com/kentbrought/block-code-comp'
+              target='_blank'
+              rel='noreferrer'
+            >
+              {githubIcon} View on GitHub
+            </a>
+          </div>
+        </header>
+
         <header className='about-hero'>
           <p className='about-kicker'>About This Project</p>
           <h1 className='about-title'>
@@ -74,7 +113,7 @@ function AboutPage({ onBack }) {
             target='_blank'
             rel='noreferrer'
           >
-            View on GitHub
+            {githubIcon} View on GitHub
           </a>
         </div>
       </main>

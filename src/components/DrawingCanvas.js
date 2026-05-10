@@ -28,6 +28,7 @@ const DrawingCanvas = ({
   onChallengeScore,
   onRunStateChange,
   ghostPreview,
+  scoreGhostPreview,
   showClassification = true,
   showGuessPanel = true
 }) => {
@@ -43,6 +44,7 @@ const DrawingCanvas = ({
   const onChallengeScoreRef = useRef(onChallengeScore)
   const onRunStateChangeRef = useRef(onRunStateChange)
   const ghostPreviewRef = useRef(ghostPreview)
+  const scoreGhostPreviewRef = useRef(scoreGhostPreview)
   const [classifying, setClassifying] = useState(false)
   const [classificationResult, setClassificationResult] = useState(null)
   const [classificationError, setClassificationError] = useState(null)
@@ -56,7 +58,8 @@ const DrawingCanvas = ({
     onChallengeScoreRef.current = onChallengeScore
     onRunStateChangeRef.current = onRunStateChange
     ghostPreviewRef.current = ghostPreview
-  }, [commands, onHighlight, onGuessComplete, onChallengeScore, onRunStateChange, ghostPreview])
+    scoreGhostPreviewRef.current = scoreGhostPreview
+  }, [commands, onHighlight, onGuessComplete, onChallengeScore, onRunStateChange, ghostPreview, scoreGhostPreview])
 
   useEffect(() => {
     runIdRef.current += 1
@@ -769,16 +772,16 @@ const DrawingCanvas = ({
         drawCtx.stroke()
       }
 
+      if (!isStale() && onChallengeScoreRef.current && scoreGhostPreviewRef.current && drawingCanvas) {
+        const ghostScore = scoreDrawingAgainstGhost(drawingCanvas, scoreGhostPreviewRef.current)
+        onChallengeScoreRef.current(ghostScore)
+      }
+
         if (!showClassification) {
           if (!isStale()) {
             setClassifying(false)
             setClassificationError(null)
             setClassificationResult(null)
-
-            if (onChallengeScoreRef.current && ghostPreviewRef.current && drawingCanvas) {
-              const result = scoreDrawingAgainstGhost(drawingCanvas, ghostPreviewRef.current)
-              onChallengeScoreRef.current(result)
-            }
           }
           return
         }

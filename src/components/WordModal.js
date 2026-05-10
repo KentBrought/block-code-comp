@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './WordModal.css'
 import { getWordChoiceOptions } from '../constants/wordPool'
+import WordChoiceList from './WordChoiceList'
 
 const DIFFICULTY_STEPS = ['very easy', 'easy', 'medium', 'hard', 'very hard']
 
@@ -12,6 +13,10 @@ function getDisplayedDifficulty(difficulty, timerEnabled) {
 
 function WordModal({ onSelect, onBack, timerEnabled = false, onTimerToggle = null }) {
   const [wordOptions] = useState(getWordChoiceOptions)
+  const displayedOptions = wordOptions.map(({ word, difficulty }) => ({
+    word,
+    difficulty: getDisplayedDifficulty(difficulty, timerEnabled)
+  }))
 
   return (
     <div className='word-modal-overlay'>
@@ -24,47 +29,38 @@ function WordModal({ onSelect, onBack, timerEnabled = false, onTimerToggle = nul
           The AI will try to guess what you drew!
         </p>
 
-        <div className='word-choices'>
-          {wordOptions.map(({ word, difficulty }) => {
-            const displayedDifficulty = getDisplayedDifficulty(difficulty, timerEnabled)
-            return (
-            <button
-              key={word}
-              className='word-choice-btn'
-              onClick={() => onSelect(word)}
-            >
-              <span>{word}</span>
-              <span className={`word-choice-difficulty word-choice-difficulty--${displayedDifficulty.replace(/\s+/g, '-')}`}>{displayedDifficulty}</span>
-            </button>
-            )
-          })}
-        </div>
+        <WordChoiceList
+          options={displayedOptions}
+          onSelect={onSelect}
+        />
 
-        <div className='word-timer-toggle-row'>
-          <span className='word-timer-toggle-label'>Timer challenge</span>
+        <div className='word-modal-controls-row'>
           <button
             type='button'
-            className={`word-timer-toggle ${timerEnabled ? 'is-on' : 'is-off'}`}
-            onClick={() => onTimerToggle && onTimerToggle(!timerEnabled)}
-            aria-pressed={timerEnabled}
-            aria-label='Enable timer challenge'
+            className='word-modal-back-btn'
+            onClick={onBack}
           >
-            <span className='word-timer-toggle-knob' />
+            ← Back
           </button>
+
+          <div className='word-timer-toggle-row'>
+            <span className='word-timer-toggle-label'>Timer challenge</span>
+            <button
+              type='button'
+              className={`word-timer-toggle ${timerEnabled ? 'is-on' : 'is-off'}`}
+              onClick={() => onTimerToggle && onTimerToggle(!timerEnabled)}
+              aria-pressed={timerEnabled}
+              aria-label='Enable timer challenge'
+            >
+              <span className='word-timer-toggle-knob' />
+            </button>
+          </div>
         </div>
         {timerEnabled && (
           <p className='word-timer-warning'>
-            Timer is ON. Words are shown one level harder.
+            Timer is on. This may be more challenging.
           </p>
         )}
-
-        <button
-          type='button'
-          className='word-modal-back-btn'
-          onClick={onBack}
-        >
-          Back
-        </button>
       </div>
     </div>
   )

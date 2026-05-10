@@ -5,7 +5,7 @@
     radial-gradient(1200px 500px at 10% -10%, rgba(72, 149, 239, 0.2), transparent 60%),
     radial-gradient(900px 500px at 100% 0%, rgba(247, 37, 133, 0.16), transparent 62%),
     linear-gradient(180deg, #f8fbff 0%, #f0f5ff 45%, #eef2ff 100%);
-  padding: 2rem 1.2rem 3rem;
+  padding: 0 0 3rem;
   overflow-x: hidden;
 }
 
@@ -35,10 +35,38 @@
 .about-shell {
   position: relative;
   z-index: 2;
-  width: min(980px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   display: grid;
   gap: 1rem;
+}
+
+.about-app-header {
+  height: auto;
+  min-height: 54px;
+  width: 100%;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+
+.about-shell > :not(.about-app-header) {
+  width: min(980px, calc(100% - 1.6rem));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.about-header-centre {
+  justify-content: center;
+}
+
+.about-header-actions {
+  gap: 0.45rem;
+}
+
+.about-github-link--top {
+  display: inline-flex;
+  align-items: center;
 }
 
 .about-hero {
@@ -174,7 +202,19 @@
 
 @media (max-width: 640px) {
   .about-page {
-    padding: 1rem 0.8rem 2rem;
+    padding: 0 0 2rem;
+  }
+
+  .about-app-header {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .about-header-centre,
+  .about-header-actions {
+    justify-content: flex-start;
   }
 
   .about-hero,

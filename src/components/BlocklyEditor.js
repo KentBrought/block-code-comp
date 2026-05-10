@@ -8,27 +8,33 @@ import {
 } from '@blockly/continuous-toolbox'
 
 registerFieldColour()
+Blockly.Msg.PROCEDURES_DEFNORETURN_DO = ''
+Blockly.Msg.PROCEDURES_DEFRETURN_DO = ''
 
 const EVENT_NEW = '__NEW_MESSAGE__'
 const eventMessages = ['A']
 let initialized = false
 let continuousRegistered = false
-const POINTER_STYLE_OPTIONS = [
-  ['🔺', 'arrow'],
-  ['🐢', 'turtle'],
-  ['🖌️', 'paintbrush'],
-  ['✏️', 'pencil'],
-  ['🖍️', 'crayon'],
-  ['🖊️', 'pen'],
-  ['🐈', 'cat'],
-  ['🐕', 'dog'],
-  ['🦙', 'llama'],
-  ['🦒', 'giraffe'],
-  ['🐖', 'pig'],
-  ['🐑', 'sheep'],
-  ['🐅', 'tiger']
-]
+const TWEMOJI_BASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg'
+const ARROW_ICON_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"><g transform="translate(11 11)"><path d="M 10 0 L -5 -5 L -2 0 L -5 5 Z" fill="#e63946" stroke="#ffffff" stroke-width="1.5"/></g></svg>'
+)}`
 
+const POINTER_STYLE_OPTIONS = [
+  [{ src: ARROW_ICON_SVG, width: 20, height: 20, alt: 'arrow' }, 'arrow'],
+  [{ src: `${TWEMOJI_BASE}/1f422.svg`, width: 20, height: 20, alt: 'turtle' }, 'turtle'],
+  [{ src: `${TWEMOJI_BASE}/1f58c-fe0f.svg`, width: 20, height: 20, alt: 'paintbrush' }, 'paintbrush'],
+  [{ src: `${TWEMOJI_BASE}/270f-fe0f.svg`, width: 20, height: 20, alt: 'pencil' }, 'pencil'],
+  [{ src: `${TWEMOJI_BASE}/1f58d-fe0f.svg`, width: 20, height: 20, alt: 'crayon' }, 'crayon'],
+  [{ src: `${TWEMOJI_BASE}/1f58a-fe0f.svg`, width: 20, height: 20, alt: 'pen' }, 'pen'],
+  [{ src: `${TWEMOJI_BASE}/1f408.svg`, width: 20, height: 20, alt: 'cat' }, 'cat'],
+  [{ src: `${TWEMOJI_BASE}/1f415.svg`, width: 20, height: 20, alt: 'dog' }, 'dog'],
+  [{ src: `${TWEMOJI_BASE}/1f999.svg`, width: 20, height: 20, alt: 'llama' }, 'llama'],
+  [{ src: `${TWEMOJI_BASE}/1f992.svg`, width: 20, height: 20, alt: 'giraffe' }, 'giraffe'],
+  [{ src: `${TWEMOJI_BASE}/1f416.svg`, width: 20, height: 20, alt: 'pig' }, 'pig'],
+  [{ src: `${TWEMOJI_BASE}/1f411.svg`, width: 20, height: 20, alt: 'sheep' }, 'sheep'],
+  [{ src: `${TWEMOJI_BASE}/1f405.svg`, width: 20, height: 20, alt: 'tiger' }, 'tiger']
+]
 export const customTheme = Blockly.Theme.defineTheme('blockCodeTheme', {
   base: Blockly.Themes.Classic,
   blockStyles: {
@@ -988,6 +994,19 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
   const blocklyDiv = useRef(null)
   const workspace = useRef(null)
 
+  const ensureProcedureNames = (ws) => {
+    if (!ws) return
+    const procedureBlocks = ws.getAllBlocks(false).filter((block) =>
+      block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn'
+    )
+    procedureBlocks.forEach((block) => {
+      const name = (block.getFieldValue('NAME') || '').trim()
+      if (!name) {
+        block.setFieldValue('my_function', 'NAME')
+      }
+    })
+  }
+
   useEffect(() => {
     if (!workspace.current) return
     workspace.current.highlightBlock(highlightBlockId || null)
@@ -1016,8 +1035,10 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
     `
     const startXml = Blockly.utils.xml.textToDom(startXmlText)
     Blockly.Xml.domToWorkspace(startXml, workspace.current)
+    ensureProcedureNames(workspace.current)
 
     workspace.current.addChangeListener(() => {
+      ensureProcedureNames(workspace.current)
       onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
     })
     onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
@@ -1032,16 +1053,20 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
         <button
           type='button'
           onClick={() => workspace.current && workspace.current.undo(false)}
+          aria-label='Undo'
+          title='Undo'
           style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d0d7de', cursor: 'pointer' }}
         >
-          Undo
+          ↶
         </button>
         <button
           type='button'
           onClick={() => workspace.current && workspace.current.undo(true)}
+          aria-label='Redo'
+          title='Redo'
           style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d0d7de', cursor: 'pointer' }}
         >
-          Redo
+          ↷
         </button>
       </div>
     </div>
@@ -1121,3 +1146,5 @@ export function buildLessonFlyoutToolbox(allowedTypes = []) {
 }
 
 export default BlocklyEditor
+
+
