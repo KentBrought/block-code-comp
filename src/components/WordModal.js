@@ -1,9 +1,17 @@
 import React, { useState } from 'react'
 import './WordModal.css'
-import { getRandomWordsFromPool } from '../constants/wordPool'
+import { getWordChoiceOptions } from '../constants/wordPool'
 
-function WordModal({ onSelect, onBack }) {
-  const [words] = useState(getRandomWordsFromPool)
+const DIFFICULTY_STEPS = ['very easy', 'easy', 'medium', 'hard', 'very hard']
+
+function getDisplayedDifficulty(difficulty, timerEnabled) {
+  const index = DIFFICULTY_STEPS.indexOf(difficulty)
+  if (!timerEnabled || index < 0) return difficulty
+  return DIFFICULTY_STEPS[Math.min(index + 1, DIFFICULTY_STEPS.length - 1)]
+}
+
+function WordModal({ onSelect, onBack, timerEnabled = false, onTimerToggle = null }) {
+  const [wordOptions] = useState(getWordChoiceOptions)
 
   return (
     <div className='word-modal-overlay'>
@@ -17,16 +25,38 @@ function WordModal({ onSelect, onBack }) {
         </p>
 
         <div className='word-choices'>
-          {words.map((word) => (
+          {wordOptions.map(({ word, difficulty }) => {
+            const displayedDifficulty = getDisplayedDifficulty(difficulty, timerEnabled)
+            return (
             <button
               key={word}
               className='word-choice-btn'
               onClick={() => onSelect(word)}
             >
-              {word}
+              <span>{word}</span>
+              <span className={`word-choice-difficulty word-choice-difficulty--${displayedDifficulty.replace(/\s+/g, '-')}`}>{displayedDifficulty}</span>
             </button>
-          ))}
+            )
+          })}
         </div>
+
+        <div className='word-timer-toggle-row'>
+          <span className='word-timer-toggle-label'>Timer challenge</span>
+          <button
+            type='button'
+            className={`word-timer-toggle ${timerEnabled ? 'is-on' : 'is-off'}`}
+            onClick={() => onTimerToggle && onTimerToggle(!timerEnabled)}
+            aria-pressed={timerEnabled}
+            aria-label='Enable timer challenge'
+          >
+            <span className='word-timer-toggle-knob' />
+          </button>
+        </div>
+        {timerEnabled && (
+          <p className='word-timer-warning'>
+            Timer is ON. Words are shown one level harder.
+          </p>
+        )}
 
         <button
           type='button'

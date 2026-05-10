@@ -12,17 +12,13 @@ const SYSTEM_PROMPT =
   'Help the user figure out which blocks to use and how to combine them to draw their target shape. ' +
   'Keep replies concise (2-4 sentences). Be friendly and encouraging.'
 
-const INITIAL_MESSAGES = [
-  {
-    role: 'assistant',
-    content:
-      "Hi! I'm BCD AI Bot! Tell me what you're trying to draw and I'll help you figure out which blocks to use!"
-  }
-]
+const INITIAL_MESSAGES = []
+const INTRO_MESSAGE =
+  "Hi! I'm BCD AI Bot! Tell me what you're trying to draw and I'll help you figure out which blocks to use!"
 
 const STATUS_LABEL = {
   idle: 'Starting...',
-  loading: 'Loading AI',
+  loading: 'Starting...',
   ready: 'Online',
   generating: 'Thinking...',
   error: 'Error'
@@ -44,7 +40,10 @@ function toRoleBasedMessages(items = []) {
 function ChatWindow({ messages: externalMessages = null, onSend = null }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
+  const [introTyping, setIntroTyping] = useState(false)
+  const [introShown, setIntroShown] = useState(false)
   const bottomRef = useRef(null)
+  const messagesRef = useRef(null)
   const { status, loadProgress, generate } = useTextGeneration()
 
   const usingExternalMessages = Array.isArray(externalMessages)
@@ -52,8 +51,32 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
   const normalizedMessages = toRoleBasedMessages(displayedMessages)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [displayedMessages, status])
+    const el = messagesRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+    bottomRef.current?.scrollIntoView({ behavior: 'auto' })
+  }, [normalizedMessages.length, status, introTyping])
+
+  useEffect(() => {
+    if (!usingExternalMessages) return
+    if (!onSend) return
+    if (normalizedMessages.length > 0) {
+      setIntroTyping(false)
+      setIntroShown(true)
+      return
+    }
+
+    setIntroShown(false)
+    setIntroTyping(true)
+    const timer = setTimeout(() => {
+      onSend(INTRO_MESSAGE, { from: 'assistant' })
+      setIntroShown(true)
+      setIntroTyping(false)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [usingExternalMessages, onSend, normalizedMessages.length])
 
   const handleSend = async (e) => {
     e.preventDefault()
@@ -100,25 +123,22 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
   }
 
   const isReady = status === 'ready'
-  const statusLabel =
-    status === 'loading'
-      ? `Loading AI (${loadProgress}%)`
-      : STATUS_LABEL[status]
+  const statusLabel = STATUS_LABEL[status]
 
   return (
     <div className='chat-window'>
       <div className='chat-header'>
-        <span className='chat-title'>BCD AI Bot</span>
+        <span className='chat-title'>AI Helper Chat</span>
         <span className={`chat-status-dot chat-status-dot--${status}`} />
         <span className='chat-status-label'>{statusLabel}</span>
       </div>
 
-      <div className='chat-messages'>
+      <div className='chat-messages' ref={messagesRef}>
         {normalizedMessages.map((msg, i) => (
           <div key={i} className={`chat-bubble chat-bubble--${msg.role}`}>
-            {msg.role === 'assistant' && (
-              <span className='chat-bubble-label'>Bot</span>
-            )}
+            <span className='chat-bubble-label'>
+              {msg.role === 'assistant' ? '🤖 Bot' : '🧑 You'}
+            </span>
             {msg.raw?.prefix || msg.raw?.bold || msg.raw?.suffix
               ? (
                 <p>
@@ -137,9 +157,16 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
           </div>
         ))}
 
-        {status === 'generating' && (
+        {status === 'loading' && introShown && (
           <div className='chat-bubble chat-bubble--assistant'>
-            <span className='chat-bubble-label'>Bot</span>
+            <span className='chat-bubble-label'>🤖 Bot</span>
+            <p>Getting ready... {loadProgress}%</p>
+          </div>
+        )}
+
+        {(status === 'generating' || introTyping) && (
+          <div className='chat-bubble chat-bubble--assistant'>
+            <span className='chat-bubble-label'>🤖 Bot</span>
             <p className='chat-typing'>
               <span />
               <span />
@@ -156,13 +183,18 @@ function ChatWindow({ messages: externalMessages = null, onSend = null }) {
           type='text'
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isReady ? 'Give me a hint...' : statusLabel}
+          placeholder={isReady ? 'Give me a hint...' : 'Please wait... Bot is getting ready'}
           disabled={!isReady}
         />
         <button type='submit' disabled={!isReady || !input.trim()}>
           Send
         </button>
       </form>
+      {!isReady && (
+        <div className='chat-loading-note'>
+          Please wait for the bot to finish loading before typing.
+        </div>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export function useTextGeneration() {
   const [status, setStatus] = useState('idle');
   const [loadProgress, setLoadProgress] = useState(0);
+  const [loadMessage, setLoadMessage] = useState('Initializing...');
 
   // Keep status accessible inside stable callbacks without adding it as a dep.
   const statusRef = useRef('idle');
@@ -27,12 +28,18 @@ export function useTextGeneration() {
       switch (data.type) {
         case 'LOAD_START':
           updateStatus('loading');
+          setLoadProgress(0);
+          setLoadMessage('Initializing model...');
           break;
 
         case 'LOAD_PROGRESS': {
           const p = data.payload;
           if (typeof p?.progress === 'number') {
-            setLoadProgress(Math.round(p.progress));
+            const value = p.progress <= 1 ? p.progress * 100 : p.progress;
+            setLoadProgress(Math.max(0, Math.min(100, Math.round(value))));
+          }
+          if (typeof p?.text === 'string' && p.text.trim()) {
+            setLoadMessage(p.text.trim());
           }
           break;
         }
@@ -40,6 +47,7 @@ export function useTextGeneration() {
         case 'LOAD_DONE':
           updateStatus('ready');
           setLoadProgress(100);
+          setLoadMessage('Model ready');
           break;
 
         case 'GENERATE_DONE':
@@ -50,6 +58,7 @@ export function useTextGeneration() {
 
         case 'ERROR':
           updateStatus('error');
+          setLoadMessage('Failed to load model');
           pendingRef.current?.reject(new Error(data.payload));
           pendingRef.current = null;
           break;
@@ -80,5 +89,5 @@ export function useTextGeneration() {
     });
   }, []);
 
-  return { status, loadProgress, generate };
+  return { status, loadProgress, loadMessage, generate };
 }

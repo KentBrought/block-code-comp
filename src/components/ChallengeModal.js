@@ -5,7 +5,7 @@ import { CHALLENGES } from '../constants/challenges'
 function ChallengeModal({ onSelect, onBack }) {
   return (
     <div className='word-modal-overlay'>
-      <div className='word-modal'>
+      <div className='word-modal challenge-word-modal'>
         <div className='word-modal-icon'>🐞</div>
         <h2 className='word-modal-title'>Bug Fix Challenges</h2>
         <p className='word-modal-desc'>
@@ -18,7 +18,7 @@ function ChallengeModal({ onSelect, onBack }) {
           {CHALLENGES.map((challenge) => (
             <button
               key={challenge.id}
-              className='word-choice-btn'
+              className='word-choice-btn challenge-word-choice-btn'
               onClick={() => onSelect(challenge)}
             >
               {challenge.title}

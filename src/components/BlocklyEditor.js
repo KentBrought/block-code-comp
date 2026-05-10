@@ -13,6 +13,21 @@ const EVENT_NEW = '__NEW_MESSAGE__'
 const eventMessages = ['A']
 let initialized = false
 let continuousRegistered = false
+const POINTER_STYLE_OPTIONS = [
+  ['🔺', 'arrow'],
+  ['🐢', 'turtle'],
+  ['🖌️', 'paintbrush'],
+  ['✏️', 'pencil'],
+  ['🖍️', 'crayon'],
+  ['🖊️', 'pen'],
+  ['🐈', 'cat'],
+  ['🐕', 'dog'],
+  ['🦙', 'llama'],
+  ['🦒', 'giraffe'],
+  ['🐖', 'pig'],
+  ['🐑', 'sheep'],
+  ['🐅', 'tiger']
+]
 
 export const customTheme = Blockly.Theme.defineTheme('blockCodeTheme', {
   base: Blockly.Themes.Classic,
@@ -247,6 +262,18 @@ export function initBlocks() {
       args0: [
         { type: 'input_value', name: 'WIDTH', check: 'Number' },
         { type: 'input_value', name: 'HEIGHT', check: 'Number' }
+      ],
+      inputsInline: true,
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#f72585'
+    },
+    {
+      type: 'draw_arc',
+      message0: 'draw arc radius %1 angle %2',
+      args0: [
+        { type: 'input_value', name: 'RADIUS', check: 'Number' },
+        { type: 'input_value', name: 'ANGLE', check: 'Number' }
       ],
       inputsInline: true,
       previousStatement: null,
@@ -572,6 +599,8 @@ export function initBlocks() {
   javascriptGenerator.forBlock.draw_line = (block) => `await drawLine(${num(block, 'LENGTH', '50')});\n`
   javascriptGenerator.forBlock.draw_rectangle = (block) =>
     `await drawRectangle(${num(block, 'WIDTH', '80')}, ${num(block, 'HEIGHT', '50')});\n`
+  javascriptGenerator.forBlock.draw_arc = (block) =>
+    `await drawArc(${num(block, 'RADIUS', '50')}, ${num(block, 'ANGLE', '90')});\n`
   javascriptGenerator.forBlock.color_value = (block) => [`'${block.getFieldValue('COLOR')}'`, javascriptGenerator.ORDER_ATOMIC]
   javascriptGenerator.forBlock.set_color = (block) => {
     const color = javascriptGenerator.valueToCode(block, 'COLOR', javascriptGenerator.ORDER_NONE) || "'#f03e3e'"
@@ -641,6 +670,17 @@ export function initBlocks() {
     const name = JSON.stringify((block.getFieldValue('NAME') || 'myList').trim() || 'myList')
     return `(globalThis.__bcdLists ||= {})[${name}] = (globalThis.__bcdLists ||= {})[${name}] || [];\n`
   }
+
+  Blockly.Blocks.set_pointer_style = {
+    init: function () {
+      this.appendDummyInput()
+        .appendField('set pointer')
+        .appendField(new Blockly.FieldDropdown(POINTER_STYLE_OPTIONS), 'STYLE')
+      this.setPreviousStatement(true, null)
+      this.setNextStatement(true, null)
+      this.setColour('#06d6a0')
+    }
+  }
   javascriptGenerator.forBlock.array_get = (block) => {
     const listName = javascriptGenerator.valueToCode(block, 'LIST_NAME', javascriptGenerator.ORDER_NONE) || "'myList'"
     const index = num(block, 'INDEX', '0')
@@ -671,6 +711,8 @@ export function initBlocks() {
   javascriptGenerator.forBlock.canvas_zoom_out = (block) => `await canvasZoomOut(${num(block, 'AMOUNT', '10')});\n`
   javascriptGenerator.forBlock.canvas_reset_zoom = () => 'await canvasResetZoom();\n'
   javascriptGenerator.forBlock.canvas_toggle_grid = () => 'await canvasToggleGrid();\n'
+  javascriptGenerator.forBlock.set_pointer_style = (block) =>
+    `await setPointerStyle(${JSON.stringify(block.getFieldValue('STYLE') || 'arrow')});\n`
 
   // Make Blockly "Functions" compatible with our async runtime.
   // We intentionally use standalone implementations to avoid HMR wrapper
@@ -778,6 +820,7 @@ export const defaultToolbox = {
         { kind: 'block', type: 'color_value' },
         { kind: 'block', type: 'set_random_color' },
         { kind: 'block', type: 'set_pen_size', inputs: { SIZE: { shadow: { type: 'op_number', fields: { NUM: 3 } } } } },
+        { kind: 'block', type: 'set_pointer_style' },
         { kind: 'block', type: 'clear_screen' }
       ]
     },
@@ -802,6 +845,14 @@ export const defaultToolbox = {
           inputs: {
             WIDTH: { shadow: { type: 'op_number', fields: { NUM: 80 } } },
             HEIGHT: { shadow: { type: 'op_number', fields: { NUM: 50 } } }
+          }
+        },
+        {
+          kind: 'block',
+          type: 'draw_arc',
+          inputs: {
+            RADIUS: { shadow: { type: 'op_number', fields: { NUM: 50 } } },
+            ANGLE: { shadow: { type: 'op_number', fields: { NUM: 90 } } }
           }
         }
       ]
@@ -921,7 +972,15 @@ export const defaultToolbox = {
       ]
     },
     { kind: 'category', name: 'Variables', custom: 'VARIABLE', categorystyle: 'variable_category' },
-    { kind: 'category', name: 'Functions', custom: 'PROCEDURE', categorystyle: 'procedure_category' }
+    {
+      kind: 'category',
+      name: 'Functions',
+      categorystyle: 'procedure_category',
+      contents: [
+        { kind: 'block', type: 'procedures_defnoreturn' },
+        { kind: 'block', type: 'procedures_callnoreturn' }
+      ]
+    }
   ]
 }
 

@@ -220,7 +220,7 @@ function HomePage({ onPlay, onHowToPlay, onChallengeMode, onAbout, onLessons }) 
 
         <div className='home-cta-stack'>
           <div className='home-primary-row'>
-            <button className='home-play-btn' onClick={onPlay}>
+            <button className='home-play-btn home-play-btn--play' onClick={onPlay}>
               <span className='home-play-icon'>🎮</span>
               <span className='home-play-label'>Play Now</span>
             </button>
@@ -236,12 +236,12 @@ function HomePage({ onPlay, onHowToPlay, onChallengeMode, onAbout, onLessons }) 
             </button>
           </div>
 
-          <button className='home-play-btn' onClick={onLessons}>
+          <button className='home-play-btn home-play-btn--learning' onClick={onLessons}>
             <span className='home-play-icon'>🧭</span>
             <span className='home-play-label'>Learning Path</span>
           </button>
 
-          <button className='home-play-btn home-challenge-btn' onClick={onChallengeMode}>
+          <button className='home-play-btn home-play-btn--challenge' onClick={onChallengeMode}>
             <span className='home-play-icon'>🐞</span>
             <span className='home-play-label'>Challenge Mode</span>
           </button>

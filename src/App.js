@@ -52,10 +52,7 @@ function formatTime(seconds) {
 
 function AppInner() {
   const defaultChat = useCallback(
-    () => [
-      { user: 'BCD AI Bot', text: 'Welcome to Block, Code, Draw! Can I guess what you draw?' },
-      { user: 'You', text: "Let's find out!" }
-    ],
+    () => [],
     []
   )
 
@@ -64,6 +61,7 @@ function AppInner() {
   const [gameMode, setGameMode] = useState('classic') // 'classic' | 'challenge'
   const [selectedWord, setSelectedWord] = useState(null)
   const [selectedChallenge, setSelectedChallenge] = useState(null)
+  const [timerEnabled, setTimerEnabled] = useState(false)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [timerRunning, setTimerRunning] = useState(false)
   const [timeUp, setTimeUp] = useState(false)
@@ -174,15 +172,13 @@ function AppInner() {
     setSelectedChallenge(null)
     setTimeLeft(GAME_DURATION)
     setTimeUp(false)
-    setTimerRunning(true)
+    setTimerRunning(timerEnabled)
     setRunCount(0)
     setIsRunning(false)
     setGuessRound(0)
     setGuessedSuccessfully(false)
     setChallengeHintIndex(0)
-    setChatMessages([
-      { user: 'BCD AI Bot', text: "Awesome! I'll try to guess what your word is every time you click Run." }
-    ])
+    setChatMessages([])
     setScreen('game')
     setEditorResetKey((k) => k + 1)
 
@@ -208,9 +204,7 @@ function AppInner() {
     setGuessedSuccessfully(false)
     setChallengeComplete(false)
     setChallengeHintIndex(0)
-    setChatMessages([
-      { user: 'BCD AI Bot', text: 'Challenge mode is on. Match the gray outline drawing.' }
-    ])
+    setChatMessages([])
     setEditorResetKey((k) => k + 1)
     setScreen('game')
   }
@@ -465,6 +459,8 @@ function AppInner() {
       {screen === 'word-select' && (
         <WordModal
           onSelect={handleWordSelect}
+          timerEnabled={timerEnabled}
+          onTimerToggle={setTimerEnabled}
           onBack={handleExit}
         />
       )}
@@ -507,7 +503,7 @@ function AppInner() {
               <span className='word-badge-word'>{selectedChallenge.title}</span>
             </div>
           )}
-          {selectedWord && gameMode === 'classic' && (
+          {selectedWord && gameMode === 'classic' && timerEnabled && (
             <div className={timerClass}>
               {formatTime(timeLeft)}
               {timeUp && <span className='timer-up-tag'>Time&apos;s up!</span>}

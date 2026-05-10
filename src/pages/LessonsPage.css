@@ -4,37 +4,45 @@
     radial-gradient(900px 460px at 8% -10%, rgba(67, 97, 238, 0.2), transparent 64%),
     radial-gradient(800px 380px at 100% 0%, rgba(247, 37, 133, 0.14), transparent 66%),
     linear-gradient(180deg, #f8fbff 0%, #eef2ff 52%, #f8fbff 100%);
-  padding: 1rem 0.8rem 2rem;
+  padding: 0 0 2rem;
 }
 
 .lessons-shell {
-  width: min(1120px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   display: grid;
   gap: 0.85rem;
 }
 
-.lessons-hero {
+.lessons-app-header {
+  height: auto;
+  min-height: 54px;
+  width: 100%;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+
+.lessons-shell > :not(.lessons-app-header) {
+  width: min(1120px, calc(100% - 1.6rem));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lessons-header-centre {
+  justify-content: center;
+}
+
+.lessons-header-actions {
+  gap: 0.45rem;
+}
+
+.lessons-hero-meta {
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 18px;
   padding: 0.95rem 1rem;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
-}
-
-.hero-top-row {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.2rem;
-}
-
-.hero-title-row {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.8rem;
 }
 
 .home-back-btn {
@@ -52,35 +60,8 @@
   background: #e0e9ff;
 }
 
-.hero-progress {
-  margin: 0;
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: #334155;
-}
-
-.lessons-hero h1 {
-  margin: 0;
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: #0f172a;
-}
-
-.logo-b {
-  color: #4361ee;
-}
-
-.logo-c {
-  color: #7209b7;
-}
-
-.logo-d {
-  color: #f72585;
-}
-
 .hero-sub {
-  margin: 0.28rem 0 0;
+  margin: 0;
   color: #475569;
 }
 
@@ -540,6 +521,18 @@
 }
 
 @media (max-width: 760px) {
+  .lessons-app-header {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .lessons-header-centre,
+  .lessons-header-actions {
+    justify-content: flex-start;
+  }
+
   .studio-shell {
     grid-template-columns: 1fr;
   }

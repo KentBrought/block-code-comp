@@ -1025,33 +1025,44 @@ export default function LessonsPage({ onBack }) {
   return (
     <div className='lessons-page'>
       <main className='lessons-shell'>
-        <header className='lessons-hero'>
-          <div className='hero-top-row'>
+        <header className='app-header lessons-app-header'>
+          <h1
+            className='app-title'
+            onClick={onBack}
+            style={{ cursor: 'pointer' }}
+            title='Back to home'
+          >
+            <span className='title-block'>Block</span>
+            <span className='title-comma'>,</span>{' '}
+            <span className='title-code'>Code</span>
+            <span className='title-comma'>,</span>{' '}
+            <span className='title-draw'>Draw!</span>
+          </h1>
+
+          <div className='header-centre lessons-header-centre'>
+            <div className='word-badge'>
+              <span className='word-badge-label'>Learning Path:</span>
+              <span className='word-badge-word'>{completedCount}/{LESSONS_ENRICHED.length} complete</span>
+            </div>
+          </div>
+
+          <div className='header-actions lessons-header-actions'>
             <button type='button' className='home-back-btn' onClick={onBack}>Back to Home</button>
             {selectedLesson && (
               <button type='button' className='catalog-back-btn' onClick={() => setSelectedLessonId(null)}>
                 Back to All {LESSONS_ENRICHED.length} Lessons
               </button>
             )}
-            <p className='hero-progress'>{completedCount}/{LESSONS_ENRICHED.length} complete</p>
           </div>
-          <div className='hero-title-row'>
-            <h1
-              onClick={() => setSelectedLessonId(null)}
-              style={{ cursor: 'pointer' }}
-              title='Go to all lessons'
-            >
-              <span className='logo-b'>B</span>
-              <span className='logo-c'>C</span>
-              <span className='logo-d'>D</span> Lessons
-            </h1>
-          </div>
+        </header>
+
+        <section className='lessons-hero-meta'>
           <p className='hero-sub'>Block, Code, Draw learning path with {LESSONS_ENRICHED.length} lessons.</p>
           <div className='lessons-progress-wrap'>
             <div className='lessons-progress-bar'><div style={{ width: `${progressPercent}%` }} /></div>
             <span>{progressPercent}% progress</span>
           </div>
-        </header>
+        </section>
 
         {!selectedLesson && (
           <section className='lesson-catalog'>

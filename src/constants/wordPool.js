@@ -1,6 +1,44 @@
 import { MODEL_LABELS } from './modelLabels'
 
 export const WORD_POOL = [...MODEL_LABELS]
+export const DIFFICULTY_LEVELS = ['very easy', 'easy', 'medium', 'hard', 'very hard']
+
+const WORD_DIFFICULTY = {
+  square: 'very easy',
+  triangle: 'very easy',
+  circle: 'very easy',
+  door: 'very easy',
+  cat: 'easy',
+  dog: 'easy',
+  fish: 'easy',
+  'smiley face': 'easy',
+  sun: 'easy',
+  moon: 'easy',
+  house: 'easy',
+  tree: 'easy',
+  flower: 'easy',
+  star: 'easy',
+  car: 'medium',
+  bicycle: 'medium',
+  boat: 'medium',
+  airplane: 'medium',
+  bird: 'medium',
+  rabbit: 'medium',
+  bridge: 'hard',
+  castle: 'hard',
+  octopus: 'hard',
+  dragon: 'very hard',
+  helicopter: 'very hard',
+  saxophone: 'very hard'
+}
+
+const DIFFICULTY_ORDER = {
+  'very easy': 0,
+  easy: 1,
+  medium: 2,
+  hard: 3,
+  'very hard': 4
+}
 
 export function normalizeWord(value) {
   return (value || '')
@@ -44,7 +82,55 @@ export function findMatchingWordFromCandidates(rawGuess, candidates = WORD_POOL)
   return null
 }
 
-export function getRandomWordsFromPool() {
-  const shuffled = [...WORD_POOL].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, 5)
+function shuffle(items = []) {
+  return [...items].sort(() => Math.random() - 0.5)
+}
+
+function pickUniqueWords(pool, count, excluded = new Set()) {
+  const choices = []
+  const shuffled = shuffle(pool)
+
+  for (const word of shuffled) {
+    if (choices.length >= count) break
+    if (excluded.has(word)) continue
+    choices.push(word)
+    excluded.add(word)
+  }
+  return choices
+}
+
+function getDifficultyForWord(word) {
+  return WORD_DIFFICULTY[word] || 'hard'
+}
+
+export function getWordChoiceOptions() {
+  const used = new Set()
+  const labeledWords = WORD_POOL.filter((word) => WORD_DIFFICULTY[word])
+  const veryEasyPool = labeledWords.filter((word) => WORD_DIFFICULTY[word] === 'very easy')
+  const easyPool = labeledWords.filter((word) => WORD_DIFFICULTY[word] === 'easy')
+  const mediumPool = labeledWords.filter((word) => WORD_DIFFICULTY[word] === 'medium')
+  const harderPool = labeledWords.filter((word) => {
+    const difficulty = WORD_DIFFICULTY[word]
+    return difficulty === 'hard' || difficulty === 'very hard'
+  })
+  const guaranteedEasyWords = ['house', 'sun'].filter((word) => easyPool.includes(word))
+  guaranteedEasyWords.forEach((word) => used.add(word))
+
+  const picked = [
+    ...pickUniqueWords(veryEasyPool, 1, used),
+    ...guaranteedEasyWords,
+    ...pickUniqueWords(easyPool, Math.max(0, 2 - guaranteedEasyWords.length), used),
+    ...pickUniqueWords(mediumPool, 1, used),
+    ...pickUniqueWords(harderPool, 1, used)
+  ]
+
+  if (picked.length < 5) {
+    pickUniqueWords(labeledWords, 5 - picked.length, used).forEach((word) => {
+      picked.push(word)
+    })
+  }
+
+  return picked
+    .map((word) => ({ word, difficulty: getDifficultyForWord(word) }))
+    .sort((a, b) => DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty])
 }

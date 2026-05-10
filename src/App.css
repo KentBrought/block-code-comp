@@ -317,6 +317,8 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* ─── Chat ─── */
@@ -342,6 +344,7 @@ body {
   font-weight: 700;
   color: #2d3436;
   margin-right: auto;
+  letter-spacing: 0.01em;
 }
 
 .chat-status-dot {
@@ -428,6 +431,10 @@ body {
   letter-spacing: 0.04em;
 }
 
+.chat-bubble--user .chat-bubble-label {
+  color: rgba(255, 255, 255, 0.92);
+}
+
 /* Animated typing indicator */
 .chat-typing {
   display: flex;
@@ -508,6 +515,14 @@ body {
 .chat-form button:disabled {
   background: #a5b4fc;
   cursor: not-allowed;
+}
+
+.chat-loading-note {
+  padding: 0 10px 8px;
+  font-size: 0.72rem;
+  color: #92400e;
+  background: #fff7ed;
+  border-top: 1px solid #fed7aa;
 }
 
 /* ─── Blockly Overrides ─── */
@@ -617,6 +632,21 @@ body {
   overflow-y: auto !important;
 }
 
+.editor-section .blocklyFlyoutButton .blocklyFlyoutButtonBackground {
+  fill: #2563eb !important;
+  stroke: #1d4ed8 !important;
+  stroke-width: 1px !important;
+}
+
+.editor-section .blocklyFlyoutButton .blocklyText {
+  fill: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.editor-section .blocklyFlyoutButton:hover .blocklyFlyoutButtonBackground {
+  fill: #1d4ed8 !important;
+}
+
 /* Category section heading labels inside flyout */
 .editor-section .blocklyFlyoutLabelText {
   font-family: 'Inter', sans-serif !important;
@@ -639,6 +669,13 @@ body {
 
 .editor-section .blocklyScrollbarHandle {
   fill: #ced4da !important;
+}
+
+/* Some starter challenge blocks can surface Blockly's default invalid-input red
+   highlights while editing. Keep these input sockets visually neutral. */
+.editor-section .blocklyInvalidInput {
+  background: #e9ecef !important;
+  border-radius: 4px;
 }
 
 /* Highlight executing block with a gold outline */

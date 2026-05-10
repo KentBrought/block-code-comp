@@ -1,27 +1,26 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline, env } from '@huggingface/transformers';
+import * as webllm from '@mlc-ai/web-llm';
 
-env.allowLocalModels = false;
-env.useBrowserCache = true;
-
-const MODEL_ID = 'HuggingFaceTB/SmolLM2-135M-Instruct';
+const MODEL_ID = 'Llama-3.2-1B-Instruct-q4f32_1-MLC';
 
 const GENERATION_DEFAULTS = {
-  max_new_tokens: 150,
-  do_sample: true,
+  max_tokens: 150,
   temperature: 0.8,
   top_p: 0.9,
-  repetition_penalty: 1.15,
 };
 
-let pipe = null;
+let engine = null;
 
 async function loadModel() {
+  if (engine) {
+    self.postMessage({ type: 'LOAD_DONE' });
+    return;
+  }
+
   self.postMessage({ type: 'LOAD_START' });
 
-  pipe = await pipeline('text-generation', MODEL_ID, {
-    dtype: 'q4',
-    progress_callback: (progress) => {
+  engine = await webllm.CreateMLCEngine(MODEL_ID, {
+    initProgressCallback: (progress) => {
       self.postMessage({ type: 'LOAD_PROGRESS', payload: progress });
     },
   });
@@ -30,10 +29,16 @@ async function loadModel() {
 }
 
 async function generate({ messages, options = {} }) {
-  const output = await pipe(messages, { ...GENERATION_DEFAULTS, ...options });
-  // For chat-template models, generated_text is an array of message objects.
-  // The last element is the new assistant reply.
-  const reply = output?.[0]?.generated_text?.at(-1)?.content ?? '';
+  if (!engine) {
+    throw new Error('Model is not loaded yet.');
+  }
+
+  const output = await engine.chat.completions.create({
+    messages,
+    ...GENERATION_DEFAULTS,
+    ...options,
+  });
+  const reply = output?.choices?.[0]?.message?.content ?? '';
   self.postMessage({ type: 'GENERATE_DONE', payload: reply });
 }
 

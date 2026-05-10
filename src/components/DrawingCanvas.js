@@ -3,6 +3,22 @@ import { classifyCanvas } from '../utils/imageClassifier'
 import { findMatchingWordFromCandidates, WORD_POOL } from '../constants/wordPool'
 import { scoreDrawingAgainstGhost } from '../utils/challengeScorer'
 
+const POINTER_ASSET = {
+  arrow: null,
+  turtle: '🐢',
+  paintbrush: '🖌️',
+  pencil: '✏️',
+  crayon: '🖍️',
+  pen: '🖊️',
+  cat: '🐈',
+  dog: '🐕',
+  llama: '🦙',
+  giraffe: '🦒',
+  pig: '🐖',
+  sheep: '🐑',
+  tiger: '🐅'
+}
+
 const DrawingCanvas = ({
   commands,
   runSequence,
@@ -84,7 +100,8 @@ const DrawingCanvas = ({
           markerCanvas.getContext('2d'),
           w / 2,
           h / 2,
-          0
+          0,
+          'arrow'
         )
         applyViewScale()
       }
@@ -216,22 +233,30 @@ const DrawingCanvas = ({
   }
 
   // Draws marker exclusively on the clear overlay canvas
-  function drawMarkerAt(canvas, ctx, x, y, angle) {
+  function drawMarkerAt(canvas, ctx, x, y, angle, pointerStyle = 'arrow') {
     ctx.clearRect(0, 0, canvas.width, canvas.height) // clear entire overlay
     ctx.save()
     ctx.translate(x, y)
     ctx.rotate((angle * Math.PI) / 180)
-    ctx.fillStyle = '#e63946'
-    ctx.strokeStyle = '#fff'
-    ctx.lineWidth = 1.5
-    ctx.beginPath()
-    ctx.moveTo(14, 0)
-    ctx.lineTo(-7, -7)
-    ctx.lineTo(-4, 0)
-    ctx.lineTo(-7, 7)
-    ctx.closePath()
-    ctx.fill()
-    ctx.stroke()
+    const emoji = POINTER_ASSET[pointerStyle]
+    if (emoji) {
+      ctx.font = '24px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(emoji, 0, 0)
+    } else {
+      ctx.fillStyle = '#e63946'
+      ctx.strokeStyle = '#fff'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.moveTo(14, 0)
+      ctx.lineTo(-7, -7)
+      ctx.lineTo(-4, 0)
+      ctx.lineTo(-7, 7)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+    }
     ctx.restore()
   }
 
@@ -257,6 +282,7 @@ const DrawingCanvas = ({
     let curPenDown = true
     let curColor = '#4361ee'
     let curSize = 3
+    let curPointerStyle = 'arrow'
 
     const resetAndDraw = () => {
       drawGrid(bgCanvas, bgCtx)
@@ -273,6 +299,7 @@ const DrawingCanvas = ({
       curPenDown = true
       curColor = '#4361ee'
       curSize = 3
+      curPointerStyle = 'arrow'
       bgCtx.strokeStyle = curColor
       bgCtx.lineWidth = curSize
       bgCtx.lineCap = 'round'
@@ -310,7 +337,7 @@ const DrawingCanvas = ({
         if (drawCtx) {
           drawCtx.stroke()
         }
-        drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle)
+        drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle, curPointerStyle)
       }
 
       const moveTo = (x, y) => {
@@ -576,6 +603,56 @@ const DrawingCanvas = ({
           syncCanvases()
           await finishStep()
         },
+        drawArc: async (radius = 50, angle = 90) => {
+          assertActive()
+          const r = Math.max(1, Math.abs(Number(radius) || 0))
+          const sweepDeg = Number(angle) || 0
+          if (sweepDeg === 0) {
+            await finishStep()
+            return
+          }
+
+          const headingRad = (curAngle * Math.PI) / 180
+          const rightNormalX = Math.sin(headingRad)
+          const rightNormalY = -Math.cos(headingRad)
+          const centerX = curX + rightNormalX * r
+          const centerY = curY + rightNormalY * r
+          const startAngle = Math.atan2(curY - centerY, curX - centerX)
+          const endAngle = startAngle + (sweepDeg * Math.PI) / 180
+          const steps = Math.max(8, Math.ceil(Math.abs(sweepDeg) / 12))
+
+          for (let i = 1; i <= steps; i += 1) {
+            const t = i / steps
+            const a = startAngle + (endAngle - startAngle) * t
+            const nextX = centerX + Math.cos(a) * r
+            const nextY = centerY + Math.sin(a) * r
+
+            if (curPenDown) {
+              bgCtx.lineTo(nextX, nextY)
+              if (drawCtx) drawCtx.lineTo(nextX, nextY)
+            } else {
+              bgCtx.moveTo(nextX, nextY)
+              if (drawCtx) drawCtx.moveTo(nextX, nextY)
+            }
+
+            curX = nextX
+            curY = nextY
+            curAngle += sweepDeg / steps
+            syncCanvases()
+            await sleep(STEP_MS / steps)
+          }
+
+          await finishStep()
+        },
+        setPointerStyle: async (style = 'arrow') => {
+          assertActive()
+          const key = String(style || 'arrow')
+          curPointerStyle = Object.prototype.hasOwnProperty.call(POINTER_ASSET, key)
+            ? key
+            : 'arrow'
+          syncCanvases()
+          await finishStep()
+        },
         canvasZoomIn: async (amount = 10) => {
           assertActive()
           const step = Math.max(0, Number(amount) || 0) / 100
@@ -776,7 +853,7 @@ const DrawingCanvas = ({
       runCommandsAsync()
     } else {
       resetAndDraw()
-      drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle)
+      drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle, 'arrow')
       if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
     }
     return () => {
@@ -803,6 +880,12 @@ const DrawingCanvas = ({
           : null
       )
       .find(Boolean) || null
+
+  const showFooterPanel =
+    (showClassification && Boolean(classificationError)) ||
+    (showClassification && showGuessPanel && !classificationError && topCategories && topCategories.length > 0) ||
+    (showClassification && showGuessPanel && !classificationError && (!topCategories || topCategories.length === 0) && !classifying) ||
+    (showClassification && classifying)
 
   return (
     <div
@@ -843,7 +926,7 @@ const DrawingCanvas = ({
           padding: '8px 10px',
           borderTop: '1px solid #e0e4ea',
           background: '#f8fafc',
-          display: 'flex',
+          display: showFooterPanel ? 'flex' : 'none',
           alignItems: 'center',
           fontSize: 12,
           lineHeight: 1.4,
