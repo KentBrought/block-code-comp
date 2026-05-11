@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f2fbff"/>
+  <path d="M120 230 L250 230 L250 100" stroke="#2563eb" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <path d="M280 100 L390 100 L390 210 L500 210" stroke="#0ea5e9" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <text x="60" y="72" font-size="34" font-family="Verdana,Arial" fill="#0f172a" font-weight="700">Order & Paths</text>
+  <text x="60" y="102" font-size="20" font-family="Verdana,Arial" fill="#334155">Instructions happen in sequence</text>
+</svg>

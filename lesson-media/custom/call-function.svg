@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Main code can call a reusable function</text>
+  <path d="M120 250 H280" stroke="#2563eb" stroke-width="16" stroke-linecap="round"/>
+  <path d="M280 250 L255 228" stroke="#2563eb" stroke-width="16" stroke-linecap="round"/>
+  <path d="M280 250 L255 272" stroke="#2563eb" stroke-width="16" stroke-linecap="round"/>
+  <rect x="285" y="190" width="230" height="120" rx="28" fill="#fef3c7" stroke="#f59e0b" stroke-width="6"/>
+  <text x="400" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#92400e">drawSquare()</text>
+  <text x="400" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#92400e">run the saved steps here</text>
+  <path d="M520 250 H680" stroke="#db2777" stroke-width="16" stroke-linecap="round"/>
+  <path d="M680 250 L655 228" stroke="#db2777" stroke-width="16" stroke-linecap="round"/>
+  <path d="M680 250 L655 272" stroke="#db2777" stroke-width="16" stroke-linecap="round"/>
+</svg>

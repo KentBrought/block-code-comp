@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#ffffff"/>
+  <text x="400" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">AND means both rules are true</text>
+  <circle cx="320" cy="270" r="130" fill="#93c5fd" fill-opacity="0.75"/>
+  <circle cx="480" cy="270" r="130" fill="#f9a8d4" fill-opacity="0.75"/>
+  <ellipse cx="400" cy="270" rx="50" ry="130" fill="#a78bfa" fill-opacity="0.92"/>
+  <text x="260" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#1e3a8a">Rule A</text>
+  <text x="540" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#9d174d">Rule B</text>
+  <text x="400" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">BOTH</text>
+</svg>

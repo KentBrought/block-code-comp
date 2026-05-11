@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f5f3ff"/>
+  <circle cx="250" cy="180" r="84" fill="none" stroke="#8b5cf6" stroke-width="14"/>
+  <polygon points="250,88 270,130 230,130" fill="#7c3aed"/>
+  <text x="360" y="160" font-size="38" font-family="Verdana,Arial" fill="#4c1d95" font-weight="700">Functions</text>
+  <text x="360" y="198" font-size="22" font-family="Verdana,Arial" fill="#334155">Define once, call many times</text>
+</svg>

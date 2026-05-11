@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#ffffff"/>
+  <rect x="110" y="60" width="580" height="400" fill="#f8fbff" stroke="#cbd5e1" stroke-width="4"/>
+  <g stroke="#dbeafe" stroke-width="2">
+    <line x1="168" y1="60" x2="168" y2="460"/><line x1="226" y1="60" x2="226" y2="460"/><line x1="284" y1="60" x2="284" y2="460"/><line x1="342" y1="60" x2="342" y2="460"/><line x1="458" y1="60" x2="458" y2="460"/><line x1="516" y1="60" x2="516" y2="460"/><line x1="574" y1="60" x2="574" y2="460"/><line x1="632" y1="60" x2="632" y2="460"/>
+    <line x1="110" y1="120" x2="690" y2="120"/><line x1="110" y1="180" x2="690" y2="180"/><line x1="110" y1="240" x2="690" y2="240"/><line x1="110" y1="340" x2="690" y2="340"/><line x1="110" y1="400" x2="690" y2="400"/>
+  </g>
+  <line x1="400" y1="60" x2="400" y2="460" stroke="#2563eb" stroke-width="8"/>
+  <line x1="110" y1="280" x2="690" y2="280" stroke="#db2777" stroke-width="8"/>
+  <text x="660" y="268" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#db2777">x</text>
+  <text x="412" y="96" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#2563eb">y</text>
+  <circle cx="516" cy="180" r="12" fill="#0f172a"/>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Test one thing, check it, then try again</text>
+  <g transform="translate(120 140)">
+    <ellipse cx="90" cy="96" rx="64" ry="72" fill="#ef4444"/>
+    <circle cx="90" cy="30" r="34" fill="#f87171"/>
+    <circle cx="76" cy="24" r="5" fill="#111827"/>
+    <circle cx="104" cy="24" r="5" fill="#111827"/>
+    <path d="M66 44 Q90 60 114 44" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
+    <g stroke="#111827" stroke-width="7" stroke-linecap="round">
+      <line x1="26" y1="62" x2="-10" y2="42"/>
+      <line x1="26" y1="110" x2="-10" y2="110"/>
+      <line x1="26" y1="158" x2="-10" y2="178"/>
+      <line x1="154" y1="62" x2="190" y2="42"/>
+      <line x1="154" y1="110" x2="190" y2="110"/>
+      <line x1="154" y1="158" x2="190" y2="178"/>
+    </g>
+  </g>
+  <g transform="translate(360 140)">
+    <rect x="0" y="0" width="320" height="220" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="6"/>
+    <g font-family="Arial, sans-serif" font-size="30" fill="#334155">
+      <text x="76" y="62">Run a small test</text>
+      <text x="76" y="122">See what changed</text>
+      <text x="76" y="182">Fix one tiny thing</text>
+    </g>
+    <g stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M24 48 L38 62 L60 34"/>
+      <path d="M24 108 L38 122 L60 94"/>
+      <path d="M24 168 L38 182 L60 154"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Objects store named pieces of information</text>
+  <rect x="185" y="125" width="430" height="270" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="6"/>
+  <circle cx="275" cy="205" r="42" fill="#bfdbfe"/>
+  <rect x="338" y="165" width="208" height="24" rx="12" fill="#e2e8f0"/>
+  <rect x="338" y="205" width="162" height="22" rx="11" fill="#fce7f3"/>
+  <rect x="238" y="280" width="324" height="66" rx="22" fill="#eff6ff" stroke="#bfdbfe" stroke-width="4"/>
+  <text x="260" y="308" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#1d4ed8">name</text>
+  <text x="470" y="308" font-family="Arial, sans-serif" font-size="26" fill="#0f172a">Turtle</text>
+  <text x="260" y="338" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#7c3aed">score</text>
+  <text x="470" y="338" font-family="Arial, sans-serif" font-size="26" fill="#0f172a">12</text>
+</svg>

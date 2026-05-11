@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#fff7fb"/>
+  <rect x="120" y="98" width="400" height="164" rx="20" fill="#fdf2f8" stroke="#ec4899" stroke-width="4"/>
+  <text x="150" y="150" font-size="36" font-family="Verdana,Arial" fill="#be185d" font-weight="700">IF x &gt; 50</text>
+  <text x="150" y="200" font-size="30" font-family="Verdana,Arial" fill="#334155">then move + turn</text>
+  <text x="150" y="238" font-size="22" font-family="Verdana,Arial" fill="#64748b">Rules help code make choices</text>
+</svg>

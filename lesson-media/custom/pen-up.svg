@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <rect x="70" y="330" width="660" height="90" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="6"/>
+  <g transform="translate(500 105) rotate(16)">
+    <rect x="0" y="0" width="170" height="42" rx="20" fill="#f59e0b"/>
+    <rect x="120" y="-4" width="42" height="50" rx="16" fill="#92400e"/>
+    <polygon points="165,21 230,6 230,36" fill="#374151"/>
+  </g>
+  <line x1="615" y1="220" x2="615" y2="310" stroke="#94a3b8" stroke-width="8" stroke-dasharray="14 12"/>
+  <text x="400" y="90" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Pen lifted = move without drawing</text>
+</svg>

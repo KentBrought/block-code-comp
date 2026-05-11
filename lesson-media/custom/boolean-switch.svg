@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="90" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Boolean values are just true or false</text>
+  <rect x="150" y="180" width="500" height="150" rx="75" fill="#dbeafe" stroke="#93c5fd" stroke-width="8"/>
+  <circle cx="270" cy="255" r="58" fill="#22c55e"/>
+  <text x="270" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#ffffff">ON</text>
+  <text x="520" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#475569">OFF</text>
+  <text x="270" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#15803d">TRUE</text>
+  <text x="520" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#64748b">FALSE</text>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#ffffff"/>
+  <text x="400" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">OR means either side can work</text>
+  <circle cx="320" cy="270" r="130" fill="#60a5fa" fill-opacity="0.88"/>
+  <circle cx="480" cy="270" r="130" fill="#f472b6" fill-opacity="0.88"/>
+  <ellipse cx="400" cy="270" rx="50" ry="130" fill="#c084fc" fill-opacity="0.9"/>
+  <text x="320" y="432" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1e3a8a">This side counts</text>
+  <text x="480" y="432" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#9d174d">This side counts</text>
+</svg>

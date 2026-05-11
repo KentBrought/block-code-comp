@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="92" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Forward and backward use the same path</text>
+  <line x1="150" y1="250" x2="650" y2="250" stroke="#cbd5e1" stroke-width="14" stroke-linecap="round"/>
+  <path d="M180 190 H520" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
+  <path d="M520 190 L488 164" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
+  <path d="M520 190 L488 216" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
+  <path d="M620 320 H280" stroke="#db2777" stroke-width="18" stroke-linecap="round"/>
+  <path d="M280 320 L312 294" stroke="#db2777" stroke-width="18" stroke-linecap="round"/>
+  <path d="M280 320 L312 346" stroke="#db2777" stroke-width="18" stroke-linecap="round"/>
+  <text x="400" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1d4ed8">FORWARD</text>
+  <text x="400" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#be185d">BACKWARD</text>
+</svg>
