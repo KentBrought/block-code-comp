@@ -67,6 +67,7 @@
 .about-github-link--top {
   display: inline-flex;
   align-items: center;
+  gap: 0.45rem;
 }
 
 .about-hero {
@@ -186,6 +187,9 @@
 }
 
 .about-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   border-radius: 999px;
   padding: 0.62rem 1.15rem;
   font-size: 0.9rem;
@@ -198,6 +202,21 @@
 
 .about-github-link:hover {
   background: #f8fafc;
+}
+
+.about-links {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.about-inline-link {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.about-inline-link:hover {
+  color: #1e40af;
 }
 
 @media (max-width: 640px) {

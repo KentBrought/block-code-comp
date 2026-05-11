@@ -4,6 +4,8 @@ const TOLERANCE_PX = 20
 
 // Fraction of user's drawn pixels that must fall inside the tolerance zone.
 const SCORE_THRESHOLD = 0.65
+// Fraction of ghost target pixels that must be covered by user drawing.
+const GHOST_COVERAGE_THRESHOLD = 0.55
 
 // Minimum drawn pixels before we attempt scoring (avoids divide-by-zero
 // and trivial wins from a single dot inside the ghost zone).
@@ -68,7 +70,12 @@ export function scoreDrawingAgainstGhost(drawingCanvas, ghostPreview) {
   const userData = drawingCanvas.getContext('2d').getImageData(0, 0, w, h).data
 
   let userPixels = 0
+  let ghostPixels = 0
   let overlap = 0
+
+  for (let i = 0; i < ghostData.length; i += 4) {
+    if (ghostData[i] < 128) ghostPixels++
+  }
 
   for (let i = 0; i < userData.length; i += 4) {
     const r = userData[i]
@@ -86,5 +93,9 @@ export function scoreDrawingAgainstGhost(drawingCanvas, ghostPreview) {
   if (userPixels < MIN_USER_PIXELS) return { score: 0, pass: false }
 
   const score = overlap / userPixels
-  return { score, pass: score >= SCORE_THRESHOLD }
+  const ghostCoverage = ghostPixels > 0 ? overlap / ghostPixels : 0
+  return {
+    score,
+    pass: score >= SCORE_THRESHOLD && ghostCoverage >= GHOST_COVERAGE_THRESHOLD
+  }
 }

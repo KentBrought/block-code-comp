@@ -23,10 +23,10 @@ const ARROW_ICON_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(
 const POINTER_STYLE_OPTIONS = [
   [{ src: ARROW_ICON_SVG, width: 20, height: 20, alt: 'arrow' }, 'arrow'],
   [{ src: `${TWEMOJI_BASE}/1f422.svg`, width: 20, height: 20, alt: 'turtle' }, 'turtle'],
-  [{ src: `${TWEMOJI_BASE}/1f58c-fe0f.svg`, width: 20, height: 20, alt: 'paintbrush' }, 'paintbrush'],
-  [{ src: `${TWEMOJI_BASE}/270f-fe0f.svg`, width: 20, height: 20, alt: 'pencil' }, 'pencil'],
-  [{ src: `${TWEMOJI_BASE}/1f58d-fe0f.svg`, width: 20, height: 20, alt: 'crayon' }, 'crayon'],
-  [{ src: `${TWEMOJI_BASE}/1f58a-fe0f.svg`, width: 20, height: 20, alt: 'pen' }, 'pen'],
+  [{ src: `${TWEMOJI_BASE}/1f58c-fe0f.svg`, width: 20, height: 20, alt: '🖌️' }, 'paintbrush'],
+  [{ src: `${TWEMOJI_BASE}/270f-fe0f.svg`, width: 20, height: 20, alt: '✏️' }, 'pencil'],
+  [{ src: `${TWEMOJI_BASE}/1f58d-fe0f.svg`, width: 20, height: 20, alt: '🖍️' }, 'crayon'],
+  [{ src: `${TWEMOJI_BASE}/1f58a-fe0f.svg`, width: 20, height: 20, alt: '🖊️' }, 'pen'],
   [{ src: `${TWEMOJI_BASE}/1f408.svg`, width: 20, height: 20, alt: 'cat' }, 'cat'],
   [{ src: `${TWEMOJI_BASE}/1f415.svg`, width: 20, height: 20, alt: 'dog' }, 'dog'],
   [{ src: `${TWEMOJI_BASE}/1f999.svg`, width: 20, height: 20, alt: 'llama' }, 'llama'],
@@ -983,8 +983,8 @@ export const defaultToolbox = {
       name: 'Functions',
       categorystyle: 'procedure_category',
       contents: [
-        { kind: 'block', type: 'procedures_defnoreturn' },
-        { kind: 'block', type: 'procedures_callnoreturn' }
+        { kind: 'block', type: 'procedures_defnoreturn', fields: { NAME: 'my_function' } },
+        { kind: 'block', type: 'procedures_callnoreturn', extraState: { name: 'my_function' } }
       ]
     }
   ]
@@ -1003,6 +1003,20 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
       const name = (block.getFieldValue('NAME') || '').trim()
       if (!name) {
         block.setFieldValue('my_function', 'NAME')
+      }
+    })
+
+    const callBlocks = ws.getAllBlocks(false).filter((block) =>
+      block.type === 'procedures_callnoreturn' || block.type === 'procedures_callreturn'
+    )
+    callBlocks.forEach((block) => {
+      const name = (block.getFieldValue('NAME') || '').trim()
+      if (!name) {
+        try {
+          block.setFieldValue('my_function', 'NAME')
+        } catch (error) {
+          // Keep resilient if dropdown options are not ready yet.
+        }
       }
     })
   }
@@ -1055,7 +1069,15 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
           onClick={() => workspace.current && workspace.current.undo(false)}
           aria-label='Undo'
           title='Undo'
-          style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d0d7de', cursor: 'pointer' }}
+          style={{
+            width: 40,
+            height: 36,
+            borderRadius: 8,
+            border: '1px solid #d0d7de',
+            cursor: 'pointer',
+            fontSize: 22,
+            lineHeight: 1
+          }}
         >
           ↶
         </button>
@@ -1064,7 +1086,15 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
           onClick={() => workspace.current && workspace.current.undo(true)}
           aria-label='Redo'
           title='Redo'
-          style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d0d7de', cursor: 'pointer' }}
+          style={{
+            width: 40,
+            height: 36,
+            borderRadius: 8,
+            border: '1px solid #d0d7de',
+            cursor: 'pointer',
+            fontSize: 22,
+            lineHeight: 1
+          }}
         >
           ↷
         </button>
@@ -1127,8 +1157,8 @@ export function buildLessonFlyoutToolbox(allowedTypes = []) {
     if (type === '__PROCEDURES__') {
       contents.push(
         { kind: 'label', text: 'Functions' },
-        { kind: 'block', type: 'procedures_defnoreturn' },
-        { kind: 'block', type: 'procedures_callnoreturn' },
+        { kind: 'block', type: 'procedures_defnoreturn', fields: { NAME: 'my_function' } },
+        { kind: 'block', type: 'procedures_callnoreturn', extraState: { name: 'my_function' } },
         { kind: 'sep', gap: '8' }
       )
       return

@@ -1,3 +1,5 @@
+import { GENERATED_QUICKDRAW_EXAMPLES } from '../data/quickdrawGenerated'
+
 const QUICKDRAW_BASE_URLS = [
   'https://storage.googleapis.com/quickdraw_dataset/full/simplified'
 ]
@@ -261,6 +263,9 @@ async function fetchExamplesInternal(category, count) {
 
   if (LOCAL_QUICKDRAW_EXAMPLES[key]) {
     return LOCAL_QUICKDRAW_EXAMPLES[key].slice(0, count)
+  }
+  if (GENERATED_QUICKDRAW_EXAMPLES[key]) {
+    return GENERATED_QUICKDRAW_EXAMPLES[key].slice(0, count)
   }
   if (!USE_REMOTE_QUICKDRAW_FETCH) {
     return [createFallbackDrawing(key)]

@@ -1,4 +1,5 @@
 import { MODEL_LABELS } from './modelLabels'
+import { GENERATED_WORD_DIFFICULTY } from '../data/quickdrawGenerated'
 
 export const WORD_POOL = [...MODEL_LABELS]
 export const DIFFICULTY_LEVELS = ['very easy', 'easy', 'medium', 'hard', 'very hard']
@@ -100,20 +101,27 @@ function pickUniqueWords(pool, count, excluded = new Set()) {
 }
 
 function getDifficultyForWord(word) {
-  return WORD_DIFFICULTY[word] || 'hard'
+  const key = String(word || '').trim().toLowerCase()
+  return WORD_DIFFICULTY[word] || GENERATED_WORD_DIFFICULTY[key] || 'hard'
 }
 
 export function getWordChoiceOptions() {
   const used = new Set()
-  const labeledWords = WORD_POOL.filter((word) => WORD_DIFFICULTY[word])
-  const veryEasyPool = labeledWords.filter((word) => WORD_DIFFICULTY[word] === 'very easy')
-  const easyPool = labeledWords.filter((word) => WORD_DIFFICULTY[word] === 'easy')
-  const mediumPool = labeledWords.filter((word) => WORD_DIFFICULTY[word] === 'medium')
+  const labeledWords = WORD_POOL.filter((word) => {
+    const difficulty = getDifficultyForWord(word)
+    return typeof difficulty === 'string' && difficulty.length > 0
+  })
+  const veryEasyPool = labeledWords.filter((word) => getDifficultyForWord(word) === 'very easy')
+  const easyPool = labeledWords.filter((word) => getDifficultyForWord(word) === 'easy')
+  const mediumPool = labeledWords.filter((word) => getDifficultyForWord(word) === 'medium')
   const harderPool = labeledWords.filter((word) => {
-    const difficulty = WORD_DIFFICULTY[word]
+    const difficulty = getDifficultyForWord(word)
     return difficulty === 'hard' || difficulty === 'very hard'
   })
-  const guaranteedEasyWords = ['house', 'sun'].filter((word) => easyPool.includes(word))
+  const guaranteedEasyWords = WORD_POOL.filter((word) => {
+    const lower = normalizeWord(word)
+    return (lower === 'house' || lower === 'sun') && easyPool.includes(word)
+  })
   guaranteedEasyWords.forEach((word) => used.add(word))
 
   const picked = [

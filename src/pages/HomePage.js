@@ -202,7 +202,7 @@ function HomePage({ onPlay, onHowToPlay, onChallengeMode, onAbout, onLessons }) 
 
       <div className='home-content'>
         <div className='home-logo-wrap'>
-          <div className='home-logo-icon'>🎨</div>
+          <img className='home-logo-icon' src={`${process.env.PUBLIC_URL || ''}/bcd-logo.svg`} alt='BCD logo' />
           <h1 className='home-title'>
             <span className='ht-block'>Block</span>
             <span className='ht-comma'>,</span>
@@ -259,3 +259,4 @@ function HomePage({ onPlay, onHowToPlay, onChallengeMode, onAbout, onLessons }) 
 }
 
 export default HomePage
+

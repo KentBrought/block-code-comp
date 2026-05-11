@@ -14,6 +14,24 @@ const githubIcon = (
   </svg>
 )
 
+function ConfirmExternalLink({ href, children, className }) {
+  const handleClick = (event) => {
+    const isExternal = /^https?:\/\//i.test(href)
+    if (!isExternal) return
+    event.preventDefault()
+    const approved = window.confirm(`You are leaving Block, Code, Draw.\n\nOpen this external link?\n${href}`)
+    if (approved) {
+      window.open(href, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  return (
+    <a className={className} href={href} target='_blank' rel='noreferrer' onClick={handleClick}>
+      {children}
+    </a>
+  )
+}
+
 function AboutPage({ onBack }) {
   return (
     <div className='about-page'>
@@ -38,14 +56,12 @@ function AboutPage({ onBack }) {
           <div className='header-centre about-header-centre' />
 
           <div className='header-actions about-header-actions'>
-            <a
+            <ConfirmExternalLink
               className='about-github-link about-github-link--top'
               href='https://github.com/kentbrought/block-code-comp'
-              target='_blank'
-              rel='noreferrer'
             >
               {githubIcon} View on GitHub
-            </a>
+            </ConfirmExternalLink>
           </div>
         </header>
 
@@ -95,11 +111,102 @@ function AboutPage({ onBack }) {
         </section>
 
         <section className='about-card'>
+          <h2>AI + Model Stack (Runs Locally)</h2>
+          <p>
+            The chat helper runs with <strong>WebLLM</strong> using{' '}
+            <code>Llama-3.2-1B-Instruct-q4f32_1-MLC</code>. The model is downloaded to the
+            browser and inference runs on the learner&apos;s device with WebGPU acceleration.
+          </p>
+          <p>
+            We also run the drawing evaluation pipeline fully in-browser. The app compares user
+            strokes to a ghost target using an on-canvas pixel overlap scorer, so no drawing
+            images need to be sent to a remote server for challenge checking.
+          </p>
+          <ul className='about-links'>
+            <li>
+              <ConfirmExternalLink href='https://webllm.mlc.ai/' className='about-inline-link'>
+                WebLLM project
+              </ConfirmExternalLink>
+            </li>
+            <li>
+              <ConfirmExternalLink href='https://github.com/mlc-ai/web-llm' className='about-inline-link'>
+                @mlc-ai/web-llm source
+              </ConfirmExternalLink>
+            </li>
+            <li>
+              <ConfirmExternalLink href='https://huggingface.co/mlc-ai' className='about-inline-link'>
+                MLC model hub (Llama variants)
+              </ConfirmExternalLink>
+            </li>
+          </ul>
+        </section>
+
+        <section className='about-card'>
+          <h2>Quick Draw Data + Why Lines Look Hand-Drawn</h2>
+          <p>
+            Word previews are based on Google Quick, Draw! stroke data. We simplify those vectors,
+            but they still come from real human sketches, which is why some previews are naturally
+            imperfect and not all straight-line geometry.
+          </p>
+          <p>
+            The app keeps a local generated preview set for performance and reliability, instead of
+            downloading examples every time the word picker opens.
+          </p>
+          <figure className='about-demo-wrap'>
+            <img
+              className='about-demo-gif'
+              src='https://raw.githubusercontent.com/googlecreativelab/quickdraw-dataset/master/examples/apple.png'
+              alt='Example Quick Draw sketch from public dataset assets'
+            />
+            <figcaption>
+              Public Quick Draw example asset (source link below).
+            </figcaption>
+          </figure>
+          <ul className='about-links'>
+            <li>
+              <ConfirmExternalLink href='https://quickdraw.withgoogle.com/data' className='about-inline-link'>
+                Quick, Draw! dataset page
+              </ConfirmExternalLink>
+            </li>
+            <li>
+              <ConfirmExternalLink href='https://github.com/googlecreativelab/quickdraw-dataset' className='about-inline-link'>
+                quickdraw-dataset GitHub repository
+              </ConfirmExternalLink>
+            </li>
+            <li>
+              <ConfirmExternalLink href='https://raw.githubusercontent.com/googlecreativelab/quickdraw-dataset/master/examples/apple.png' className='about-inline-link'>
+                Example asset used above
+              </ConfirmExternalLink>
+            </li>
+          </ul>
+        </section>
+
+        <section className='about-card'>
+          <h2>Twemoji + Visual Assets</h2>
+          <p>
+            Pointer styles and chat/persona emoji visuals use Twemoji assets, so emojis render
+            consistently across devices in both the canvas and block UI.
+          </p>
+          <ul className='about-links'>
+            <li>
+              <ConfirmExternalLink href='https://twemoji.twitter.com/' className='about-inline-link'>
+                Twemoji project site
+              </ConfirmExternalLink>
+            </li>
+            <li>
+              <ConfirmExternalLink href='https://github.com/twitter/twemoji' className='about-inline-link'>
+                Twemoji GitHub repository
+              </ConfirmExternalLink>
+            </li>
+          </ul>
+        </section>
+
+        <section className='about-card'>
           <h2>References Informing the Design</h2>
           <p>
             This prototype draws from literature on generative AI in education, educational game
-            design, and critical STEM/game design methods. It also uses a drawing-guessing
-            pipeline inspired by the Quick, Draw dataset context for computer vision interactions.
+            design, and critical STEM/game design methods, while prioritizing local-first
+            interaction for responsiveness and privacy.
           </p>
         </section>
 
@@ -107,14 +214,12 @@ function AboutPage({ onBack }) {
           <button type='button' className='about-back-btn' onClick={onBack}>
             Back to Home
           </button>
-          <a
+          <ConfirmExternalLink
             className='about-github-link'
             href='https://github.com/kentbrought/block-code-comp'
-            target='_blank'
-            rel='noreferrer'
           >
             {githubIcon} View on GitHub
-          </a>
+          </ConfirmExternalLink>
         </div>
       </main>
     </div>

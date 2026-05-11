@@ -134,23 +134,36 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    perspective: 900px;
 }
 
 .home-logo-icon {
-    font-size: 4.5rem;
-    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.1));
-    animation: iconFloat 3s ease-in-out infinite;
+    width: min(220px, 48vw);
+    height: clamp(84px, 18vw, 132px);
+    object-fit: contain;
+    display: block;
+    transform-style: preserve-3d;
+    will-change: transform;
+    animation: iconFloat3d 4.2s ease-in-out infinite;
 }
 
-@keyframes iconFloat {
+@keyframes iconFloat3d {
 
     0%,
     100% {
-        transform: translateY(0);
+        transform: translateY(0) rotateX(0deg) rotateY(0deg);
+    }
+
+    25% {
+        transform: translateY(-8px) rotateX(5deg) rotateY(-8deg);
     }
 
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-12px) rotateX(-4deg) rotateY(7deg);
+    }
+
+    75% {
+        transform: translateY(-7px) rotateX(3deg) rotateY(-5deg);
     }
 }
 

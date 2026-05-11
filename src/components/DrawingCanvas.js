@@ -1,22 +1,20 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { classifyCanvas } from '../utils/imageClassifier'
-import { findMatchingWordFromCandidates, WORD_POOL } from '../constants/wordPool'
 import { scoreDrawingAgainstGhost } from '../utils/challengeScorer'
 
-const POINTER_ASSET = {
-  arrow: null,
-  turtle: '🐢',
-  paintbrush: '🖌️',
-  pencil: '✏️',
-  crayon: '🖍️',
-  pen: '🖊️',
-  cat: '🐈',
-  dog: '🐕',
-  llama: '🦙',
-  giraffe: '🦒',
-  pig: '🐖',
-  sheep: '🐑',
-  tiger: '🐅'
+const TWEMOJI_BASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg'
+const POINTER_TWEMOJI = {
+  turtle: `${TWEMOJI_BASE}/1f422.svg`,
+  paintbrush: `${TWEMOJI_BASE}/1f58c-fe0f.svg`,
+  pencil: `${TWEMOJI_BASE}/270f-fe0f.svg`,
+  crayon: `${TWEMOJI_BASE}/1f58d-fe0f.svg`,
+  pen: `${TWEMOJI_BASE}/1f58a-fe0f.svg`,
+  cat: `${TWEMOJI_BASE}/1f408.svg`,
+  dog: `${TWEMOJI_BASE}/1f415.svg`,
+  llama: `${TWEMOJI_BASE}/1f999.svg`,
+  giraffe: `${TWEMOJI_BASE}/1f992.svg`,
+  pig: `${TWEMOJI_BASE}/1f416.svg`,
+  sheep: `${TWEMOJI_BASE}/1f411.svg`,
+  tiger: `${TWEMOJI_BASE}/1f405.svg`
 }
 
 const DrawingCanvas = ({
@@ -24,13 +22,11 @@ const DrawingCanvas = ({
   runSequence,
   stopSequence,
   onHighlight,
-  onGuessComplete,
   onChallengeScore,
   onRunStateChange,
   ghostPreview,
   scoreGhostPreview,
-  showClassification = true,
-  showGuessPanel = true
+  defaultPointerStyle = 'arrow'
 }) => {
   const bgCanvasRef = useRef(null)
   const markerCanvasRef = useRef(null)
@@ -40,30 +36,26 @@ const DrawingCanvas = ({
   const executedRunSequenceRef = useRef(0)
   const commandsRef = useRef(commands)
   const onHighlightRef = useRef(onHighlight)
-  const onGuessCompleteRef = useRef(onGuessComplete)
   const onChallengeScoreRef = useRef(onChallengeScore)
   const onRunStateChangeRef = useRef(onRunStateChange)
   const ghostPreviewRef = useRef(ghostPreview)
   const scoreGhostPreviewRef = useRef(scoreGhostPreview)
-  const [classifying, setClassifying] = useState(false)
-  const [classificationResult, setClassificationResult] = useState(null)
-  const [classificationError, setClassificationError] = useState(null)
   const gridVisibleRef = useRef(true)
   const viewScaleRef = useRef(1)
+  const pointerImageCacheRef = useRef(new Map())
+  const markerStateRef = useRef({ x: 0, y: 0, angle: 0, pointerStyle: 'arrow' })
 
   useEffect(() => {
     commandsRef.current = commands
     onHighlightRef.current = onHighlight
-    onGuessCompleteRef.current = onGuessComplete
     onChallengeScoreRef.current = onChallengeScore
     onRunStateChangeRef.current = onRunStateChange
     ghostPreviewRef.current = ghostPreview
     scoreGhostPreviewRef.current = scoreGhostPreview
-  }, [commands, onHighlight, onGuessComplete, onChallengeScore, onRunStateChange, ghostPreview, scoreGhostPreview])
+  }, [commands, onHighlight, onChallengeScore, onRunStateChange, ghostPreview, scoreGhostPreview])
 
   useEffect(() => {
     runIdRef.current += 1
-    setClassifying(false)
     if (onHighlightRef.current) onHighlightRef.current(null)
     if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
   }, [stopSequence])
@@ -104,7 +96,7 @@ const DrawingCanvas = ({
           w / 2,
           h / 2,
           0,
-          'arrow'
+          defaultPointerStyle
         )
         applyViewScale()
       }
@@ -234,19 +226,46 @@ const DrawingCanvas = ({
 
     ctx.restore()
   }
-
   // Draws marker exclusively on the clear overlay canvas
+  function getPointerTwemojiImage(pointerStyle, onReady) {
+    const src = POINTER_TWEMOJI[pointerStyle]
+    if (!src) return null
+
+    const cached = pointerImageCacheRef.current.get(src)
+    if (cached) {
+      return cached.complete ? cached : null
+    }
+
+    const img = new window.Image()
+    img.crossOrigin = 'anonymous'
+    img.decoding = 'async'
+    img.src = src
+    img.onload = () => {
+      if (typeof onReady === 'function') onReady()
+    }
+    pointerImageCacheRef.current.set(src, img)
+    return null
+  }
+
   function drawMarkerAt(canvas, ctx, x, y, angle, pointerStyle = 'arrow') {
-    ctx.clearRect(0, 0, canvas.width, canvas.height) // clear entire overlay
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    markerStateRef.current = { x, y, angle, pointerStyle }
     ctx.save()
     ctx.translate(x, y)
     ctx.rotate((angle * Math.PI) / 180)
-    const emoji = POINTER_ASSET[pointerStyle]
-    if (emoji) {
-      ctx.font = '24px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(emoji, 0, 0)
+
+    const image = getPointerTwemojiImage(pointerStyle, () => {
+      const markerCanvas = markerCanvasRef.current
+      if (!markerCanvas) return
+      const markerCtx = markerCanvas.getContext('2d')
+      const marker = markerStateRef.current
+      drawMarkerAt(markerCanvas, markerCtx, marker.x, marker.y, marker.angle, marker.pointerStyle)
+    })
+
+    if (image) {
+      const size = 26
+      ctx.scale(-1, 1)
+      ctx.drawImage(image, -size / 2, -size / 2, size, size)
     } else {
       ctx.fillStyle = '#e63946'
       ctx.strokeStyle = '#fff'
@@ -262,7 +281,6 @@ const DrawingCanvas = ({
     }
     ctx.restore()
   }
-
   useEffect(() => {
     const runId = ++runIdRef.current
     const isStale = () => runIdRef.current !== runId
@@ -285,7 +303,7 @@ const DrawingCanvas = ({
     let curPenDown = true
     let curColor = '#4361ee'
     let curSize = 3
-    let curPointerStyle = 'arrow'
+    let curPointerStyle = defaultPointerStyle
 
     const resetAndDraw = () => {
       drawGrid(bgCanvas, bgCtx)
@@ -302,7 +320,7 @@ const DrawingCanvas = ({
       curPenDown = true
       curColor = '#4361ee'
       curSize = 3
-      curPointerStyle = 'arrow'
+      curPointerStyle = defaultPointerStyle
       bgCtx.strokeStyle = curColor
       bgCtx.lineWidth = curSize
       bgCtx.lineCap = 'round'
@@ -325,9 +343,6 @@ const DrawingCanvas = ({
         assertActive()
         resetAndDraw()
         if (onRunStateChangeRef.current) onRunStateChangeRef.current(true)
-        setClassifying(showClassification)
-        setClassificationError(null)
-        setClassificationResult(null)
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
       const STEP_MS = 300
@@ -650,7 +665,7 @@ const DrawingCanvas = ({
         setPointerStyle: async (style = 'arrow') => {
           assertActive()
           const key = String(style || 'arrow')
-          curPointerStyle = Object.prototype.hasOwnProperty.call(POINTER_ASSET, key)
+          curPointerStyle = key === 'arrow' || Object.prototype.hasOwnProperty.call(POINTER_TWEMOJI, key)
             ? key
             : 'arrow'
           syncCanvases()
@@ -761,7 +776,7 @@ const DrawingCanvas = ({
         }
       } catch (err) {
         if (!isStale() && err?.message !== '__RUN_CANCELLED__') {
-          setClassificationError(err?.message || 'Program execution failed.')
+          // keep canvas responsive even when user code errors
         }
       }
 
@@ -777,68 +792,8 @@ const DrawingCanvas = ({
         onChallengeScoreRef.current(ghostScore)
       }
 
-        if (!showClassification) {
-          if (!isStale()) {
-            setClassifying(false)
-            setClassificationError(null)
-            setClassificationResult(null)
-          }
-          return
-        }
-
-        try {
-          assertActive()
-          const canvasForClassification = drawingCanvas || bgCanvas
-          if (!canvasForClassification) {
-            if (!isStale()) {
-              setClassificationError('No canvas available for classification.')
-              setClassificationResult(null)
-            }
-          } else {
-            const result = await classifyCanvas(canvasForClassification)
-            if (!isStale()) {
-              setClassificationResult(result)
-            }
-
-            if (!isStale() && onGuessCompleteRef.current) {
-              const categories =
-                result &&
-                result.classifications &&
-                result.classifications[0] &&
-                result.classifications[0].categories
-                  ? result.classifications[0].categories
-                  : null
-
-              const categoryNames = (categories || [])
-                .map((c) =>
-                  c && (c.displayName || c.categoryName)
-                    ? (c.displayName || c.categoryName).toString()
-                    : ''
-                )
-                .filter(Boolean)
-
-              const guessName =
-                categoryNames
-                  .map((name) => findMatchingWordFromCandidates(name, WORD_POOL))
-                  .find(Boolean) || ''
-
-              onGuessCompleteRef.current({ guess: guessName, result, categories })
-            }
-          }
-        } catch (err) {
-          if (!isStale()) {
-            setClassificationError(err?.message || 'Failed to classify drawing.')
-            setClassificationResult(null)
-          }
-        } finally {
-          if (!isStale()) {
-            setClassifying(false)
-          }
-        }
       } catch (err) {
-        if (!isStale()) {
-          setClassifying(false)
-        }
+        // no-op
       } finally {
         if (!isStale()) {
           if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
@@ -856,39 +811,14 @@ const DrawingCanvas = ({
       runCommandsAsync()
     } else {
       resetAndDraw()
-      drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle, 'arrow')
+      drawMarkerAt(markerCanvas, markerCtx, curX, curY, curAngle, defaultPointerStyle)
       if (onRunStateChangeRef.current) onRunStateChangeRef.current(false)
     }
     return () => {
       runIdRef.current += 1
     }
-  }, [runSequence, showClassification, ghostPreview])
+  }, [runSequence, ghostPreview, defaultPointerStyle])
 
-  const topCategories =
-    classificationResult &&
-    classificationResult.classifications &&
-    classificationResult.classifications[0] &&
-    classificationResult.classifications[0].categories
-      ? classificationResult.classifications[0].categories
-      : null
-
-  const topGuessFromWordPool =
-    (topCategories || [])
-      .map((c) =>
-        c && (c.displayName || c.categoryName)
-          ? findMatchingWordFromCandidates(
-              (c.displayName || c.categoryName).toString(),
-              WORD_POOL
-            )
-          : null
-      )
-      .find(Boolean) || null
-
-  const showFooterPanel =
-    (showClassification && Boolean(classificationError)) ||
-    (showClassification && showGuessPanel && !classificationError && topCategories && topCategories.length > 0) ||
-    (showClassification && showGuessPanel && !classificationError && (!topCategories || topCategories.length === 0) && !classifying) ||
-    (showClassification && classifying)
 
   return (
     <div
@@ -924,66 +854,12 @@ const DrawingCanvas = ({
         />
       </div>
 
-      <div
-        style={{
-          padding: '8px 10px',
-          borderTop: '1px solid #e0e4ea',
-          background: '#f8fafc',
-          display: showFooterPanel ? 'flex' : 'none',
-          alignItems: 'center',
-          fontSize: 12,
-          lineHeight: 1.4,
-          zIndex: 3
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {showClassification && classificationError && (
-            <span style={{ color: '#b91c1c' }}>{classificationError}</span>
-          )}
-          {showClassification &&
-            showGuessPanel &&
-            !classificationError &&
-            topCategories &&
-            topCategories.length > 0 && (
-              <span style={{ color: '#111827' }}>
-                <strong>Top guess:</strong>{' '}
-                {topGuessFromWordPool || 'No word-list match yet'}
-                {topCategories.length > 1 && (
-                  <>
-                    {' '}
-                    ·{' '}
-                    <span style={{ color: '#6b7280' }}>
-                      also:{' '}
-                      {topCategories
-                        .slice(1)
-                        .map(
-                          (c) =>
-                            `${c.displayName || c.categoryName || 'Unknown'} (${(
-                              c.score * 100
-                            ).toFixed(1)}%)`
-                        )
-                        .join(', ')}
-                    </span>
-                  </>
-                )}
-              </span>
-            )}
-          {showClassification &&
-            showGuessPanel &&
-            !classificationError &&
-            (!topCategories || topCategories.length === 0) &&
-            !classifying && (
-              <span style={{ color: '#6b7280' }}>
-                Press "Run" to draw and let the AI guess.
-              </span>
-            )}
-          {showClassification && classifying && (
-            <span style={{ color: '#6b7280' }}>Analyzing your drawing...</span>
-          )}
-        </div>
-      </div>
     </div>
   )
 }
 
 export default DrawingCanvas
+
+
+
+

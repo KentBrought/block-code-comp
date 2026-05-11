@@ -1,16 +1,54 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useTextGeneration } from '../ai/useTextGeneration'
 
-const SYSTEM_PROMPT =
-  'You are BCD AI Bot, a helpful coding assistant for a visual block-coding drawing app. ' +
-  'The user arranges Blockly blocks to control a marker on a canvas. ' +
-  'Available blocks include: move_forward, move_backward, turn_left, turn_right, set_heading, jump_to, go_to_center, ' +
-  'pen_up, pen_down, set_color, set_pen_size, set_random_color, clear_screen, draw_circle, draw_polygon, draw_line, draw_rectangle, ' +
-  'repeat_times, forever_loop, repeat_until, wait_until, if_condition, op_compare, op_logic, op_not, op_math, op_number, op_boolean, ' +
-  'get_x, get_y, get_heading, array_create, array_get, array_push, object_create, object_get, object_set, note_comment, ' +
-  'canvas_zoom_in, canvas_zoom_out, canvas_reset_zoom, canvas_toggle_grid. ' +
-  'Help the user figure out which blocks to use and how to combine them to draw their target shape. ' +
-  'Keep replies concise (2-4 sentences). Be friendly and encouraging.'
+const BASE_SYSTEM_PROMPT =
+  'You are BCD AI Bot, a helpful coding assistant for a visual block-coding drawing app for kids. ' +
+  'The user arranges Blockly blocks to control a turtle on a canvas. ' +
+  'Available blocks include: when_run_clicked, move_forward, move_backward, turn_left, turn_right, set_heading, jump_to, go_to_center, ' +
+  'pen_up, pen_down, set_color, set_pen_size, set_random_color, clear_screen, draw_circle, draw_polygon, draw_line, draw_rectangle, arc, ' +
+  'repeat_times, forever_loop, repeat_until, wait_until, if_condition, op_compare, op_logic, op_not, op_math, op_number, op_boolean, op_string, ' +
+  'get_x, get_y, get_heading, variables_set, variables_get, math_change, array_create, array_get, array_add_item, object_create, object_get, object_set, note_comment, ' +
+  'canvas_zoom_in, canvas_zoom_out, canvas_reset_zoom, canvas_toggle_grid, on_event_message, send_event_message, procedures_defnoreturn, procedures_callnoreturn. ' +
+  'Teaching style rules: explain with short concrete steps, suggest exact blocks by name, and avoid long paragraphs. ' +
+  'Never claim to see the drawing image directly; reason from user description and game state hints. ' +
+  'Default response length: 2-5 short sentences. Be friendly and encouraging.'
+
+function buildSystemPrompt(chatContext = {}) {
+  const mode = chatContext?.mode || 'classic'
+  const word = chatContext?.selectedWord || ''
+  const challengeTitle = chatContext?.challengeTitle || ''
+  const challengeHint = chatContext?.challengeHint || ''
+  const timerEnabled = Boolean(chatContext?.timerEnabled)
+  const ghostEnabled = Boolean(chatContext?.ghostAssistEnabled)
+  const runCount = Number.isFinite(chatContext?.runCount) ? chatContext.runCount : 0
+
+  const modeRules =
+    mode === 'challenge'
+      ? [
+          'Current mode: CHALLENGE MODE.',
+          'Goal: help the user match the ghost outline accurately.',
+          'Give stronger procedural debugging help: ordering, angles, repeat counts, pen state, and alignment.',
+          'Prioritize corrections over guesses. Use phrasing like "try changing X to Y".',
+          challengeTitle ? `Challenge title: ${challengeTitle}.` : '',
+          challengeHint ? `Challenge hint available: ${challengeHint}.` : ''
+        ]
+      : [
+          'Current mode: PLAY NOW (classic).',
+          'Goal: help user draw the selected word well so guesses can succeed.',
+          'Offer scaffolded help: first a simple plan, then optional refinement.',
+          'Avoid giving an over-complex solution immediately unless user asks for it.',
+          word ? `Current selected word: ${word}.` : ''
+        ]
+
+  const runtimeContext = [
+    `Timer enabled: ${timerEnabled ? 'yes' : 'no'}.`,
+    `Ghost view enabled: ${ghostEnabled ? 'yes' : 'no'}.`,
+    `Run count this round: ${runCount}.`,
+    'If run count is high, suggest one small change at a time and quick retest steps.'
+  ]
+
+  return [BASE_SYSTEM_PROMPT, ...modeRules, ...runtimeContext].filter(Boolean).join(' ')
+}
 
 const INITIAL_MESSAGES = []
 const INTRO_MESSAGE =
@@ -19,7 +57,7 @@ const INTRO_MESSAGE =
 const STATUS_LABEL = {
   idle: 'Starting...',
   loading: 'Starting...',
-  ready: 'Online',
+  ready: 'Llama Online',
   generating: 'Thinking...',
   error: 'Error'
 }
@@ -37,7 +75,7 @@ function toRoleBasedMessages(items = []) {
   })
 }
 
-function ChatWindow({ messages: externalMessages = null, onSend = null, onModelStatusChange = null }) {
+function ChatWindow({ messages: externalMessages = null, onSend = null, onModelStatusChange = null, chatContext = null }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
   const [introTyping, setIntroTyping] = useState(false)
@@ -116,7 +154,7 @@ function ChatWindow({ messages: externalMessages = null, onSend = null, onModelS
 
     try {
       const chatPayload = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: buildSystemPrompt(chatContext) },
         ...history
       ]
       const reply = await generate(chatPayload)

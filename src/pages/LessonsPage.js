@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react'
 import * as Blockly from 'blockly'
 import { javascriptGenerator } from 'blockly/javascript'
 import { buildLessonFlyoutToolbox, customTheme, initBlocks } from '../components/BlocklyEditor'
@@ -6,7 +6,6 @@ import DrawingCanvas from '../components/DrawingCanvas'
 import './LessonsPage.css'
 
 const STORAGE_KEY = 'bcd_lesson_progress_v3'
-const OPENED_STORAGE_KEY = 'bcd_lesson_opened_v1'
 
 const LEVEL_TITLES = {
   0: 'Welcome Studio',
@@ -35,9 +34,9 @@ const BLOCK_LABELS = {
   op_compare: 'compare',
   op_logic: 'and/or',
   op_not: 'not',
-  get_x: 'marker x',
-  get_y: 'marker y',
-  get_heading: 'marker heading',
+  get_x: 'turtle x',
+  get_y: 'turtle y',
+  get_heading: 'turtle heading',
   wait_until: 'wait until',
   repeat_until: 'repeat until',
   set_color: 'set color',
@@ -45,6 +44,31 @@ const BLOCK_LABELS = {
   set_pen_size: 'set pen size',
   draw_circle: 'draw circle',
   draw_polygon: 'draw polygon',
+  move_backward: 'move backward',
+  jump_to: 'jump to',
+  go_to_center: 'go to center',
+  set_heading: 'set heading',
+  set_random_color: 'set random color',
+  draw_line: 'draw line',
+  draw_rectangle: 'draw rectangle',
+  array_create: 'make list',
+  array_get: 'list item',
+  array_add_item: 'add to list',
+  object_create: 'make object',
+  object_get: 'get object key',
+  object_set: 'set object key',
+  note_comment: 'note',
+  canvas_zoom_in: 'zoom in',
+  canvas_zoom_out: 'zoom out',
+  canvas_reset_zoom: 'reset zoom',
+  canvas_toggle_grid: 'toggle grid',
+  on_event_message: 'on event',
+  send_event_message: 'send event',
+  op_math: 'math operator',
+  op_boolean: 'true/false',
+  op_string: 'text',
+  procedures_defnoreturn: 'define function',
+  procedures_callnoreturn: 'call function',
   variables_set: 'set variable',
   variables_get: 'get variable',
   math_change: 'change variable'
@@ -52,11 +76,11 @@ const BLOCK_LABELS = {
 
 const BLOCK_TEACHING = {
   when_run_clicked: 'This is your start block. It tells the computer where to begin every single time you press Run. If this block is missing, your other blocks do not know when to wake up.',
-  move_forward: 'This block moves the marker in the direction it is facing. Bigger numbers make longer lines, so this is one of your main shape-building blocks.',
-  turn_right: 'This block rotates the marker to the right. Turn blocks plus move blocks are how corners and shapes are made.',
-  turn_left: 'This block rotates the marker to the left. It is the mirror version of turn right and helps control direction.',
-  pen_down: 'This tells the marker to draw while it moves. Use it when you want visible lines on the canvas.',
-  pen_up: 'This tells the marker to move without drawing. It is useful when you want to reposition before drawing again.',
+  move_forward: 'This block moves the turtle in the direction it is facing. Bigger numbers make longer lines, so this is one of your main shape-building blocks.',
+  turn_right: 'This block rotates the turtle to the right. Turn blocks plus move blocks are how corners and shapes are made.',
+  turn_left: 'This block rotates the turtle to the left. It is the mirror version of turn right and helps control direction.',
+  pen_down: 'This tells the turtle to draw while it moves. Use it when you want visible lines on the canvas.',
+  pen_up: 'This tells the turtle to move without drawing. It is useful when you want to reposition before drawing again.',
   clear_screen: 'This wipes the canvas so you can test again cleanly. It helps you compare one run to the next run without old lines in the way.',
   repeat_times: 'This repeats the same instructions again and again. It makes your program shorter and helps avoid copying blocks many times.',
   forever_loop: 'This keeps running until you stop the program. It is often used for animation or continuous game behavior.',
@@ -65,19 +89,184 @@ const BLOCK_TEACHING = {
   op_compare: 'This creates a true/false rule like greater than or less than. It is usually plugged into if, wait until, or repeat until blocks.',
   op_logic: 'This combines two true/false rules with and/or. Use it when one condition is not enough to describe your idea.',
   op_not: 'This flips true to false and false to true. It is useful when you want the opposite behavior of a condition.',
-  get_x: 'This reads where the marker is on the left-right axis. It lets your code react to horizontal position.',
-  get_y: 'This reads where the marker is on the up-down axis. It lets your code react to vertical position.',
-  get_heading: 'This reads the direction the marker is facing. It helps you build rules based on orientation.',
+  get_x: 'This reads where the turtle is on the x-axis (left and right). Think of x like side-to-side movement on a map.',
+  get_y: 'This reads where the turtle is on the y-axis (up and down). Think of y like how high or low something is.',
+  get_heading: 'This reads the direction the turtle is facing. It helps you build rules based on orientation.',
   wait_until: 'This waits until a rule becomes true. It is helpful for timing moments in a sequence.',
-  repeat_until: 'This loops until a rule becomes true. Think of it as “keep trying until the condition is met.”',
+  repeat_until: 'This loops until a rule becomes true. Think of it as "keep trying until the condition is met."',
   set_color: 'This sets the pen color for future lines and shapes. Use it to separate parts of a drawing visually.',
   color_value: 'This picks the exact color value to use. Changing this value can completely change the mood of your art.',
   set_pen_size: 'This changes line thickness. Thick lines can emphasize, thin lines can add detail.',
   draw_circle: 'This draws a circle quickly using a radius. It is great for eyes, wheels, targets, and rounded designs.',
   draw_polygon: 'This draws many-sided shapes like triangles and pentagons. It turns side count and length into a full shape.',
+  move_backward: 'This moves the turtle backward while keeping its current direction. It is useful for symmetry and retreat steps.',
+  jump_to: 'This teleports the turtle to an exact x/y location (coordinates). Coordinates are like an address on the canvas.',
+  go_to_center: 'This returns the turtle to the center of the canvas. It is a clean reset move between drawing parts.',
+  set_heading: 'This points the turtle at an exact angle. Use it when you want deterministic direction before moving.',
+  set_random_color: 'This picks a random pen color each time it runs. It is great for playful patterns and variation.',
+  draw_line: 'This draws one straight segment in the current direction. It is useful for exact side construction.',
+  draw_rectangle: 'This draws a rectangle using width and height values. It is a fast way to build box-like shapes.',
+  array_create: 'This makes a named list for storing multiple values in order.',
+  array_get: 'This reads one value from a list by index. It helps programs reuse stored sequences.',
+  array_add_item: 'This appends a new value to the end of a list. It is useful for collecting steps, points, or history.',
+  object_create: 'This makes a named object for key-value data. Use it for grouped properties like settings or state.',
+  object_get: 'This reads a value from an object key. It is useful when your data is named, not just indexed.',
+  object_set: 'This writes or updates a value on an object key. It lets your program edit structured state.',
+  note_comment: 'This adds a plain-language note to your code. Comments help explain intent without changing behavior.',
+  canvas_zoom_in: 'This zooms the canvas view in. It helps inspect details while debugging.',
+  canvas_zoom_out: 'This zooms the canvas view out. It helps view bigger patterns and composition.',
+  canvas_reset_zoom: 'This returns canvas zoom to normal size. It is a quick visual reset.',
+  canvas_toggle_grid: 'This turns the grid on or off. Grids help with alignment and spacing checks.',
+  on_event_message: 'This starts a script when a named event is received. It is a core block for multi-script coordination.',
+  send_event_message: 'This broadcasts a named event to listeners. Use it to trigger other stacks at the right moment.',
+  op_math: 'This combines numbers using +, -, x, or /. It is key for computed movement and dynamic values.',
+  op_boolean: 'This outputs true or false directly. It is useful for testing condition wiring and logic flow.',
+  op_string: 'This creates a text value. Text can label events, keys, and notes in your programs.',
+  procedures_defnoreturn: 'This defines a custom function block. Functions package reusable instructions into one named action.',
+  procedures_callnoreturn: 'This runs a custom function you defined. It keeps main scripts cleaner and easier to read.',
   variables_set: 'This stores a value in memory. It is the starting point for score, timer, and lives systems.',
   variables_get: 'This reads a value from memory. Use it inside rules and math so the program can react to current state.',
   math_change: 'This increases or decreases a stored value. It is a core block for tracking progress over time.'
+}
+
+const LESSON_MEDIA = {
+  l0: { query: 'kids coding blocks', caption: 'Coding starts with one clear instruction at a time.' },
+  l1: { query: 'start button game ui', caption: 'Programs need a clear start trigger.' },
+  l2: { query: 'step by step arrows', caption: 'Instruction order changes what happens.' },
+  l3: { query: 'pen drawing hand', caption: 'Pen state controls when drawing happens.' },
+  l4: { query: 'clean whiteboard erase', caption: 'Resetting first makes testing easier.' },
+  l5: { query: 'repeating pattern tiles', caption: 'Loops reduce repetitive code.' },
+  l6: { query: 'square geometry line drawing', caption: 'Squares come from repeated move and turn steps.' },
+  l7: { query: 'animation motion sequence', caption: 'Continuous loops power animation-like behavior.' },
+  l8: { query: 'mandala geometric pattern', caption: 'Nested loops build richer repeated patterns.' },
+  l9: { query: 'decision tree logic', caption: 'If-blocks run actions only when a rule is true.' },
+  l10: { query: 'coordinate grid x axis', caption: 'Position-aware rules use live coordinate data.' },
+  l11: { query: 'logic and or diagram', caption: 'AND/OR combine checks for smarter behavior.' },
+  l12: { query: 'opposite concept mirror', caption: 'NOT flips a condition to its opposite.' },
+  l13: { query: 'memory storage concept', caption: 'Variables store values your program can reuse.' },
+  l14: { query: 'counter number increment', caption: 'Changing variables tracks progress over time.' },
+  l15: { query: 'dashboard data readout', caption: 'Reading stored values drives dynamic decisions.' },
+  l16: { query: 'progress counter loop', caption: 'Loops and state updates are core programming patterns.' },
+  l17: { query: 'vertical movement graph', caption: 'Y-position can act like a motion sensor.' },
+  l18: { query: 'wait signal traffic light', caption: 'Wait-until coordinates timing between actions.' },
+  l19: { query: 'finish line target', caption: 'Repeat-until loops stop when the goal is reached.' },
+  l20: { query: 'compass heading direction', caption: 'Heading checks control directional logic.' },
+  l21: { query: 'settings setup interface', caption: 'Setup blocks create consistent starting conditions.' },
+  l22: { query: 'circle shape drawing', caption: 'Circle primitives are useful for fast shape building.' },
+  l23: { query: 'polygon geometry shapes', caption: 'Polygon parameters generate many shape types.' },
+  l24: { query: 'workflow system diagram', caption: 'Real scripts combine setup, loops, and conditions.' },
+  l25: { query: 'debugging checklist code', caption: 'Debugging often starts with fixing structure.' },
+  l26: { query: 'fix code bug', caption: 'Correct block choices produce correct behavior.' },
+  l27: { query: 'software bug debugging', caption: 'Small test cycles make bugs easier to isolate.' },
+  l28: { query: 'creative coding art', caption: 'Remixing known blocks helps create new ideas.' },
+  l29: { query: 'prototype concept board', caption: 'Mini systems connect multiple programming ideas.' },
+  l30: { query: 'fractal spiral recursion', caption: 'Recursion repeats a smaller step with a stop rule.' },
+  l31: { query: 'capstone project build', caption: 'Capstone lessons combine all core skills together.' },
+  l32: { query: 'forward backward arrows', caption: 'Backward movement improves control and symmetry.' },
+  l33: { query: 'map pin coordinates', caption: 'Jump-to blocks place objects precisely.' },
+  l34: { query: 'center target bullseye', caption: 'Returning to center gives a reliable anchor point.' },
+  l35: { query: 'angle protractor direction', caption: 'Set heading creates predictable orientation.' },
+  l36: { query: 'color palette random', caption: 'Random color adds variation to repeated drawings.' },
+  l37: { query: 'line drawing tool vector', caption: 'Line primitives are fundamental graphics tools.' },
+  l38: { query: 'rectangle wireframe boxes', caption: 'Rectangle width/height controls many layout-like shapes.' },
+  l39: { query: 'math formula calculator', caption: 'Math operators make movement values dynamic.' },
+  l40: { query: 'true false toggle', caption: 'Boolean values are core to control flow.' },
+  l41: { query: 'text labels typography', caption: 'String values carry names, labels, and messages.' },
+  l42: { query: 'ordered list checklist', caption: 'Lists store ordered values and enable indexed access.' },
+  l43: { query: 'object key value data', caption: 'Objects organize named properties and state.' },
+  l44: { query: 'code comments notes', caption: 'Comments explain intent for teammates and future-you.' },
+  l45: { query: 'message broadcast communication', caption: 'Event messages coordinate separate scripts.' },
+  l46: { query: 'zoom in zoom out ui', caption: 'Zoom controls help inspect details while building.' },
+  l47: { query: 'grid alignment blueprint', caption: 'Grid overlays support spacing and alignment checks.' },
+  l48: { query: 'modular code function', caption: 'Functions package reusable behavior into one unit.' },
+  l49: { query: 'function call flowchart', caption: 'Calling functions keeps the main script clean.' }
+}
+
+const LESSON_REAL_WORLD_CONTEXT = {
+  l0: { relevance: 'This is how every program starts: one trigger plus one action.', utility: 'Teaches execution flow from top to bottom.', imageIdea: 'Placeholder image idea: a start button that triggers one simple action.' },
+  l1: { relevance: 'Apps and games need clear entry points.', utility: 'Shows why start events are required to run logic.', imageIdea: 'Placeholder image idea: play button launching a mini game.' },
+  l2: { relevance: 'Instruction order controls behavior everywhere in software.', utility: 'Builds sequencing skills used in UI flows and scripts.', imageIdea: 'Placeholder image idea: step-by-step arrows showing ordered actions.' },
+  l3: { relevance: 'Programs often switch modes (active/inactive).', utility: 'Introduces state toggles like on/off drawing behavior.', imageIdea: 'Placeholder image idea: pen touching paper vs pen lifted.' },
+  l4: { relevance: 'Developers reset state to retest cleanly.', utility: 'Teaches repeatable testing and clean-run debugging.', imageIdea: 'Placeholder image idea: whiteboard being erased.' },
+  l5: { relevance: 'Loops are core to automation and scalable code.', utility: 'Replaces copy/paste logic with compact repetition.', imageIdea: 'Placeholder image idea: repeating tile pattern.' },
+  l6: { relevance: 'Geometry logic powers graphics and game maps.', utility: 'Applies loops/turns to construct predictable shapes.', imageIdea: 'Placeholder image idea: square path traced by arrows.' },
+  l7: { relevance: 'Animations and simulations run continuously.', utility: 'Introduces forever loops plus pacing control.', imageIdea: 'Placeholder image idea: looping animation frames.' },
+  l8: { relevance: 'Nested loops are used in grids, textures, and procedural art.', utility: 'Builds multi-layer repetition patterns.', imageIdea: 'Placeholder image idea: checkerboard or mandala pattern.' },
+  l9: { relevance: 'Conditionals are foundational for decisions in apps and games.', utility: 'Executes code only when a rule is true.', imageIdea: 'Placeholder image idea: if/then decision sign.' },
+  l10: { relevance: 'Position-aware logic drives movement systems and boundaries.', utility: 'Uses x-coordinate as program input.', imageIdea: 'Placeholder image idea: x-axis map with marker position.' },
+  l11: { relevance: 'Complex systems combine multiple conditions.', utility: 'Uses AND/OR for precise behavior rules.', imageIdea: 'Placeholder image idea: two-condition logic diagram.' },
+  l12: { relevance: 'Negation is essential for opposite cases and guard clauses.', utility: 'Flips logic outcomes cleanly with NOT.', imageIdea: 'Placeholder image idea: normal rule vs opposite rule.' },
+  l13: { relevance: 'Variables power scores, settings, and state memory.', utility: 'Stores values for later reuse.', imageIdea: 'Placeholder image idea: labeled storage box called score.' },
+  l14: { relevance: 'Programs update values over time constantly.', utility: 'Changes variable values with increments/decrements.', imageIdea: 'Placeholder image idea: counter increasing.' },
+  l15: { relevance: 'Dynamic behavior requires reading current state.', utility: 'Uses stored values inside logic rules.', imageIdea: 'Placeholder image idea: dashboard value driving a decision light.' },
+  l16: { relevance: 'Loops plus state updates drive timers and progress bars.', utility: 'Tracks evolving values during repeated execution.', imageIdea: 'Placeholder image idea: progress bar updating in steps.' },
+  l17: { relevance: 'Y-position checks are common in movement and collision logic.', utility: 'Uses vertical position as a sensor input.', imageIdea: 'Placeholder image idea: object moving up/down on a chart.' },
+  l18: { relevance: 'Programs often wait for conditions before continuing.', utility: 'Synchronizes timing and event order.', imageIdea: 'Placeholder image idea: traffic light turning green before moving.' },
+  l19: { relevance: 'Safe loops need clear stop conditions.', utility: 'Repeats until a condition passes, then exits.', imageIdea: 'Placeholder image idea: loop path ending at a finish flag.' },
+  l20: { relevance: 'Direction-based logic appears in robotics and navigation.', utility: 'Reads heading to trigger directional behavior.', imageIdea: 'Placeholder image idea: compass heading control.' },
+  l21: { relevance: 'Setup phases are common in all software systems.', utility: 'Separates initialization from runtime behavior.', imageIdea: 'Placeholder image idea: app settings panel before run.' },
+  l22: { relevance: 'Primitive shape APIs are used in drawing and game engines.', utility: 'Draws circles quickly with parameters.', imageIdea: 'Placeholder image idea: circles of different radii.' },
+  l23: { relevance: 'Parameterized geometry is reusable and scalable.', utility: 'Creates polygons via side/length controls.', imageIdea: 'Placeholder image idea: triangle, square, pentagon lineup.' },
+  l24: { relevance: 'Real programs combine setup, loops, and rules together.', utility: 'Practices system composition across block types.', imageIdea: 'Placeholder image idea: flowchart with setup-loop-condition sections.' },
+  l25: { relevance: 'Debugging structure is a daily developer skill.', utility: 'Finds broken links and repairs flow.', imageIdea: 'Placeholder image idea: broken chain reconnected.' },
+  l26: { relevance: 'Correct block choice maps to correct algorithm choice.', utility: 'Improves behavior by selecting proper operations.', imageIdea: 'Placeholder image idea: wrong tool vs right tool.' },
+  l27: { relevance: 'Fast feedback cycles reduce debugging time.', utility: 'Uses quick reruns and small adjustments.', imageIdea: 'Placeholder image idea: bug icon with checklist.' },
+  l28: { relevance: 'Creative prototyping depends on remixing known patterns.', utility: 'Combines many blocks to explore new outputs.', imageIdea: 'Placeholder image idea: collage/remix board.' },
+  l29: { relevance: 'Mini systems thinking leads to stronger projects.', utility: 'Designs behavior with coordinated parts.', imageIdea: 'Placeholder image idea: modular system blocks connected.' },
+  l30: { relevance: 'Recursion appears in trees, fractals, and divide-and-conquer.', utility: 'Repeats a smaller step with a stop case.', imageIdea: 'Placeholder image idea: spiral or fractal branching pattern.' },
+  l31: { relevance: 'Capstones mirror real project integration work.', utility: 'Combines state, logic, loops, and visuals in one build.', imageIdea: 'Placeholder image idea: completed mini project board.' },
+  l32: { relevance: 'Reverse motion is useful in path correction and symmetry.', utility: 'Moves backward without changing heading.', imageIdea: 'Placeholder image idea: forward and backward arrows.' },
+  l33: { relevance: 'Coordinate targeting is used in maps, games, and plotting.', utility: 'Jumps to exact x/y positions.', imageIdea: 'Placeholder image idea: map pin on grid coordinates.' },
+  l34: { relevance: 'Reset anchors keep multi-step systems stable.', utility: 'Returns to a known center point.', imageIdea: 'Placeholder image idea: target bullseye center.' },
+  l35: { relevance: 'Deterministic angles improve reproducible behavior.', utility: 'Sets exact heading before motion.', imageIdea: 'Placeholder image idea: protractor and directional arrow.' },
+  l36: { relevance: 'Randomization adds variation in games and generative art.', utility: 'Chooses random colors automatically.', imageIdea: 'Placeholder image idea: random color palette swatches.' },
+  l37: { relevance: 'Line primitives are core building blocks in vector graphics.', utility: 'Draws precise straight segments fast.', imageIdea: 'Placeholder image idea: vector line tool reference.' },
+  l38: { relevance: 'Rectangle primitives are used in UI layout and sprites.', utility: 'Creates width/height-controlled boxes.', imageIdea: 'Placeholder image idea: wireframe rectangles.' },
+  l39: { relevance: 'Math operators drive dynamic movement and scaling.', utility: 'Computes values instead of hardcoding constants.', imageIdea: 'Placeholder image idea: calculator feeding motion values.' },
+  l40: { relevance: 'Boolean logic underpins control flow everywhere.', utility: 'Uses explicit true/false values for testing logic wiring.', imageIdea: 'Placeholder image idea: toggle switch true/false.' },
+  l41: { relevance: 'Text values label keys, messages, and metadata.', utility: 'Creates reusable string inputs.', imageIdea: 'Placeholder image idea: labels/tags with text fields.' },
+  l42: { relevance: 'Lists are essential for ordered collections.', utility: 'Creates, appends, and reads indexed values.', imageIdea: 'Placeholder image idea: checklist with numbered items.' },
+  l43: { relevance: 'Objects model real entities with named properties.', utility: 'Sets and gets key-value data.', imageIdea: 'Placeholder image idea: profile card with named fields.' },
+  l44: { relevance: 'Documentation improves maintainability and teamwork.', utility: 'Uses comments to explain intent.', imageIdea: 'Placeholder image idea: sticky notes on code printout.' },
+  l45: { relevance: 'Event systems coordinate independent components.', utility: 'Broadcasts and listens to named messages.', imageIdea: 'Placeholder image idea: megaphone sending signals to listeners.' },
+  l46: { relevance: 'View controls support inspection and presentation.', utility: 'Zooms in/out and resets camera scale.', imageIdea: 'Placeholder image idea: magnifier zoom controls.' },
+  l47: { relevance: 'Grids help precision in design and debugging.', utility: 'Toggles alignment guides on demand.', imageIdea: 'Placeholder image idea: graph paper overlay.' },
+  l48: { relevance: 'Functions reduce duplication and improve clarity.', utility: 'Defines reusable named behavior blocks.', imageIdea: 'Placeholder image idea: reusable component/module icon.' },
+  l49: { relevance: 'Function calls are how reusable logic executes.', utility: 'Runs defined functions from main flow.', imageIdea: 'Placeholder image idea: call stack arrow into function box.' }
+}
+
+function getLessonMedia(lesson) {
+  const media = LESSON_MEDIA[lesson.id]
+  if (!media) return null
+  const query = encodeURIComponent(media.query || lesson.title || 'coding')
+  return {
+    src: `https://source.unsplash.com/640x360/?${query}&sig=${lesson.lessonNumber}`,
+    alt: `${lesson.title} reference image`,
+    caption: media.caption
+  }
+}
+
+const LESSON_WORD_HELP = {
+  l9: ['Condition: a rule your code checks (like "if this is true, then do this").'],
+  l10: ['Axis: an invisible line used to measure position.', 'x-axis: left ↔ right.', 'Coordinate: a location address using numbers.'],
+  l11: ['Logic: rule-thinking in code.', 'AND means both rules must be true. OR means at least one rule is true.'],
+  l12: ['NOT means opposite. If something is true, NOT makes it false.'],
+  l13: ['Variable: a labeled memory box that stores a value.'],
+  l15: ['State: what your program currently remembers right now.'],
+  l17: ['y-axis: up ↕ down.', 'Sensor (in coding): information your program can read.'],
+  l18: ['Synchronize: make steps happen at the right time, in order.'],
+  l19: ['Stop condition: the rule that tells a loop when to end.'],
+  l20: ['Heading: the direction your turtle is facing, measured by an angle.'],
+  l30: ['Recursion: when a function uses a smaller version of itself, with a stop rule.'],
+  l33: ['Coordinates: two numbers (x, y) that point to one exact spot.'],
+  l35: ['Deterministic: predictable; same input gives same result.'],
+  l39: ['Operator: a math symbol like +, -, x, or /.'],
+  l40: ['Boolean: a value that is only true or false.'],
+  l42: ['Index: the position number of an item in a list.'],
+  l43: ['Key-value: named data, like "name: turtle" or "score: 10".'],
+  l45: ['Event: a signal that tells code to start doing something.'],
+  l48: ['Function: a reusable named set of steps.'],
+  l49: ['Main flow: the primary top-to-bottom script that runs first.']
 }
 
 const LESSONS = [
@@ -85,49 +274,37 @@ const LESSONS = [
     id: 'l0',
     level: 0,
     title: 'Welcome - What Blocks and Coding Are',
-    goal: 'Run your first tiny block program and see your marker draw a line.',
+    goal: 'Run your first tiny block program and see your turtle draw a line.',
     intention: 'Coding means giving clear instructions that run from top to bottom.',
     task: 'Snap move forward under when Run clicked, press Run, then Check Lesson.',
     steps: [
       'Drag move forward under when Run clicked.',
       'Press Run + Check Lesson to test your first block program.'
     ],
-    media: {
-      miniStudio1: {
-        src: '/media/block-code-draw-demo.gif',
-        caption: 'Snap move forward under the start block, then press Run.',
-        alt: 'Move forward snapped under when Run clicked, then Run is pressed.'
-      },
-      miniStudio2: {
-        src: '/media/block-code-draw-demo.gif',
-        caption: 'Change the number in move forward to make shorter or longer lines.',
-        alt: 'Move forward value changes and the line length changes.'
-      }
-    },
     toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'pen_down', 'clear_screen', 'op_number'],
     focusBlocks: ['when_run_clicked', 'move_forward'],
     rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true }
   },
-  { id: 'l1', level: 1, title: 'Run Your First Program', goal: 'Make the marker do one action when you press Run.', intention: 'Programs need a start point.', task: 'Connect move forward under when Run clicked.', steps: ['Drag the green start block.', 'Snap one move block below it.', 'Press Check Lesson.'], toolbox: ['when_run_clicked', 'move_forward'], focusBlocks: ['when_run_clicked', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true } },
-  { id: 'l2', level: 1, title: 'Two Steps in Order', goal: 'Make your marker do two actions in order.', intention: 'Computers follow instructions from top to bottom.', task: 'Use start, move, then turn.', steps: ['Place start block first.', 'Add move forward.', 'Add turn right after move.'], toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'turn_left'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'move_forward', 'turn_right'], requireStartLinked: true } },
-  { id: 'l3', level: 1, title: 'Pen Up, Pen Down', goal: 'Control when the marker draws lines.', intention: 'Creators decide when to draw and when to move silently.', task: 'Use pen down before moving.', steps: ['Start your script.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'pen_down', 'pen_up', 'move_forward'], focusBlocks: ['pen_down', 'pen_up', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'pen_down', 'move_forward'], requireStartLinked: true } },
+  { id: 'l1', level: 1, title: 'Run Your First Program', goal: 'Make the turtle do one action when you press Run.', intention: 'Programs need a start point.', task: 'Connect move forward under when Run clicked.', steps: ['Drag the green start block.', 'Snap one move block below it.', 'Press Check Lesson.'], toolbox: ['when_run_clicked', 'move_forward'], focusBlocks: ['when_run_clicked', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true } },
+  { id: 'l2', level: 1, title: 'Two Steps in Order', goal: 'Make your turtle do two actions in order.', intention: 'Computers follow instructions from top to bottom.', task: 'Use start, move, then turn.', steps: ['Place start block first.', 'Add move forward.', 'Add turn right after move.'], toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'turn_left'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'move_forward', 'turn_right'], requireStartLinked: true } },
+  { id: 'l3', level: 1, title: 'Pen Up, Pen Down', goal: 'Control when the turtle draws lines.', intention: 'Creators decide when to draw and when to move silently.', task: 'Use pen down before moving.', steps: ['Start your script.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'pen_down', 'pen_up', 'move_forward'], focusBlocks: ['pen_down', 'pen_up', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'pen_down', 'move_forward'], requireStartLinked: true } },
   { id: 'l4', level: 1, title: 'Clear and Draw Again', goal: 'Reset the canvas before drawing.', intention: 'Clean tests help you understand what changed.', task: 'Use clear screen, then draw.', steps: ['Put clear screen under start.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'clear_screen', 'pen_down', 'move_forward'], focusBlocks: ['clear_screen', 'pen_down'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'move_forward'], requireStartLinked: true } },
   { id: 'l5', level: 2, title: 'Your First Loop', goal: 'Use repeat instead of copying blocks.', intention: 'Loops make code shorter and stronger.', task: 'Use repeat with move inside.', steps: ['Drag repeat.', 'Put move in the repeat body.', 'Connect repeat to start.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'op_number'], focusBlocks: ['repeat_times', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward'], requireStartLinked: true } },
   { id: 'l6', level: 2, title: 'Square Loop', goal: 'Draw a square using one loop.', intention: 'Shapes are repeated patterns.', task: 'Use repeat + move + turn right.', steps: ['Set repeat to 4.', 'Put move and turn inside.', 'Check your work.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
   { id: 'l7', level: 2, title: 'Forever Animation', goal: 'Build a script that keeps moving.', intention: 'Animations often run continuously.', task: 'Use forever with move or turn.', steps: ['Drag forever.', 'Place one motion block inside.', 'Add wait so movement is visible.'], toolbox: ['when_run_clicked', 'forever_loop', 'move_forward', 'turn_right', 'wait_seconds', 'op_number'], focusBlocks: ['forever_loop', 'wait_seconds'], rules: { requiredTypes: ['when_run_clicked', 'forever_loop'], requireStartLinked: true } },
   { id: 'l8', level: 2, title: 'Nested Pattern', goal: 'Use one repeat inside another repeat.', intention: 'Nested loops build big patterns from small loops.', task: 'Create nested loops with motion blocks.', steps: ['Drop repeat inside repeat.', 'Put move and turn in the inner loop.', 'Attach to start.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
   { id: 'l9', level: 3, title: 'First If Rule', goal: 'Make code run only when a rule is true.', intention: 'Conditionals help programs make choices.', task: 'Use if + compare.', steps: ['Add if block.', 'Add compare in if hole.', 'Place move inside if body.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['if_condition', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], requireStartLinked: true } },
-  { id: 'l10', level: 3, title: 'Use Marker X', goal: 'Use marker position in a rule.', intention: 'Programs can react to where they are.', task: 'Use marker x in compare block.', steps: ['Drag marker x.', 'Connect to compare.', 'Use compare inside if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['get_x', 'op_compare', 'if_condition'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x'], requireStartLinked: true } },
+  { id: 'l10', level: 3, title: 'Use Turtle X', goal: 'Use turtle position in a rule.', intention: 'Programs can react to where they are.', task: 'Use turtle x in compare block.', steps: ['Drag turtle x.', 'Connect to compare.', 'Use compare inside if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['get_x', 'op_compare', 'if_condition'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x'], requireStartLinked: true } },
   { id: 'l11', level: 3, title: 'Logic And / Or', goal: 'Combine two rules in one condition.', intention: 'Big behavior grows from small rules.', task: 'Use logic block inside if.', steps: ['Drag and/or block.', 'Fill both sides with compare checks.', 'Place in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_logic', 'op_compare', 'get_x', 'get_y', 'op_number', 'move_forward'], focusBlocks: ['op_logic', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_logic'], requireStartLinked: true } },
   { id: 'l12', level: 3, title: 'Logic Not', goal: 'Invert a condition using not.', intention: 'Not flips true and false.', task: 'Use not in if condition.', steps: ['Drag not block.', 'Put compare inside not.', 'Use it in if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_not', 'op_compare', 'op_number', 'get_y', 'move_forward'], focusBlocks: ['op_not', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_not'], requireStartLinked: true } },
   { id: 'l13', level: 4, title: 'Create a Score Variable', goal: 'Make your first memory box.', intention: 'Variables store information over time.', task: 'Use set variable.', steps: ['Open variable blocks.', 'Set variable value.', 'Connect under start.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set'], rules: { requiredTypes: ['when_run_clicked', 'variables_set'], requireStartLinked: true } },
   { id: 'l14', level: 4, title: 'Change a Variable', goal: 'Increase or decrease stored value.', intention: 'Games update score and lives constantly.', task: 'Use change variable block.', steps: ['Set a variable first.', 'Add change block.', 'Use number value.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'math_change'], requireStartLinked: true } },
   { id: 'l15', level: 4, title: 'Read a Variable', goal: 'Use memory value in a rule.', intention: 'Reading state lets code make smart decisions.', task: 'Use get variable inside compare.', steps: ['Set a variable.', 'Use get variable.', 'Place in compare and if.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['variables_get', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'variables_get', 'if_condition'], requireStartLinked: true } },
   { id: 'l16', level: 4, title: 'Loop + Score', goal: 'Update memory while repeating actions.', intention: 'State changes are often inside loops.', task: 'Use repeat and change variable together.', steps: ['Add repeat block.', 'Put change variable inside it.', 'Connect to start.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'op_number', 'move_forward'], focusBlocks: ['repeat_times', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'math_change'], requireStartLinked: true } },
-  { id: 'l17', level: 5, title: 'Use Marker Y', goal: 'Sense vertical position.', intention: 'Sensors let your program react to movement.', task: 'Use marker y in compare rule.', steps: ['Drag marker y.', 'Connect to compare.', 'Use in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_y', 'op_number', 'turn_right'], focusBlocks: ['get_y', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_y', 'op_compare'], requireStartLinked: true } },
+  { id: 'l17', level: 5, title: 'Use Turtle Y', goal: 'Sense vertical position.', intention: 'Sensors let your program react to movement.', task: 'Use turtle y in compare rule.', steps: ['Drag turtle y.', 'Connect to compare.', 'Use in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_y', 'op_number', 'turn_right'], focusBlocks: ['get_y', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_y', 'op_compare'], requireStartLinked: true } },
   { id: 'l18', level: 5, title: 'Wait Until True', goal: 'Pause until a rule passes.', intention: 'Timing controls keep code in the right order.', task: 'Use wait until with compare.', steps: ['Place wait until.', 'Build compare condition.', 'Attach to start script.'], toolbox: ['when_run_clicked', 'wait_until', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['wait_until', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'wait_until', 'op_compare'], requireStartLinked: true } },
   { id: 'l19', level: 5, title: 'Repeat Until', goal: 'Repeat until a condition is true.', intention: 'This loop stops on purpose when the condition succeeds.', task: 'Use repeat until with compare.', steps: ['Drop repeat until block.', 'Add compare condition.', 'Put motion inside loop body.'], toolbox: ['when_run_clicked', 'repeat_until', 'op_compare', 'get_x', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['repeat_until', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'repeat_until', 'op_compare'], requireStartLinked: true } },
-  { id: 'l20', level: 5, title: 'Heading Rule', goal: 'Use direction in a condition.', intention: 'Direction checks help control movement behavior.', task: 'Use marker heading with compare.', steps: ['Get heading block.', 'Compare heading to number.', 'Use in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_heading', 'op_number', 'move_forward'], focusBlocks: ['get_heading', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_heading', 'op_compare'], requireStartLinked: true } },
+  { id: 'l20', level: 5, title: 'Heading Rule', goal: 'Use direction in a condition.', intention: 'Direction checks help control movement behavior.', task: 'Use turtle heading with compare.', steps: ['Get heading block.', 'Compare heading to number.', 'Use in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_heading', 'op_number', 'move_forward'], focusBlocks: ['get_heading', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_heading', 'op_compare'], requireStartLinked: true } },
   { id: 'l21', level: 6, title: 'Setup Section', goal: 'Build a clean setup section.', intention: 'Setup helps your program start consistently.', task: 'Use clear, set color, and set pen size.', steps: ['Clear screen first.', 'Set color.', 'Set pen size before drawing.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'op_number', 'move_forward'], focusBlocks: ['clear_screen', 'set_color', 'set_pen_size'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'set_color', 'set_pen_size'], requireStartLinked: true } },
   { id: 'l22', level: 6, title: 'Shape System: Circle', goal: 'Draw a circle in a full script.', intention: 'Systems combine style setup and actions.', task: 'Use setup blocks and draw circle.', steps: ['Use start and setup.', 'Add draw circle.', 'Check completion.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'draw_circle', 'op_number'], focusBlocks: ['draw_circle', 'set_color'], rules: { requiredTypes: ['when_run_clicked', 'draw_circle', 'set_color'], requireStartLinked: true } },
   { id: 'l23', level: 6, title: 'Shape System: Polygon', goal: 'Use sides and length for polygons.', intention: 'One block can create many different shapes.', task: 'Use draw polygon in script.', steps: ['Add draw polygon.', 'Set sides and length.', 'Run and check.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_polygon', 'op_number', 'set_color', 'color_value'], focusBlocks: ['draw_polygon', 'op_number'], rules: { requiredTypes: ['when_run_clicked', 'draw_polygon'], requireStartLinked: true } },
@@ -137,7 +314,26 @@ const LESSONS = [
   { id: 'l27', level: 7, title: 'Debug with Fast Tests', goal: 'Reset and rerun quickly while fixing.', intention: 'Fast cycles make debugging easier.', task: 'Use clear + wait + draw.', steps: ['Add clear screen first.', 'Add draw block.', 'Add wait to watch output.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds', 'op_number'], focusBlocks: ['clear_screen', 'wait_seconds', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds'], requireStartLinked: true } },
   { id: 'l28', level: 8, title: 'Remix Starter', goal: 'Mix at least 5 different block types.', intention: 'Remixing helps you invent quickly.', task: 'Use 5 non-number blocks in one script.', steps: ['Start with green block.', 'Use at least five different block types.', 'Check completion.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'move_forward', 'turn_right', 'repeat_times', 'draw_circle', 'op_number'], focusBlocks: ['set_color', 'repeat_times', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked'], minNonNumberBlocks: 5, requireStartLinked: true } },
   { id: 'l29', level: 8, title: 'Invent a Mini Tool', goal: 'Create your own drawing behavior.', intention: 'Invention means making your own rules.', task: 'Use loop + rule + shape together.', steps: ['Add repeat block.', 'Add if with compare.', 'Use circle or polygon.'], toolbox: ['when_run_clicked', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'draw_polygon'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition'], oneOfTypes: ['draw_circle', 'draw_polygon'], requireStartLinked: true } },
-  { id: 'l30', level: 8, title: 'Capstone Build', goal: 'Build a full mini project with systems.', intention: 'Capstones show how your ideas and code fit together.', task: 'Use start + loop + condition + variable + shape.', steps: ['Add setup under start.', 'Use variables for state.', 'Add loops, rules, and one shape block.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'set_color', 'color_value', 'move_forward', 'turn_right'], focusBlocks: ['variables_set', 'repeat_times', 'if_condition', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition', 'variables_set'], oneOfTypes: ['draw_circle', 'draw_polygon'], minNonNumberBlocks: 7, requireStartLinked: true } }
+  { id: 'l30', level: 8, title: 'Recursion Basics', goal: 'Build your first self-calling function.', intention: 'Recursion solves big tasks by repeating a smaller step until a stop rule is met.', task: 'Define a function that calls itself with a counter and a stop condition.', steps: ['Create a function named spiralStep.', 'Inside it, move and turn, then lower a counter.', 'Use if + compare to stop calling itself when the counter reaches 0.'], toolbox: ['when_run_clicked', '__PROCEDURES__', '__VARIABLES__', 'if_condition', 'op_compare', 'op_math', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['if_condition', 'op_compare', 'variables_set'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], oneOfTypes: ['procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } },
+  { id: 'l31', level: 8, title: 'Capstone Build', goal: 'Build a full mini project with systems.', intention: 'Capstones show how your ideas and code fit together.', task: 'Use start + loop + condition + variable + shape.', steps: ['Add setup under start.', 'Use variables for state.', 'Add loops, rules, and one shape block.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'set_color', 'color_value', 'move_forward', 'turn_right'], focusBlocks: ['variables_set', 'repeat_times', 'if_condition', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition', 'variables_set'], oneOfTypes: ['draw_circle', 'draw_polygon'], minNonNumberBlocks: 7, requireStartLinked: true } },
+  { id: 'l32', level: 9, title: 'Move Backward', goal: 'Control reverse movement.', intention: 'Good movement control includes forward and backward steps.', task: 'Use move backward under start.', steps: ['Place when Run clicked.', 'Add move backward.', 'Run and observe direction.'], toolbox: ['when_run_clicked', 'move_backward', 'op_number'], focusBlocks: ['move_backward'], rules: { requiredTypes: ['when_run_clicked', 'move_backward'], requireStartLinked: true } },
+  { id: 'l33', level: 9, title: 'Jump to Coordinates', goal: 'Place the turtle at a specific point.', intention: 'Coordinate placement is foundational for precise drawing.', task: 'Use jump to with x and y values.', steps: ['Drag jump to.', 'Set x and y values.', 'Connect under start.'], toolbox: ['when_run_clicked', 'jump_to', 'op_number'], focusBlocks: ['jump_to'], rules: { requiredTypes: ['when_run_clicked', 'jump_to'], requireStartLinked: true } },
+  { id: 'l34', level: 9, title: 'Return to Center', goal: 'Reset turtle location fast.', intention: 'Center resets simplify multi-part drawings.', task: 'Use go to center in your script.', steps: ['Place start block.', 'Add go to center.', 'Add one move block after it.'], toolbox: ['when_run_clicked', 'go_to_center', 'move_forward', 'op_number'], focusBlocks: ['go_to_center'], rules: { requiredTypes: ['when_run_clicked', 'go_to_center'], requireStartLinked: true } },
+  { id: 'l35', level: 9, title: 'Set Heading', goal: 'Point the turtle to an exact angle.', intention: 'Heading control makes movement predictable.', task: 'Set heading, then move forward.', steps: ['Add set heading.', 'Pick an angle value.', 'Move forward after heading.'], toolbox: ['when_run_clicked', 'set_heading', 'move_forward', 'op_number'], focusBlocks: ['set_heading'], rules: { requiredTypes: ['when_run_clicked', 'set_heading', 'move_forward'], requireStartLinked: true } },
+  { id: 'l36', level: 10, title: 'Random Color Fun', goal: 'Use random color changes in drawing.', intention: 'Randomization creates playful variation.', task: 'Use set random color before drawing.', steps: ['Add set random color.', 'Add move or shape block after it.', 'Run a few times and compare colors.'], toolbox: ['when_run_clicked', 'set_random_color', 'move_forward', 'op_number'], focusBlocks: ['set_random_color'], rules: { requiredTypes: ['when_run_clicked', 'set_random_color'], requireStartLinked: true } },
+  { id: 'l37', level: 10, title: 'Draw Line Block', goal: 'Create straight segments with one block.', intention: 'Primitive shape blocks speed up building.', task: 'Use draw line with a chosen length.', steps: ['Add draw line.', 'Set length value.', 'Run and compare results.'], toolbox: ['when_run_clicked', 'draw_line', 'op_number'], focusBlocks: ['draw_line'], rules: { requiredTypes: ['when_run_clicked', 'draw_line'], requireStartLinked: true } },
+  { id: 'l38', level: 10, title: 'Draw Rectangle Block', goal: 'Draw box shapes using width and height.', intention: 'Parameters let one block generate many forms.', task: 'Use draw rectangle with two values.', steps: ['Place draw rectangle.', 'Set width and height.', 'Run and inspect proportion changes.'], toolbox: ['when_run_clicked', 'draw_rectangle', 'op_number'], focusBlocks: ['draw_rectangle'], rules: { requiredTypes: ['when_run_clicked', 'draw_rectangle'], requireStartLinked: true } },
+  { id: 'l39', level: 11, title: 'Math Expressions', goal: 'Compute values with math operators.', intention: 'Calculated values make code dynamic.', task: 'Use an op math block to feed movement.', steps: ['Build a math expression.', 'Plug it into move or turn.', 'Run and test by changing operands.'], toolbox: ['when_run_clicked', 'move_forward', 'op_math', 'op_number'], focusBlocks: ['op_math'], rules: { requiredTypes: ['when_run_clicked', 'op_math'], requireStartLinked: true } },
+  { id: 'l40', level: 11, title: 'Boolean Values', goal: 'Use true/false directly.', intention: 'Boolean blocks help validate condition flow.', task: 'Use op boolean inside an if condition.', steps: ['Add if block.', 'Insert op boolean.', 'Place action inside if body.'], toolbox: ['when_run_clicked', 'if_condition', 'op_boolean', 'move_forward'], focusBlocks: ['op_boolean'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_boolean'], requireStartLinked: true } },
+  { id: 'l41', level: 11, title: 'String Values', goal: 'Create and use text values.', intention: 'Text values are important for names, keys, and events.', task: 'Use op string in a block input.', steps: ['Drag op string block.', 'Edit the text.', 'Use it with a compatible block.'], toolbox: ['when_run_clicked', 'op_string', 'note_comment'], focusBlocks: ['op_string'], rules: { requiredTypes: ['when_run_clicked', 'op_string'], requireStartLinked: true } },
+  { id: 'l42', level: 12, title: 'Lists: Create + Add + Get', goal: 'Store and read ordered data.', intention: 'Lists let you manage sequences of values.', task: 'Create a list, add an item, then read one item.', steps: ['Add make list block.', 'Add add item to list.', 'Use item of list block.'], toolbox: ['when_run_clicked', 'array_create', 'array_add_item', 'array_get', 'op_string', 'op_number'], focusBlocks: ['array_create', 'array_add_item', 'array_get'], rules: { requiredTypes: ['when_run_clicked', 'array_create', 'array_add_item', 'array_get'], requireStartLinked: true } },
+  { id: 'l43', level: 12, title: 'Objects: Set + Get', goal: 'Work with key-value data.', intention: 'Objects are useful for named properties and grouped state.', task: 'Create an object, set one key, then read it.', steps: ['Add make object block.', 'Add set key block.', 'Add get key block.'], toolbox: ['when_run_clicked', 'object_create', 'object_set', 'object_get', 'op_string', 'op_number'], focusBlocks: ['object_create', 'object_set', 'object_get'], rules: { requiredTypes: ['when_run_clicked', 'object_create', 'object_set', 'object_get'], requireStartLinked: true } },
+  { id: 'l44', level: 12, title: 'Comment Your Code', goal: 'Use notes to explain intent.', intention: 'Readable code is easier to debug and remix.', task: 'Add a note_comment block in your script.', steps: ['Drag note block.', 'Write a short note.', 'Keep it in your stack while testing.'], toolbox: ['when_run_clicked', 'note_comment', 'move_forward', 'op_number'], focusBlocks: ['note_comment'], rules: { requiredTypes: ['when_run_clicked', 'note_comment'], requireStartLinked: true } },
+  { id: 'l45', level: 13, title: 'Message Events', goal: 'Trigger code with named events.', intention: 'Events let scripts coordinate like teammates.', task: 'Use send event and on event with the same name.', steps: ['Create one sender stack.', 'Create one listener stack.', 'Send and verify listener runs.'], toolbox: ['when_run_clicked', 'send_event_message', 'on_event_message', 'move_forward', 'turn_right'], focusBlocks: ['send_event_message', 'on_event_message'], rules: { requiredTypes: ['send_event_message', 'on_event_message'], requireStartLinked: false } },
+  { id: 'l46', level: 13, title: 'Canvas Zoom Controls', goal: 'Control view scale while drawing.', intention: 'View controls help inspect and present work.', task: 'Use zoom in, zoom out, and reset zoom.', steps: ['Add zoom in block.', 'Add zoom out block.', 'Add reset zoom at the end.'], toolbox: ['when_run_clicked', 'canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom', 'op_number'], focusBlocks: ['canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom'], rules: { requiredTypes: ['when_run_clicked', 'canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom'], requireStartLinked: true } },
+  { id: 'l47', level: 13, title: 'Grid Visibility', goal: 'Use grid toggling intentionally.', intention: 'Grid overlays support measurement and alignment.', task: 'Toggle grid during a short script.', steps: ['Add toggle grid.', 'Add a movement or shape action.', 'Toggle again if desired.'], toolbox: ['when_run_clicked', 'canvas_toggle_grid', 'move_forward', 'op_number'], focusBlocks: ['canvas_toggle_grid'], rules: { requiredTypes: ['when_run_clicked', 'canvas_toggle_grid'], requireStartLinked: true } },
+  { id: 'l48', level: 13, title: 'Define a Function', goal: 'Create your own reusable block flow.', intention: 'Functions reduce duplication and organize ideas.', task: 'Add a function definition and include steps inside it.', steps: ['Create define function block.', 'Add 1-2 drawing steps in it.', 'Keep it in your workspace.'], toolbox: ['when_run_clicked', '__PROCEDURES__', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['procedures_defnoreturn'], rules: { requiredTypes: ['procedures_defnoreturn'], requireStartLinked: false } },
+  { id: 'l49', level: 13, title: 'Call a Function', goal: 'Run your custom function from main flow.', intention: 'Calling functions keeps main scripts clean.', task: 'Define a function and call it from when Run clicked.', steps: ['Create function definition.', 'Add call function block under start.', 'Run to verify the call executes.'], toolbox: ['when_run_clicked', '__PROCEDURES__', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['procedures_callnoreturn', 'procedures_defnoreturn'], rules: { requiredTypes: ['when_run_clicked', 'procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } }
 ]
 
 const LESSONS_WITH_NUMBERS = LESSONS.map((lesson, index) => ({
@@ -464,8 +660,61 @@ const LESSONS_ENRICHED = LESSONS_WITH_NUMBERS.map((lesson) => ({
   ...lesson,
   ...getLessonBlueprint(lesson.lessonNumber, lesson.level)
 }))
+const LESSONS_ORDERED = [...LESSONS_ENRICHED].sort((a, b) => a.lessonNumber - b.lessonNumber)
 
-const LESSON_ID_SET = new Set(LESSONS_ENRICHED.map((lesson) => lesson.id))
+const LESSON_ID_SET = new Set(LESSONS_ORDERED.map((lesson) => lesson.id))
+const LESSON_TAKEAWAYS = {
+  l0: { summary: 'You ran your first program from top to bottom and made the turtle draw.', bullets: ['Start blocks decide when code begins.', 'One move block can already create visible output.'] },
+  l1: { summary: 'You connected a valid start-to-action flow.', bullets: ['Programs need an entry point.', 'Connected blocks run as one sequence.'] },
+  l2: { summary: 'You practiced sequence by chaining actions in order.', bullets: ['Order changes behavior.', 'Move then turn produces a different result than turn then move.'] },
+  l3: { summary: 'You controlled when drawing happens with pen state.', bullets: ['Pen down draws; pen up repositions cleanly.', 'State blocks are as important as motion blocks.'] },
+  l4: { summary: 'You reset the canvas before drawing so tests were cleaner.', bullets: ['Clear-first scripts are easier to debug.', 'Fresh runs make result comparisons reliable.'] },
+  l5: { summary: 'You replaced repeated manual steps with a loop.', bullets: ['Loops reduce duplicate blocks.', 'Repeat count controls pattern size.'] },
+  l6: { summary: 'You used repeat + turn to build a geometric shape.', bullets: ['Regular turns create corners.', 'Loop structure is ideal for polygons.'] },
+  l7: { summary: 'You built continuous behavior with a forever loop.', bullets: ['Forever powers animations.', 'Small waits make motion readable.'] },
+  l8: { summary: 'You combined nested loops to create richer patterns.', bullets: ['Inner loops define micro-patterns.', 'Outer loops replicate the pattern at a bigger scale.'] },
+  l9: { summary: 'You introduced decision logic with an if condition.', bullets: ['Conditions gate actions.', 'Compare blocks produce the true/false value if needs.'] },
+  l10: { summary: 'You used turtle X position as live input for behavior.', bullets: ['Programs can react to location.', 'Sensor values make movement context-aware.'] },
+  l11: { summary: 'You combined multiple conditions with logic operators.', bullets: ['AND is strict, OR is flexible.', 'Complex behavior comes from composing small rules.'] },
+  l12: { summary: 'You inverted behavior by wrapping a rule with NOT.', bullets: ['NOT flips true and false.', 'Inversion is useful for opposite-case handling.'] },
+  l13: { summary: 'You created your first variable and stored state.', bullets: ['Variables are memory boxes.', 'Naming variables clearly helps later lessons.'] },
+  l14: { summary: 'You updated stored state during runtime.', bullets: ['Change variable tracks progress over time.', 'Small increments/decrements create dynamic systems.'] },
+  l15: { summary: 'You read variable values inside logic decisions.', bullets: ['Get variable connects memory to behavior.', 'State-driven conditions are core to game logic.'] },
+  l16: { summary: 'You mixed loops with memory updates.', bullets: ['Repeated state changes build counters and timers.', 'Loop + variable is a foundational pattern.'] },
+  l17: { summary: 'You used Y position sensing to control actions.', bullets: ['Vertical position can trigger behavior.', 'Sensors and rules create responsive scripts.'] },
+  l18: { summary: 'You controlled timing with wait-until logic.', bullets: ['Execution can pause for a condition.', 'This helps coordinate multi-step sequences.'] },
+  l19: { summary: 'You used repeat-until to stop looping intentionally.', bullets: ['Stop conditions prevent endless loops.', 'Loop exits are just as important as loop starts.'] },
+  l20: { summary: 'You used heading as a condition input.', bullets: ['Direction can drive rule-based behavior.', 'Orientation checks improve movement control.'] },
+  l21: { summary: 'You built a cleaner setup phase before drawing.', bullets: ['Style setup makes output consistent.', 'Organized startup improves readability.'] },
+  l22: { summary: 'You integrated style setup with a circle drawing action.', bullets: ['Shape blocks speed up creation.', 'Radius choices strongly affect composition.'] },
+  l23: { summary: 'You used polygon parameters to generate shape variants.', bullets: ['Side count changes geometry instantly.', 'Length tuning controls size and spacing.'] },
+  l24: { summary: 'You combined setup, loops, and conditions in one flow.', bullets: ['Systems thinking means connecting multiple concepts.', 'Layered logic creates more intentional output.'] },
+  l25: { summary: 'You debugged by repairing structure and connections.', bullets: ['Many bugs come from missing links.', 'Rebuild and retest is a strong debugging habit.'] },
+  l26: { summary: 'You corrected block choices to match target behavior.', bullets: ['Choosing the right block matters.', 'Turn + move pairing is essential for closed shapes.'] },
+  l27: { summary: 'You used fast test cycles to stabilize behavior.', bullets: ['Clear-and-rerun improves iteration speed.', 'Slower playback reveals subtle mistakes.'] },
+  l28: { summary: 'You remixed with multiple block categories in one script.', bullets: ['Creative variety grows from block combinations.', 'Remixing is a practical invention skill.'] },
+  l29: { summary: 'You built a mini system with loops, rules, and shapes.', bullets: ['Structured creativity beats random block stacking.', 'Behavior rules can shape visual style.'] },
+  l30: { summary: 'You practiced recursion concepts with self-calling logic.', bullets: ['Recursive flows need a clear stop rule.', 'Counter-based stopping prevents infinite recursion.'] },
+  l31: { summary: 'You completed a capstone by combining core systems.', bullets: ['Full projects use setup, state, loops, and rules together.', 'Complex results come from simple blocks composed well.'] },
+  l32: { summary: 'You added backward motion for better movement control.', bullets: ['Reverse steps help symmetry and repositioning.', 'Direction control is more than turning.'] },
+  l33: { summary: 'You positioned the turtle precisely with coordinates.', bullets: ['Jump-to is ideal for exact placement.', 'Coordinate control improves layout planning.'] },
+  l34: { summary: 'You used center reset to simplify multi-part drawings.', bullets: ['Center is a reliable anchor point.', 'Reset blocks reduce drift between sections.'] },
+  l35: { summary: 'You set an exact heading before movement.', bullets: ['Deterministic angles improve repeatability.', 'Heading setup prevents accidental orientation errors.'] },
+  l36: { summary: 'You introduced randomness through color changes.', bullets: ['Randomness creates playful variation.', 'Same logic can yield varied visuals each run.'] },
+  l37: { summary: 'You used a dedicated line primitive effectively.', bullets: ['Single-purpose shape blocks speed workflows.', 'Length control makes line output predictable.'] },
+  l38: { summary: 'You drew parameterized rectangles with width and height.', bullets: ['Two parameters produce many box styles.', 'Dimension tuning changes proportion and design feel.'] },
+  l39: { summary: 'You computed dynamic values with math operators.', bullets: ['Math blocks make motion adaptive.', 'Expressions reduce hardcoded constants.'] },
+  l40: { summary: 'You tested direct boolean values in conditions.', bullets: ['Boolean blocks help validate logic wiring.', 'True/false thinking is core to control flow.'] },
+  l41: { summary: 'You created and edited text values for scripts.', bullets: ['Strings label keys, events, and notes.', 'Text data broadens what programs can describe.'] },
+  l42: { summary: 'You built list workflows: create, add, and retrieve.', bullets: ['Lists store ordered data.', 'Index access lets you reuse stored sequences.'] },
+  l43: { summary: 'You worked with object key-value state.', bullets: ['Objects group related properties.', 'Set/get keys make named data easy to manage.'] },
+  l44: { summary: 'You documented intent using comment blocks.', bullets: ['Readable code is easier to maintain.', 'Notes help collaborators and future-you.'] },
+  l45: { summary: 'You coordinated scripts using named events.', bullets: ['Send and receive must match event names.', 'Event-driven design supports modular systems.'] },
+  l46: { summary: 'You controlled zoom state with explicit canvas actions.', bullets: ['View controls aid inspection and demo quality.', 'Reset zoom keeps workspace navigation predictable.'] },
+  l47: { summary: 'You toggled grid visibility for alignment support.', bullets: ['Grid helps spacing and placement checks.', 'View aids are part of practical debugging.'] },
+  l48: { summary: 'You defined a reusable function block.', bullets: ['Functions package repeated logic.', 'Named actions improve program organization.'] },
+  l49: { summary: 'You called a custom function from the main script.', bullets: ['Definition + call is the full function workflow.', 'Main scripts stay cleaner when logic is extracted.'] }
+}
 
 function sanitizeLessonIds(rawIds) {
   if (!Array.isArray(rawIds)) return []
@@ -491,15 +740,6 @@ function getCompletedFromStorage() {
   }
 }
 
-function getOpenedFromStorage() {
-  try {
-    const raw = localStorage.getItem(OPENED_STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return sanitizeLessonIds(parsed)
-  } catch (error) {
-    return []
-  }
-}
 
 function getDefaultNumberForInput(blockType, inputName) {
   const defaults = {
@@ -576,6 +816,14 @@ function buildBlockSvgMarkup(block) {
   const height = Math.max(24, Math.ceil(bbox.height + padding * 2))
   const clone = root.cloneNode(true)
   clone.querySelectorAll('text').forEach((node) => node.setAttribute('fill', '#ffffff'))
+  // Keep editable text inputs readable in static lesson previews.
+  clone.querySelectorAll('.blocklyEditableText text, .blocklyFieldTextInput').forEach((node) => {
+    node.setAttribute('fill', '#111827')
+  })
+  clone.querySelectorAll('.blocklyEditableText rect, .blocklyFieldRect').forEach((node) => {
+    node.setAttribute('fill', '#ffffff')
+    node.setAttribute('stroke', '#94a3b8')
+  })
   clone.setAttribute('transform', `translate(${padding - bbox.x}, ${padding - bbox.y})`)
   const serializer = new XMLSerializer()
   const gMarkup = serializer.serializeToString(clone)
@@ -588,33 +836,6 @@ function InlineBlockToken({ type, svg }) {
       <span className='inline-block-svg' dangerouslySetInnerHTML={{ __html: svg || '' }} />
       <span className='inline-block-label'>{BLOCK_LABELS[type] || type}</span>
     </span>
-  )
-}
-
-function LessonGif({ src, caption, alt }) {
-  const baseUrl = process.env.PUBLIC_URL || ''
-  const fallbackSrc = `${baseUrl}/media/block-code-draw-demo.gif`
-  const initialSrc = src && /^https?:\/\//i.test(src)
-    ? src
-    : `${baseUrl}${String(src || '').startsWith('/') ? String(src || '') : `/${String(src || '')}`}`
-  const [imgSrc, setImgSrc] = useState(initialSrc || fallbackSrc)
-  useEffect(() => {
-    setImgSrc(initialSrc || fallbackSrc)
-  }, [initialSrc, fallbackSrc])
-
-  return (
-    <figure className='lesson-gif-callout'>
-      <img
-        className='lesson-gif-image'
-        src={imgSrc}
-        alt={alt || caption || 'Lesson animation preview'}
-        loading='lazy'
-        onError={() => {
-          if (imgSrc !== fallbackSrc) setImgSrc(fallbackSrc)
-        }}
-      />
-      {caption && <figcaption className='lesson-gif-caption'>{caption}</figcaption>}
-    </figure>
   )
 }
 
@@ -715,7 +936,7 @@ function blockUsagePrompt(type) {
     case 'draw_polygon':
       return 'Use this to create base shapes, then layer custom movement and style on top.'
     default:
-      return 'Use this as one of the core building blocks for today’s mission.'
+      return 'Use this as one of the core building blocks for this mission.'
   }
 }
 
@@ -743,7 +964,35 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
   const [runSequence, setRunSequence] = useState(0)
   const [stopSequence, setStopSequence] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const [showCompletionOverlay, setShowCompletionOverlay] = useState(false)
   const isIntroLesson = lesson.id === 'l0'
+  const lessonMedia = getLessonMedia(lesson)
+  const lessonContext = LESSON_REAL_WORLD_CONTEXT[lesson.id] || null
+  const ensureProcedureNames = (ws) => {
+    if (!ws) return
+    const procedureBlocks = ws.getAllBlocks(false).filter((block) =>
+      block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn'
+    )
+    procedureBlocks.forEach((block) => {
+      const name = (block.getFieldValue('NAME') || '').trim()
+      if (!name) {
+        block.setFieldValue('my_function', 'NAME')
+      }
+    })
+    const callBlocks = ws.getAllBlocks(false).filter((block) =>
+      block.type === 'procedures_callnoreturn' || block.type === 'procedures_callreturn'
+    )
+    callBlocks.forEach((block) => {
+      const name = (block.getFieldValue('NAME') || '').trim()
+      if (!name) {
+        try {
+          block.setFieldValue('my_function', 'NAME')
+        } catch (error) {
+          // Ignore if dropdown options are still initializing.
+        }
+      }
+    })
+  }
 
   useEffect(() => {
     initBlocks()
@@ -759,7 +1008,9 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
     })
     Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(starterXml), workspaceRef.current)
     ensureNumberInputs(workspaceRef.current)
+    ensureProcedureNames(workspaceRef.current)
     workspaceRef.current.addChangeListener(() => {
+      ensureProcedureNames(workspaceRef.current)
       setCommands(javascriptGenerator.workspaceToCode(workspaceRef.current))
     })
     setCommands(javascriptGenerator.workspaceToCode(workspaceRef.current))
@@ -791,6 +1042,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
   useEffect(() => {
     setMessage('')
     setChecking(false)
+    setShowCompletionOverlay(false)
     setRunSequence(0)
     setStopSequence(0)
     window.scrollTo({ top: 0, behavior: 'auto' })
@@ -805,7 +1057,9 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
     await new Promise((resolve) => setTimeout(resolve, 700))
     const passed = isLessonComplete(workspaceRef.current, lesson)
     if (passed) {
-      setMessage('Awesome work. Lesson complete.')
+      setMessage('')
+      setShowCompletionOverlay(true)
+      window.setTimeout(() => setShowCompletionOverlay(false), 1800)
       onComplete(lesson.id)
     } else {
       setMessage('Nice try. Follow the mission and steps, then check again.')
@@ -842,43 +1096,82 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
 
       {isIntroLesson ? (
         <>
-          <h3 className='lesson-mini-title'>Lesson Goal</h3>
-          <p className='lesson-long-text'>In this lesson, you will run your first tiny block program.</p>
-          <ul className='lesson-steps'>
-            <li>Blocks are pieces of code you can snap together.</li>
-            <li>Coding means giving clear instructions to a computer.</li>
-            <li>A program runs from the top block down.</li>
-            <li>Small changes in code can change what appears on the canvas.</li>
-          </ul>
-          <h3 className='lesson-mini-title'>Today&apos;s Mission</h3>
-          <p className='lesson-long-text'>
-            Build this tiny program: <strong>when Run clicked</strong> then <strong>move forward</strong>.
+          <p className='lesson-think-prompt'>
+            Turtle Journey theme: in every lesson, you are guiding one turtle artist with clearer and clearer instructions.
           </p>
-          <p className='lesson-long-text'>
-            Press Run and your character should move forward and draw a line.
-          </p>
+          <section className='lesson-focus-card'>
+            <h3 className='lesson-mini-title'>Lesson Goal</h3>
+            <p className='lesson-long-text'>In this lesson, you will run your first tiny block program.</p>
+            <ul className='lesson-steps'>
+              <li>Blocks are pieces of code you can snap together.</li>
+              <li>Coding means giving clear instructions to a computer.</li>
+              <li>A program runs from the top block down.</li>
+              <li>Small changes in code can change what appears on the canvas.</li>
+            </ul>
+          </section>
+          <section className='lesson-focus-card lesson-focus-card--mission'>
+            <h3 className='lesson-mini-title lesson-think-prompt'>Mission</h3>
+            <p className='lesson-long-text'>
+              Build this tiny program: <strong>when Run clicked</strong> then <strong>move forward</strong>.
+            </p>
+            <p className='lesson-long-text'>
+              Press Run and your character should move forward and draw a line.
+            </p>
+          </section>
         </>
       ) : (
         <>
-          <p className='lesson-long-text'>
-            In this lesson, your goal is to <strong>{lesson.goal.toLowerCase()}</strong>. We are doing this because
-            {` ${lesson.intention.toLowerCase()}`}.
+          <p className='lesson-think-prompt'>
+            Turtle Journey theme: this mission teaches your turtle a new drawing skill you will reuse in later lessons.
           </p>
-          <p className='lesson-long-text'>
-            Mission for this lesson: <strong>{lesson.task}</strong>.
-          </p>
+          <section className='lesson-focus-card'>
+            <h3 className='lesson-mini-title'>Why This Matters</h3>
+            <p className='lesson-long-text'>
+              In this lesson, your goal is to <strong>{lesson.goal.toLowerCase()}</strong>.
+            </p>
+            <p className='lesson-long-text'>
+              {lesson.intention}
+            </p>
+          </section>
+          <section className='lesson-focus-card lesson-focus-card--mission'>
+            <h3 className='lesson-mini-title lesson-think-prompt'>Mission</h3>
+            <p className='lesson-long-text'>
+              <strong>{lesson.task}</strong>
+            </p>
+          </section>
         </>
+      )}
+
+      {lessonMedia && (
+        <figure className='lesson-photo-callout'>
+          <img src={lessonMedia.src} alt={lessonMedia.alt} loading='lazy' referrerPolicy='no-referrer' />
+          <figcaption>{lessonMedia.caption}</figcaption>
+        </figure>
+      )}
+
+      {lessonContext && (
+        <section className='lesson-focus-card lesson-focus-card--context'>
+          <h3 className='lesson-mini-title'>Why Programmers Use This</h3>
+          <p className='lesson-long-text'><strong>Relevance:</strong> {lessonContext.relevance}</p>
+          <p className='lesson-long-text'><strong>Utility:</strong> {lessonContext.utility}</p>
+        </section>
+      )}
+
+      {LESSON_WORD_HELP[lesson.id] && (
+        <section className='lesson-focus-card'>
+          <h3 className='lesson-mini-title'>Word Help</h3>
+          <ul className='lesson-steps'>
+            {LESSON_WORD_HELP[lesson.id].map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {isIntroLesson && (
         <>
           <section className='lesson-mini-section'>
             <h3 className='lesson-mini-title'>Mini Studio 1: Run Your First Program</h3>
-            <LessonGif
-              src={lesson.media?.miniStudio1?.src}
-              caption={lesson.media?.miniStudio1?.caption}
-              alt={lesson.media?.miniStudio1?.alt}
-            />
           </section>
           <div className='studio-shell'>
             <div className='studio-toolbar'>
@@ -898,46 +1191,31 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
             <div className='studio-pane'>
               <div ref={mountRef} className='lesson-blockly-mount' />
             </div>
-            <div className='studio-pane'>
-              <div className='lesson-mini-canvas'>
+          <div className='studio-pane'>
+            <div className='lesson-mini-canvas'>
                 <DrawingCanvas
                   commands={commands}
                   runSequence={runSequence}
                   stopSequence={stopSequence}
                   onHighlight={() => {}}
-                  onGuessComplete={() => {}}
                   onRunStateChange={setIsRunning}
                   ghostPreview={lesson.ghostPreview}
-                  showClassification={false}
-                  showGuessPanel={false}
+                  defaultPointerStyle='turtle'
                 />
-              </div>
             </div>
           </div>
-          <section className='lesson-mini-section'>
-            <h3 className='lesson-mini-title'>Mini Studio 2: Change One Thing</h3>
-            <LessonGif
-              src={lesson.media?.miniStudio2?.src}
-              caption={lesson.media?.miniStudio2?.caption}
-              alt={lesson.media?.miniStudio2?.alt}
-            />
-            <p className='lesson-long-text'>
-              Change the number in <strong>move forward</strong>, predict if the line will be shorter or longer,
-              then press Run again.
-            </p>
-            <p className='lesson-long-text'>
-              Coding idea: small changes in code can create different results.
-            </p>
-            <p className='lesson-long-text'>
-              Try changing the value to 50, then 120. Run each time and compare line length.
-            </p>
-          </section>
-        </>
+          {showCompletionOverlay && (
+            <div className='studio-success-overlay' role='status' aria-live='polite'>
+              Awesome work. Lesson complete.
+            </div>
+          )}
+        </div>
+      </>
       )}
 
       <section className='lesson-block-focus-grid'>
         {lesson.focusBlocks.map((type) => (
-          <article key={type} className='lesson-block-focus-item'>
+          <article key={type} className='lesson-block-focus-item lesson-focus-card'>
             <InlineBlockToken type={type} svg={blockPreviews[type]} />
             <p className='lesson-long-text'>
               {BLOCK_TEACHING[type] || 'Use this block as part of your solution in this lesson.'}{' '}
@@ -948,7 +1226,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
       </section>
 
       {isIntroLesson && (
-        <section className='lesson-mini-section'>
+        <section className='lesson-mini-section lesson-focus-card'>
           <h3 className='lesson-mini-title'>Debugging Help</h3>
           <ul className='lesson-steps'>
             <li>Make sure move forward is snapped under when Run clicked.</li>
@@ -984,32 +1262,35 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
               runSequence={runSequence}
               stopSequence={stopSequence}
               onHighlight={() => {}}
-              onGuessComplete={() => {}}
               onRunStateChange={setIsRunning}
               ghostPreview={lesson.ghostPreview}
-              showClassification={false}
-              showGuessPanel={false}
+              defaultPointerStyle='turtle'
             />
           </div>
         </div>
+        {showCompletionOverlay && (
+          <div className='studio-success-overlay' role='status' aria-live='polite'>
+            Awesome work. Lesson complete.
+          </div>
+        )}
       </div>}
       <p className={`lesson-status-message ${isDone ? 'done' : ''}`}>{message}</p>
-      <p className='lesson-long-text'>{lessonChallengeText(lesson)}</p>
+      <section className='lesson-focus-card lesson-focus-card--try'>
+        <h3 className='lesson-mini-title lesson-think-prompt'>Try This Next</h3>
+        <p className='lesson-long-text'>{lessonChallengeText(lesson)}</p>
+      </section>
       <hr className='lesson-divider' />
 
-      <section className='lesson-takeaway'>
+      <section className='lesson-takeaway lesson-focus-card lesson-focus-card--recap'>
         <h3>After-Lesson Takeaways</h3>
         {!isDone && <div className='takeaway-lock'>[Locked]</div>}
         {isDone ? (
           <>
-            <p>
-              You completed this lesson, which means you successfully combined the right block types and connected
-              them in a working structure.
-            </p>
+            <p>{(LESSON_TAKEAWAYS[lesson.id] && LESSON_TAKEAWAYS[lesson.id].summary) || 'You completed this lesson and reached its mission goal.'}</p>
             <ul>
-              <li>You practiced turning an idea into a block structure.</li>
-              <li>You used targeted blocks to solve one focused mission.</li>
-              <li>You now have a stronger base for the next lesson.</li>
+              {((LESSON_TAKEAWAYS[lesson.id] && LESSON_TAKEAWAYS[lesson.id].bullets) || ['You practiced targeted block usage for this mission.', 'You are ready to build on this in the next lesson.']).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
           </>
         ) : (
@@ -1031,7 +1312,6 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
 
 export default function LessonsPage({ onBack }) {
   const [completed, setCompleted] = useState(getCompletedFromStorage)
-  const [openedLessonIds, setOpenedLessonIds] = useState(getOpenedFromStorage)
   const [selectedLessonId, setSelectedLessonId] = useState(null)
   const [catalogVisuals, setCatalogVisuals] = useState({})
 
@@ -1043,20 +1323,6 @@ export default function LessonsPage({ onBack }) {
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
   }, [completed])
-
-  useEffect(() => {
-    const cleaned = sanitizeLessonIds(openedLessonIds)
-    if (cleaned.length !== openedLessonIds.length || cleaned.some((id, index) => id !== openedLessonIds[index])) {
-      setOpenedLessonIds(cleaned)
-      return
-    }
-    localStorage.setItem(OPENED_STORAGE_KEY, JSON.stringify(cleaned))
-  }, [openedLessonIds])
-
-  useEffect(() => {
-    if (!selectedLessonId) return
-    setOpenedLessonIds((prev) => (prev.includes(selectedLessonId) ? prev : [...prev, selectedLessonId]))
-  }, [selectedLessonId])
 
   useEffect(() => {
     initBlocks()
@@ -1078,7 +1344,7 @@ export default function LessonsPage({ onBack }) {
     })
 
     const previews = {}
-    LESSONS_ENRICHED.forEach((lesson) => {
+    LESSONS_ORDERED.forEach((lesson) => {
       const type = lesson.focusBlocks.find((blockType) => Blockly.Blocks[blockType])
       if (!type) return
       try {
@@ -1102,19 +1368,19 @@ export default function LessonsPage({ onBack }) {
 
   const completedCount = completed.length
   const completedSet = useMemo(() => new Set(completed), [completed])
-  const openedSet = useMemo(() => new Set(openedLessonIds), [openedLessonIds])
-  const progressPercent = Math.round((completedCount / LESSONS_ENRICHED.length) * 100)
-  const selectedIndex = LESSONS_ENRICHED.findIndex((lesson) => lesson.id === selectedLessonId)
-  const selectedLesson = selectedIndex >= 0 ? LESSONS_ENRICHED[selectedIndex] : null
+  const progressPercent = Math.round((completedCount / LESSONS_ORDERED.length) * 100)
+  const selectedIndex = LESSONS_ORDERED.findIndex((lesson) => lesson.id === selectedLessonId)
+  const selectedLesson = selectedIndex >= 0 ? LESSONS_ORDERED[selectedIndex] : null
 
-  const groupedByLevel = useMemo(() => {
-    const map = new Map()
-    LESSONS_ENRICHED.forEach((lesson) => {
-      if (!map.has(lesson.level)) map.set(lesson.level, [])
-      map.get(lesson.level).push(lesson)
-    })
-    return Array.from(map.entries()).sort((a, b) => a[0] - b[0])
-  }, [])
+  const featuredLessonIcons = {
+    l0: '🐢',
+    l6: '🟦',
+    l9: '🤔',
+    l13: '🧠',
+    l27: '🐞',
+    l30: '🌀',
+    l41: '🔤'
+  }
 
   const handleComplete = (lessonId) => {
     setCompleted((prev) => (prev.includes(lessonId) ? prev : [...prev, lessonId]))
@@ -1140,21 +1406,24 @@ export default function LessonsPage({ onBack }) {
           <div className='header-centre lessons-header-centre'>
             <div className='word-badge'>
               <span className='word-badge-label'>Learning Path:</span>
-              <span className='word-badge-word'>{completedCount}/{LESSONS_ENRICHED.length} complete</span>
+              <span className='word-badge-word'>{completedCount}/{LESSONS_ORDERED.length} complete</span>
             </div>
           </div>
 
           <div className='header-actions lessons-header-actions'>
+            <button type='button' className='catalog-back-btn' onClick={onBack}>
+              ← Back to Home
+            </button>
             {selectedLesson && (
               <button type='button' className='catalog-back-btn' onClick={() => setSelectedLessonId(null)}>
-                Back to All {LESSONS_ENRICHED.length} Lessons
+                ← Back to All {LESSONS_ORDERED.length} Lessons
               </button>
             )}
           </div>
         </header>
 
         <section className='lessons-hero-meta'>
-          <p className='hero-sub'>Block, Code, Draw learning path with {LESSONS_ENRICHED.length} lessons.</p>
+          <p className='hero-sub'>Block, Code, Draw learning path with {LESSONS_ORDERED.length} lessons.</p>
           <div className='lessons-progress-wrap'>
             <div className='lessons-progress-bar'><div style={{ width: `${progressPercent}%` }} /></div>
             <span>{progressPercent}% progress</span>
@@ -1163,49 +1432,45 @@ export default function LessonsPage({ onBack }) {
 
         {!selectedLesson && (
           <section className='lesson-catalog'>
-            {groupedByLevel.map(([levelNumber, lessons]) => (
-              <section key={levelNumber} className='catalog-level'>
-                <h2>Level {levelNumber}: {LEVEL_TITLES[levelNumber]}</h2>
-                <p className='catalog-level-sub'>
-                  {lessons.filter((lesson) => completedSet.has(lesson.id)).length}/{lessons.length} lessons complete
-                </p>
-                <div className='catalog-grid'>
-                  {lessons.map((lesson) => {
-                    const done = completedSet.has(lesson.id)
-                    const opened = openedSet.has(lesson.id)
-                    return (
-                      <button
-                        key={lesson.id}
-                        type='button'
-                        className={`catalog-card ${done ? 'is-done' : ''} ${opened ? 'is-opened' : ''}`}
-                        onClick={() => setSelectedLessonId(lesson.id)}
-                      >
-                        <div className='catalog-card-top'>
-                          <span className='catalog-lesson-index'>Lesson {lesson.lessonNumber}</span>
-                          <span className='catalog-status-pills'>
-                            {done ? (
-                              <span className='lesson-pill done'>✅ Done</span>
-                            ) : (
-                              <span className='lesson-pill todo'>▶️ Start</span>
-                            )}
-                            {opened && <span className='lesson-pill opened'>👀 Opened</span>}
-                          </span>
-                        </div>
-                        <div className='catalog-card-visual-wrap'>
-                          {catalogVisuals[lesson.id] ? (
-                            <span className='catalog-card-block-preview' dangerouslySetInnerHTML={{ __html: catalogVisuals[lesson.id] }} />
-                          ) : (
-                            <span className='catalog-card-fallback'>{lessonFallbackVisual(lesson.level)}</span>
-                          )}
-                        </div>
-                        <h3>{lesson.title}</h3>
-                        <p>{lesson.goal}</p>
-                      </button>
-                    )
-                  })}
-                </div>
-              </section>
-            ))}
+            <div className='catalog-grid'>
+              {LESSONS_ORDERED.map((lesson) => {
+                const done = completedSet.has(lesson.id)
+                return (
+                  <button
+                    key={lesson.id}
+                    type='button'
+                    className={'catalog-card level-' + lesson.level + (done ? ' is-done' : '')}
+                    onClick={() => setSelectedLessonId(lesson.id)}
+                  >
+                    <div className='catalog-card-top'>
+                      <span className='catalog-lesson-index'>Lesson {lesson.lessonNumber}</span>
+                      <span className='catalog-status-pills'>
+                        {done ? (
+                          <span className='lesson-pill done'>Done</span>
+                        ) : (
+                          <span className='lesson-pill todo'>Start</span>
+                        )}
+                      </span>
+                    </div>
+                    <div className='catalog-card-level-badge'>
+                      <span className='catalog-level-chip'>Lv {lesson.level}</span>
+                      <span>{LEVEL_TITLES[lesson.level]}</span>
+                    </div>
+                    <div className='catalog-card-visual-wrap'>
+                      {featuredLessonIcons[lesson.id] ? (
+                        <span className='catalog-card-feature-emoji'>{featuredLessonIcons[lesson.id]}</span>
+                      ) : catalogVisuals[lesson.id] ? (
+                        <span className='catalog-card-block-preview' dangerouslySetInnerHTML={{ __html: catalogVisuals[lesson.id] }} />
+                      ) : (
+                        <span className='catalog-card-fallback'>{lessonFallbackVisual(lesson.level)}</span>
+                      )}
+                    </div>
+                    <h3>{lesson.title}</h3>
+                    <p>{lesson.goal}</p>
+                  </button>
+                )
+              })}
+            </div>
           </section>
         )}
 
@@ -1216,18 +1481,19 @@ export default function LessonsPage({ onBack }) {
             onComplete={handleComplete}
             onBackToCatalog={() => setSelectedLessonId(null)}
             onPrev={() => {
-              if (selectedIndex > 0) setSelectedLessonId(LESSONS_ENRICHED[selectedIndex - 1].id)
+              if (selectedIndex > 0) setSelectedLessonId(LESSONS_ORDERED[selectedIndex - 1].id)
             }}
             onNext={() => {
-              if (selectedIndex < LESSONS_ENRICHED.length - 1) {
-                setSelectedLessonId(LESSONS_ENRICHED[selectedIndex + 1].id)
+              if (selectedIndex < LESSONS_ORDERED.length - 1) {
+                setSelectedLessonId(LESSONS_ORDERED[selectedIndex + 1].id)
               }
             }}
             canPrev={selectedIndex > 0}
-            canNext={selectedIndex < LESSONS_ENRICHED.length - 1}
+            canNext={selectedIndex < LESSONS_ORDERED.length - 1}
           />
         )}
       </main>
     </div>
   )
 }
+

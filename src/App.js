@@ -638,9 +638,9 @@ function AppInner() {
           <button
             className='exit-button'
             onClick={handleExit}
-            title='Exit to home'
+            title='Back to home'
           >
-            <span>X</span> Exit
+            <span>←</span> Back to Home
           </button>
         </div>
       </header>
@@ -662,19 +662,25 @@ function AppInner() {
               runSequence={runSequence}
               stopSequence={stopSequence}
               onHighlight={setHighlightBlockId}
-              onGuessComplete={handleGuessComplete}
               onChallengeScore={handleChallengeScore}
               onRunStateChange={setIsRunning}
               ghostPreview={ghostAssistEnabled ? activeGhostPreview : null}
               scoreGhostPreview={ghostAssistEnabled ? activeGhostPreview : null}
-              showClassification={gameMode === 'classic'}
-              showGuessPanel={gameMode !== 'classic'}
             />
           </section>
           <section className='chat-section'>
             <ChatWindow
               messages={chatMessages}
               onModelStatusChange={setAiModelStatus}
+              chatContext={{
+                mode: gameMode,
+                selectedWord,
+                challengeTitle: selectedChallenge?.title || '',
+                challengeHint: selectedChallenge?.hint || '',
+                timerEnabled,
+                ghostAssistEnabled,
+                runCount
+              }}
               onSend={(text, meta) =>
                 setChatMessages((prev) => [
                   ...prev,

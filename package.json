@@ -9,10 +9,6 @@
     "@mediapipe/tasks-vision": "^0.10.32",
     "@mlc-ai/web-llm": "^0.2.83",
     "@reactour/tour": "^3.8.0",
-    "@tensorflow/tfjs": "^4.22.0",
-    "@tensorflow/tfjs-backend-cpu": "^4.22.0",
-    "@tensorflow/tfjs-core": "^4.22.0",
-    "@tensorflow/tfjs-tflite": "^0.0.1-alpha.10",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -29,6 +25,7 @@
   "scripts": {
     "start": "cross-env DISABLE_ESLINT_PLUGIN=true GENERATE_SOURCEMAP=false react-scripts start",
     "build": "cross-env DISABLE_ESLINT_PLUGIN=true GENERATE_SOURCEMAP=false react-scripts build",
+    "generate:quickdraw-local": "node scripts/generate-quickdraw-local.cjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "deploy": "gh-pages -d build"

@@ -15,7 +15,7 @@ function strokeToPath(stroke = []) {
 
 function DrawingPreview({ drawing, size = 56 }) {
   const normalizedStrokes = useMemo(() => {
-    const simplified = simplifyDrawing(drawing, 2.4)
+    const simplified = simplifyDrawing(drawing, 3.8)
     return normalizeStrokesToBox(simplified, size, 5)
   }, [drawing, size])
 
