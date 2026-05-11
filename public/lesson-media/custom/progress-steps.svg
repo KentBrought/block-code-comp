@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">A loop can fill progress step by step</text>
+  <g font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#334155">
+    <text x="90" y="170">25%</text>
+    <text x="90" y="245">50%</text>
+    <text x="90" y="320">75%</text>
+    <text x="90" y="395">100%</text>
+  </g>
+  <rect x="180" y="135" width="510" height="42" rx="21" fill="#e2e8f0"/>
+  <rect x="180" y="135" width="128" height="42" rx="21" fill="#60a5fa"/>
+  <rect x="180" y="210" width="510" height="42" rx="21" fill="#e2e8f0"/>
+  <rect x="180" y="210" width="255" height="42" rx="21" fill="#38bdf8"/>
+  <rect x="180" y="285" width="510" height="42" rx="21" fill="#e2e8f0"/>
+  <rect x="180" y="285" width="383" height="42" rx="21" fill="#818cf8"/>
+  <rect x="180" y="360" width="510" height="42" rx="21" fill="#e2e8f0"/>
+  <rect x="180" y="360" width="510" height="42" rx="21" fill="#22c55e"/>
+</svg>

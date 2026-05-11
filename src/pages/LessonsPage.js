@@ -129,57 +129,311 @@ const BLOCK_TEACHING = {
   math_change: 'This increases or decreases a stored value. It is a core block for tracking progress over time.'
 }
 
+const localLessonMedia = (src, caption, options = {}) => {
+  const { alt, showReferenceLabel, imageSize } = options
+  return {
+    src: `${process.env.PUBLIC_URL || ''}${src}`,
+    caption,
+    alt: alt ?? caption,
+    showReferenceLabel: !!showReferenceLabel,
+    imageSize: imageSize || 'default'
+  }
+}
+
 const LESSON_MEDIA = {
-  l0: { query: 'kids coding blocks', caption: 'Coding starts with one clear instruction at a time.' },
-  l1: { query: 'start button game ui', caption: 'Programs need a clear start trigger.' },
-  l2: { query: 'step by step arrows', caption: 'Instruction order changes what happens.' },
-  l3: { query: 'pen drawing hand', caption: 'Pen state controls when drawing happens.' },
-  l4: { query: 'clean whiteboard erase', caption: 'Resetting first makes testing easier.' },
-  l5: { query: 'repeating pattern tiles', caption: 'Loops reduce repetitive code.' },
-  l6: { query: 'square geometry line drawing', caption: 'Squares come from repeated move and turn steps.' },
-  l7: { query: 'animation motion sequence', caption: 'Continuous loops power animation-like behavior.' },
-  l8: { query: 'mandala geometric pattern', caption: 'Nested loops build richer repeated patterns.' },
-  l9: { query: 'decision tree logic', caption: 'If-blocks run actions only when a rule is true.' },
-  l10: { query: 'coordinate grid x axis', caption: 'Position-aware rules use live coordinate data.' },
-  l11: { query: 'logic and or diagram', caption: 'AND/OR combine checks for smarter behavior.' },
-  l12: { query: 'opposite concept mirror', caption: 'NOT flips a condition to its opposite.' },
-  l13: { query: 'memory storage concept', caption: 'Variables store values your program can reuse.' },
-  l14: { query: 'counter number increment', caption: 'Changing variables tracks progress over time.' },
-  l15: { query: 'dashboard data readout', caption: 'Reading stored values drives dynamic decisions.' },
-  l16: { query: 'progress counter loop', caption: 'Loops and state updates are core programming patterns.' },
-  l17: { query: 'vertical movement graph', caption: 'Y-position can act like a motion sensor.' },
-  l18: { query: 'wait signal traffic light', caption: 'Wait-until coordinates timing between actions.' },
-  l19: { query: 'finish line target', caption: 'Repeat-until loops stop when the goal is reached.' },
-  l20: { query: 'compass heading direction', caption: 'Heading checks control directional logic.' },
-  l21: { query: 'settings setup interface', caption: 'Setup blocks create consistent starting conditions.' },
-  l22: { query: 'circle shape drawing', caption: 'Circle primitives are useful for fast shape building.' },
-  l23: { query: 'polygon geometry shapes', caption: 'Polygon parameters generate many shape types.' },
-  l24: { query: 'workflow system diagram', caption: 'Real scripts combine setup, loops, and conditions.' },
-  l25: { query: 'debugging checklist code', caption: 'Debugging often starts with fixing structure.' },
-  l26: { query: 'fix code bug', caption: 'Correct block choices produce correct behavior.' },
-  l27: { query: 'software bug debugging', caption: 'Small test cycles make bugs easier to isolate.' },
-  l28: { query: 'creative coding art', caption: 'Remixing known blocks helps create new ideas.' },
-  l29: { query: 'prototype concept board', caption: 'Mini systems connect multiple programming ideas.' },
-  l30: { query: 'fractal spiral recursion', caption: 'Recursion repeats a smaller step with a stop rule.' },
-  l31: { query: 'capstone project build', caption: 'Capstone lessons combine all core skills together.' },
-  l32: { query: 'forward backward arrows', caption: 'Backward movement improves control and symmetry.' },
-  l33: { query: 'map pin coordinates', caption: 'Jump-to blocks place objects precisely.' },
-  l34: { query: 'center target bullseye', caption: 'Returning to center gives a reliable anchor point.' },
-  l35: { query: 'angle protractor direction', caption: 'Set heading creates predictable orientation.' },
-  l36: { query: 'color palette random', caption: 'Random color adds variation to repeated drawings.' },
-  l37: { query: 'line drawing tool vector', caption: 'Line primitives are fundamental graphics tools.' },
-  l38: { query: 'rectangle wireframe boxes', caption: 'Rectangle width/height controls many layout-like shapes.' },
-  l39: { query: 'math formula calculator', caption: 'Math operators make movement values dynamic.' },
-  l40: { query: 'true false toggle', caption: 'Boolean values are core to control flow.' },
-  l41: { query: 'text labels typography', caption: 'String values carry names, labels, and messages.' },
-  l42: { query: 'ordered list checklist', caption: 'Lists store ordered values and enable indexed access.' },
-  l43: { query: 'object key value data', caption: 'Objects organize named properties and state.' },
-  l44: { query: 'code comments notes', caption: 'Comments explain intent for teammates and future-you.' },
-  l45: { query: 'message broadcast communication', caption: 'Event messages coordinate separate scripts.' },
-  l46: { query: 'zoom in zoom out ui', caption: 'Zoom controls help inspect details while building.' },
-  l47: { query: 'grid alignment blueprint', caption: 'Grid overlays support spacing and alignment checks.' },
-  l48: { query: 'modular code function', caption: 'Functions package reusable behavior into one unit.' },
-  l49: { query: 'function call flowchart', caption: 'Calling functions keeps the main script clean.' }
+  l0: [localLessonMedia(
+    '/lesson-media/photos/kid-coding.jpg',
+    'A welcoming desk setup with a screen and space to try things. In this first lesson it stands for the same idea as your blocks: one clear place to press Run and see the turtle respond right away.',
+    { imageSize: 'medium' }
+  )],
+  l2: [localLessonMedia(
+    '/lesson-media/photos/flowchart.png',
+    'A flowchart reads top to bottom with arrows between steps, just like your stack of blocks. Each box is one instruction in order; changing the order would change the path the flow follows.',
+    { imageSize: 'large' }
+  )],
+  l3: [
+    localLessonMedia(
+      '/lesson-media/custom/pen-down.svg',
+      'Pen down means the turtle leaves ink behind when it moves, like a marker pressed to paper. You use this when you want every forward step to show up as part of your drawing.',
+      { imageSize: 'medium' }
+    ),
+    localLessonMedia(
+      '/lesson-media/custom/pen-up.svg',
+      'Pen up means the turtle can travel without drawing, like lifting a pencil to jump to a new corner. Pair it with pen down so you can separate shapes or move across the canvas cleanly.',
+      { imageSize: 'medium' }
+    )
+  ],
+  l4: [localLessonMedia(
+    '/lesson-media/photos/whiteboard.jpg',
+    'A wiped board is a fresh run with no old marks. That matches clear screen in code: you reset the canvas so the next Run shows only what the new program did, which makes testing and comparing runs much easier.',
+    { imageSize: 'medium' }
+  )],
+  l5: [localLessonMedia(
+    '/lesson-media/photos/repeating-pattern.jpg',
+    'Tiles or stripes repeat the same unit over and over. A repeat loop does the same for code: write the pattern once and let the computer stamp it many times instead of duplicating blocks by hand.',
+    { imageSize: 'medium' }
+  )],
+  l6: [localLessonMedia(
+    '/lesson-media/custom/square-simple.svg',
+    'A square is four equal sides with a turn at each corner. On the turtle, that is the same move-and-turn pattern repeated four times, which is why a loop fits this shape so naturally.'
+  )],
+  l7: [localLessonMedia(
+    '/lesson-media/photos/bouncing-ball.gif',
+    'The ball keeps moving in a cycle you can watch forever. That is the spirit of a forever loop in your program: the same body of blocks runs again and again until you stop it, which is how many animations stay alive.',
+    { imageSize: 'large' }
+  )],
+  l8: [localLessonMedia(
+    '/lesson-media/photos/mandala.jpg',
+    'Radial art repeats a small motif around a center. Nested loops often build that kind of structure: an outer loop turns the turtle and an inner loop draws the motif each time, like rings of detail around a hub.',
+    { imageSize: 'large' }
+  )],
+  l9: [localLessonMedia(
+    '/lesson-media/photos/decision-tree.png',
+    'Each branch is a different choice after a question. Your if block does something similar: when the condition is true the turtle follows one set of blocks, and when it is false it can skip them or follow an else path.',
+    { imageSize: 'large' }
+  )],
+  l10: [localLessonMedia(
+    '/lesson-media/custom/cartesian-grid.svg',
+    'The grid labels left and right with x. In this lesson you read the turtle x position so the program can react to how far left or right it has moved, like checking a marker on a number line.',
+    { imageSize: 'large' }
+  )],
+  l11: [
+    localLessonMedia(
+      '/lesson-media/custom/venn-and.svg',
+      'Both circles must overlap for the middle region. In code, AND means every part of the condition has to be true at once before the combined rule passes.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    ),
+    localLessonMedia(
+      '/lesson-media/custom/venn-or.svg',
+      'Either circle can cover the answer. OR means if any single test is true, the whole condition can still pass, which is useful when more than one situation should count as good enough.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    )
+  ],
+  l12: [
+    localLessonMedia(
+      '/lesson-media/photos/open-state.jpg',
+      'Think of this as the "true" side of a simple rule, like a door you describe as open. NOT in your program flips whatever condition you have so the turtle reacts to the opposite case.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    ),
+    localLessonMedia(
+      '/lesson-media/photos/closed-state.jpg',
+      'The same kind of object in the opposite state stands for "false" or the negated case. Comparing the two photos mirrors how NOT turns a yes into a no in your if and wait logic.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    )
+  ],
+  l13: [localLessonMedia(
+    '/lesson-media/photos/repeating-pattern.jpg',
+    'Repeated boxes suggest many slots with labels. A variable is a named slot the computer remembers: you store a value once and read it later by name, instead of rewriting the same number everywhere.',
+    { imageSize: 'medium' }
+  )],
+  l14: [localLessonMedia(
+    '/lesson-media/custom/counter-123.svg',
+    'The count steps from 1 to 2 to 3. change variable works the same way: each time that part of the program runs, the stored value moves up or down so scores, timers, and levels can evolve.',
+    { imageSize: 'medium' }
+  )],
+  l15: [localLessonMedia(
+    '/lesson-media/photos/dashboard.jpg',
+    'A dashboard shows live numbers you can read at a glance. When your program uses get variable inside an if or a compare block, it is reading the current stored value the way a driver reads the speed on a dial.',
+    { imageSize: 'medium' }
+  )],
+  l16: [localLessonMedia(
+    '/lesson-media/custom/progress-steps.svg',
+    'Steps fill in one after another as work completes. Loops that run many times often update a variable each pass so the turtle (or your logic) can tell how far along the sequence has gotten.',
+    { imageSize: 'large' }
+  )],
+  l17: [localLessonMedia(
+    '/lesson-media/custom/cartesian-grid.svg',
+    'Vertical position is y on the grid. Checking turtle y is how your program knows how high or low the artist is, which is the same information games use for jumping, falling, and floor tests.',
+    { imageSize: 'large' }
+  )],
+  l18: [localLessonMedia(
+    '/lesson-media/photos/traffic-light.jpg',
+    'Traffic waits for the light to match the rule "green means go." wait until pauses your stack until a condition becomes true, so later blocks only run when the world (or the turtle) is ready.',
+    { imageSize: 'medium' }
+  )],
+  l19: [localLessonMedia(
+    '/lesson-media/photos/finish-line.jpg',
+    'A race ends when you cross the line. repeat until keeps running the loop body until its condition finally becomes true, then it stops—like repeating steps until you reach a clear finish.',
+    { imageSize: 'medium' }
+  )],
+  l20: [localLessonMedia(
+    '/lesson-media/photos/compass.jpg',
+    'The needle shows which way is forward. turtle heading is the angle your artist faces; reading it lets the program branch or adjust when the turtle points a certain direction.',
+    { imageSize: 'medium' }
+  )],
+  l21: [localLessonMedia(
+    '/lesson-media/photos/setup-workspace.jpg',
+    'Tools laid out before the main build are like the first blocks in a script: color, pen size, or starting position. Separating setup from the main loop keeps long programs easier to read and change.',
+    { imageSize: 'medium' }
+  )],
+  l22: [localLessonMedia(
+    '/lesson-media/custom/circle-simple.svg',
+    'A circle from one radius is a single call in many graphics systems. draw circle in your lesson packages that idea: one block with a size parameter instead of many tiny segments.',
+    { imageSize: 'medium' }
+  )],
+  l23: [localLessonMedia(
+    '/lesson-media/custom/polygon-annotated.svg',
+    'Sides and corners are labeled so you can see what "number of sides" and "length" mean. draw polygon turns those two numbers into a whole shape, the same way functions wrap detail behind simple inputs.',
+    { imageSize: 'large' }
+  )],
+  l24: [localLessonMedia(
+    '/lesson-media/photos/flowchart.png',
+    'Real programs mix setup, loops, and decisions in one flow. This chart is a paper version of that structure: each section connects to the next, similar to how your capstone stack chains many kinds of blocks.',
+    { imageSize: 'large' }
+  )],
+  l25: [localLessonMedia(
+    '/lesson-media/photos/puzzle-connection.jpg',
+    'Debugging is finding the missing or twisted link. When output looks wrong, you reconnect logic step by step—check conditions, loops, and variable values until the picture matches what you intended.',
+    { imageSize: 'medium' }
+  )],
+  l26: [
+    localLessonMedia(
+      '/lesson-media/photos/tool-workbench.jpg',
+      'One arrangement of tools fits a specific task. Picking the right block is the same habit: the move that matches your goal is clearer and shorter than forcing the wrong block to act like a workaround.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    ),
+    localLessonMedia(
+      '/lesson-media/photos/tool-workspace.jpg',
+      'A different bench suggests a different job. Comparing setups is like comparing two code paths: small changes in which block you choose can completely change what the turtle draws.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    )
+  ],
+  l27: [localLessonMedia(
+    '/lesson-media/custom/bug-checklist.svg',
+    'A short checklist next to a bug icon is how professionals shrink big problems. Run often, change one thing, and re-check—your mini studio uses the same tight loop to get to green checks faster.',
+    { imageSize: 'large' }
+  )],
+  l28: [localLessonMedia(
+    '/lesson-media/photos/creative-remix.jpg',
+    'Mixing colors and materials is creative play. Remix lessons reward combining blocks you already know in new orders, which is how most real projects grow from small experiments into finished ideas.',
+    { imageSize: 'large' }
+  )],
+  l29: [localLessonMedia(
+    '/lesson-media/photos/mini-tool.jpg',
+    'Small modules snap together into a bigger helper. Designing with separate little behaviors mirrors how you will later split logic into clear chunks that each do one job well.',
+    { imageSize: 'medium' }
+  )],
+  l30: [
+    localLessonMedia(
+      '/lesson-media/photos/archimedean-spiral.png',
+      'Each ring repeats a similar step at a larger scale. Recursion in code calls the same idea with a simpler subproblem until a base case stops the chain, which produces spirals and growth patterns like this.',
+      { imageSize: 'hero' }
+    ),
+    localLessonMedia(
+      '/lesson-media/photos/fractal-tree.png',
+      'Each branch splits into smaller branches with the same shape. That self-similarity is the hallmark of recursive drawing: one rule applied again and again at different sizes until the detail is complete.',
+      { imageSize: 'hero' }
+    )
+  ],
+  l31: [localLessonMedia(
+    '/lesson-media/photos/kid-coding.jpg',
+    'A finished-looking project on screen is what you are building toward in the capstone: many features working together. The photo stands for integrating movement, color, logic, and maybe variables in one coherent piece.',
+    { imageSize: 'large' }
+  )],
+  l32: [localLessonMedia(
+    '/lesson-media/custom/arrows-forward-backward.svg',
+    'Forward and backward arrows share one line but opposite travel. move backward lets the turtle retrace distance without spinning around, which helps symmetry, undo-style paths, and tight corridors.',
+    { imageSize: 'large' }
+  )],
+  l33: [localLessonMedia(
+    '/lesson-media/custom/cartesian-grid.svg',
+    'A point sits at an exact (x, y) address on the plane. jump to uses those coordinates to teleport the turtle, which is how maps, games, and graphs place characters exactly where they need to be.',
+    { imageSize: 'large' }
+  )],
+  l34: [localLessonMedia(
+    '/lesson-media/photos/bullseye.jpg',
+    'The center ring is a fixed anchor everyone agrees on. go to center sends the turtle back to the middle of the canvas so multi-step drawings stay aligned after detours.',
+    { imageSize: 'medium' }
+  )],
+  l35: [localLessonMedia(
+    '/lesson-media/photos/protractor.jpg',
+    'Degrees measure rotation around a point. set heading sets the turtle angle in that same language so squares, stars, and polygons start from a direction you control precisely.',
+    { imageSize: 'large' }
+  )],
+  l36: [localLessonMedia(
+    '/lesson-media/photos/creative-remix.jpg',
+    'Paint and pigment splashes suggest variety. set random color gives your program that kind of surprise on each run while the rest of your logic stays the same.',
+    { imageSize: 'medium' }
+  )],
+  l37: [localLessonMedia(
+    '/lesson-media/photos/line-drawing.jpg',
+    'A single stroke has a clear start and length. draw line is the block version: one straight segment in the current heading without chaining many move blocks when you only need one span.',
+    { imageSize: 'medium' }
+  )],
+  l38: [localLessonMedia(
+    '/lesson-media/custom/rectangle-simple.svg',
+    'Width and height define a box in one go. draw rectangle packages two dimensions into one action, similar to how engines draw UI panels and rooms from simple measurements.',
+    { imageSize: 'medium' }
+  )],
+  l39: [localLessonMedia(
+    '/lesson-media/photos/math-workspace.jpg',
+    'Scratch paper with numbers and symbols is how people combine values by hand. math operator blocks do that inside the program so movement, waits, and comparisons can use computed results instead of fixed literals.',
+    { imageSize: 'large' }
+  )],
+  l40: [localLessonMedia(
+    '/lesson-media/custom/boolean-switch.svg',
+    'A switch is either on or off with no middle ground. true/false blocks plug into conditions so you can test flags, compare results, and wire logic that only allows two clear states.',
+    { imageSize: 'large' }
+  )],
+  l41: [localLessonMedia(
+    '/lesson-media/photos/text-labels.jpg',
+    'Written words carry meaning for humans. text values in your program label events, keys, and messages so the same logic can work with different words without rewriting the whole stack.',
+    { imageSize: 'medium' }
+  )],
+  l42: [localLessonMedia(
+    '/lesson-media/photos/ordered-checklist.jpg',
+    'Order matters: item two follows item one. Lists store values in sequence so your code can walk them in order, pick by index, or grow the series as the program runs.',
+    { imageSize: 'medium' }
+  )],
+  l43: [localLessonMedia(
+    '/lesson-media/custom/profile-card.svg',
+    'Named fields like name and score sit on one card. Objects group labeled data so you can read and update one property at a time, which mirrors forms, player stats, and settings in real apps.',
+    { imageSize: 'large' }
+  )],
+  l44: [localLessonMedia(
+    '/lesson-media/photos/sticky-notes.jpg',
+    'Notes remind you of something important later. Variables are the machine version: store a value under a name, then get variable wherever that remembered detail should influence the next step.',
+    { imageSize: 'medium' }
+  )],
+  l45: [
+    localLessonMedia(
+      '/lesson-media/photos/message-send.jpg',
+      'Someone signals readiness or sends a cue outward. send event is that broadcast in code: one stack announces a name and others can react when they are listening for it.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    ),
+    localLessonMedia(
+      '/lesson-media/photos/message-listen.jpg',
+      'Someone else watches for the cue and responds. on event is your listener stack: it starts when the matching event name arrives, which is how separate scripts coordinate without tangling into one giant chain.',
+      { showReferenceLabel: true, imageSize: 'medium' }
+    )
+  ],
+  l46: [localLessonMedia(
+    '/lesson-media/custom/zoom-controls.svg',
+    'Magnify controls change what your eye sees without changing the underlying drawing. Canvas zoom blocks adjust the view so you can inspect tight corners or see the whole composition during debugging.',
+    { imageSize: 'large' }
+  )],
+  l47: [
+    localLessonMedia(
+      '/lesson-media/custom/grid-visible.svg',
+      'Lines line up spacing and angles. toggle grid helps you judge whether the turtle moved the intended distance or landed on the cell you expected.',
+      { showReferenceLabel: true, imageSize: 'large' }
+    ),
+    localLessonMedia(
+      '/lesson-media/custom/grid-hidden.svg',
+      'The same picture without lines looks cleaner for sharing. Switching the grid off is how you preview what a player or friend would see without the construction helpers.',
+      { showReferenceLabel: true, imageSize: 'large' }
+    )
+  ],
+  l48: [localLessonMedia(
+    '/lesson-media/custom/define-function.svg',
+    'One definition block names a whole recipe. define function captures repeated steps so your main script stays short and the named action can be updated in a single place.',
+    { imageSize: 'large' }
+  )],
+  l49: [localLessonMedia(
+    '/lesson-media/custom/call-function.svg',
+    'The main script calls a packaged action and returns to the next line. call function is how you reuse that recipe anywhere, which is the same pattern libraries and game engines expose to designers.',
+    { imageSize: 'large' }
+  )]
 }
 
 const LESSON_REAL_WORLD_CONTEXT = {
@@ -233,17 +487,6 @@ const LESSON_REAL_WORLD_CONTEXT = {
   l47: { relevance: 'Grids help precision in design and debugging.', utility: 'Toggles alignment guides on demand.', imageIdea: 'Placeholder image idea: graph paper overlay.' },
   l48: { relevance: 'Functions reduce duplication and improve clarity.', utility: 'Defines reusable named behavior blocks.', imageIdea: 'Placeholder image idea: reusable component/module icon.' },
   l49: { relevance: 'Function calls are how reusable logic executes.', utility: 'Runs defined functions from main flow.', imageIdea: 'Placeholder image idea: call stack arrow into function box.' }
-}
-
-function getLessonMedia(lesson) {
-  const media = LESSON_MEDIA[lesson.id]
-  if (!media) return null
-  const query = encodeURIComponent(media.query || lesson.title || 'coding')
-  return {
-    src: `https://source.unsplash.com/640x360/?${query}&sig=${lesson.lessonNumber}`,
-    alt: `${lesson.title} reference image`,
-    caption: media.caption
-  }
 }
 
 const LESSON_WORD_HELP = {
@@ -966,7 +1209,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
   const [isRunning, setIsRunning] = useState(false)
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false)
   const isIntroLesson = lesson.id === 'l0'
-  const lessonMedia = getLessonMedia(lesson)
+  const lessonMedia = LESSON_MEDIA[lesson.id] || []
   const lessonContext = LESSON_REAL_WORLD_CONTEXT[lesson.id] || null
   const ensureProcedureNames = (ws) => {
     if (!ws) return
@@ -1142,11 +1385,26 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         </>
       )}
 
-      {lessonMedia && (
-        <figure className='lesson-photo-callout'>
-          <img src={lessonMedia.src} alt={lessonMedia.alt} loading='lazy' referrerPolicy='no-referrer' />
-          <figcaption>{lessonMedia.caption}</figcaption>
-        </figure>
+      {lessonMedia.length > 0 && (
+        <div className={`lesson-photo-gallery ${lessonMedia.length > 1 ? 'is-multi' : 'is-single'}`}>
+          {lessonMedia.map((media) => (
+            <figure
+              key={media.src}
+              className={[
+                'lesson-photo-callout',
+                media.imageSize && media.imageSize !== 'default' && `is-size-${media.imageSize}`
+              ].filter(Boolean).join(' ')}
+            >
+              <img src={media.src} alt={media.alt} loading='lazy' />
+              <figcaption>
+                {media.showReferenceLabel && (
+                  <span className='lesson-photo-reference-prefix'>Reference: </span>
+                )}
+                {media.caption}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       )}
 
       {lessonContext && (

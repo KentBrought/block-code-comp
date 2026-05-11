@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f8fafc"/>
+  <rect x="90" y="88" width="180" height="184" rx="14" fill="#e2e8f0"/>
+  <rect x="290" y="88" width="180" height="184" rx="14" fill="#dbeafe"/>
+  <rect x="490" y="88" width="60" height="184" rx="14" fill="#fecdd3"/>
+  <text x="118" y="182" font-size="30" fill="#334155">List</text>
+  <text x="322" y="182" font-size="30" fill="#1d4ed8">Object</text>
+  <text x="98" y="315" font-size="32" font-family="Verdana,Arial" fill="#0f172a" font-weight="700">Data Structures</text>
+</svg>

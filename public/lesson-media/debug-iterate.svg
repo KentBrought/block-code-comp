@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#fff7ed"/>
+  <rect x="108" y="84" width="424" height="196" rx="16" fill="#ffedd5" stroke="#fb923c" stroke-width="4"/>
+  <text x="138" y="134" font-size="30" fill="#9a3412" font-weight="700">Test ? Observe ? Fix</text>
+  <text x="138" y="176" font-size="22" fill="#334155">Small changes + quick reruns</text>
+  <text x="138" y="208" font-size="22" fill="#334155">help you debug faster</text>
+  <circle cx="474" cy="232" r="22" fill="#ef4444"/>
+  <text x="466" y="240" font-size="22" fill="#fff">!</text>
+</svg>

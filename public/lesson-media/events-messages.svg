@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#ecfeff"/>
+  <rect x="92" y="92" width="212" height="156" rx="14" fill="#cffafe" stroke="#0891b2" stroke-width="3"/>
+  <rect x="336" y="92" width="212" height="156" rx="14" fill="#ecfccb" stroke="#65a30d" stroke-width="3"/>
+  <text x="120" y="152" font-size="28" fill="#0e7490" font-weight="700">send event</text>
+  <text x="360" y="152" font-size="28" fill="#3f6212" font-weight="700">on event</text>
+  <line x1="304" y1="170" x2="336" y2="170" stroke="#0f172a" stroke-width="5" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><polygon points="0 0, 6 3, 0 6" fill="#0f172a"/></marker></defs>
+  <text x="118" y="312" font-size="30" font-family="Verdana,Arial" fill="#0f172a" font-weight="700">Events & Messaging</text>
+</svg>

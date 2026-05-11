@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#eff6ff"/>
+  <rect x="108" y="84" width="420" height="210" rx="16" fill="#fff" stroke="#93c5fd" stroke-width="4"/>
+  <line x1="178" y1="124" x2="178" y2="254" stroke="#cbd5e1" stroke-width="3"/>
+  <line x1="248" y1="124" x2="248" y2="254" stroke="#cbd5e1" stroke-width="3"/>
+  <line x1="318" y1="124" x2="318" y2="254" stroke="#cbd5e1" stroke-width="3"/>
+  <line x1="388" y1="124" x2="388" y2="254" stroke="#cbd5e1" stroke-width="3"/>
+  <line x1="458" y1="124" x2="458" y2="254" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="154" y="318" font-size="30" font-family="Verdana,Arial" fill="#1e3a8a" font-weight="700">Canvas Controls & Grid</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <rect x="80" y="140" width="150" height="160" rx="28" fill="#dbeafe"/>
+  <rect x="325" y="140" width="150" height="160" rx="28" fill="#ede9fe"/>
+  <rect x="570" y="140" width="150" height="160" rx="28" fill="#fce7f3"/>
+  <text x="155" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="94" font-weight="700" fill="#1d4ed8">1</text>
+  <text x="400" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="94" font-weight="700" fill="#7c3aed">2</text>
+  <text x="645" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="94" font-weight="700" fill="#db2777">3</text>
+  <path d="M245 220 H305" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+  <path d="M300 220 L278 202" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+  <path d="M300 220 L278 238" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+  <path d="M490 220 H550" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+  <path d="M545 220 L523 202" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+  <path d="M545 220 L523 238" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+  <text x="400" y="92" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Variables can change over time</text>
+</svg>

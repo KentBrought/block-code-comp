@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#fffdf2"/>
+  <rect x="95" y="90" width="145" height="175" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="255" y="90" width="145" height="175" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="415" y="90" width="145" height="175" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="3"/>
+  <text x="120" y="150" font-size="28" font-family="Verdana,Arial" fill="#92400e" font-weight="700">score</text>
+  <text x="280" y="150" font-size="28" font-family="Verdana,Arial" fill="#92400e" font-weight="700">lives</text>
+  <text x="450" y="150" font-size="28" font-family="Verdana,Arial" fill="#92400e" font-weight="700">timer</text>
+  <text x="160" y="310" font-size="34" font-family="Verdana,Arial" fill="#7c2d12" font-weight="700">Variables = Memory Boxes</text>
+</svg>

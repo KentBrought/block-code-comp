@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#fff1f2"/>
+  <path d="M120 250 C220 70, 420 70, 520 250" stroke="#e11d48" stroke-width="14" fill="none"/>
+  <circle cx="520" cy="250" r="14" fill="#0f172a"/>
+  <text x="84" y="94" font-size="34" font-family="Verdana,Arial" fill="#9f1239" font-weight="700">Recursion</text>
+  <text x="84" y="128" font-size="22" font-family="Verdana,Arial" fill="#334155">Repeat a smaller step</text>
+  <text x="84" y="156" font-size="22" font-family="Verdana,Arial" fill="#334155">until a stop rule is true</text>
+</svg>

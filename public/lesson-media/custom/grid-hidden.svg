@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
+  <rect width="800" height="520" fill="#f8fbff"/>
+  <text x="400" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Grid off: you only see the drawing</text>
+  <rect x="150" y="130" width="500" height="300" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="6"/>
+  <path d="M250 340 L330 220 L390 280 L470 200 L550 340" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

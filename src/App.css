@@ -747,13 +747,13 @@ body {
 
 /* Flip pointer emoji icons inside placed Blockly blocks by default. */
 .editor-section .blocklyBlockCanvas image[href*="twemoji"],
-.editor-section .blocklyBlockCanvas image[xlink\\:href*="twemoji"] {
+.editor-section .blocklyBlockCanvas image[*|href*="twemoji"] {
   transform: scaleX(-1);
   transform-origin: center;
 }
 
 /* Keep dropdown menu icons unflipped for readability. */
 .blocklyDropDownDiv image[href*="twemoji"],
-.blocklyDropDownDiv image[xlink\\:href*="twemoji"] {
+.blocklyDropDownDiv image[*|href*="twemoji"] {
   transform: none !important;
 }

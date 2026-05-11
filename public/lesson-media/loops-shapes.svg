@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f6fff7"/>
+  <rect x="100" y="90" width="140" height="140" rx="18" fill="#22c55e"/>
+  <rect x="280" y="90" width="140" height="140" rx="18" fill="#3b82f6"/>
+  <rect x="460" y="90" width="80" height="140" rx="18" fill="#8b5cf6"/>
+  <text x="130" y="172" font-size="64" fill="#fff">4</text>
+  <text x="310" y="172" font-size="64" fill="#fff">?</text>
+  <text x="482" y="172" font-size="64" fill="#fff">?</text>
+  <text x="84" y="286" font-size="34" font-family="Verdana,Arial" fill="#14532d" font-weight="700">Loops & Shapes</text>
+</svg>
