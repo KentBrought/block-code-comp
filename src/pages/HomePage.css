@@ -143,6 +143,7 @@
     object-fit: contain;
     display: block;
     transform-style: preserve-3d;
+    transform-origin: 50% 55%;
     will-change: transform;
     animation: iconFloat3d 4.2s ease-in-out infinite;
 }
@@ -151,19 +152,19 @@
 
     0%,
     100% {
-        transform: translateY(0) rotateX(0deg) rotateY(0deg);
+        transform: translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
     }
 
     25% {
-        transform: translateY(-8px) rotateX(5deg) rotateY(-8deg);
+        transform: translateY(-8px) translateZ(4px) rotateX(5deg) rotateY(-8deg) rotateZ(-1deg);
     }
 
     50% {
-        transform: translateY(-12px) rotateX(-4deg) rotateY(7deg);
+        transform: translateY(-11px) translateZ(2px) rotateX(-4deg) rotateY(7deg) rotateZ(1deg);
     }
 
     75% {
-        transform: translateY(-7px) rotateX(3deg) rotateY(-5deg);
+        transform: translateY(-7px) translateZ(3px) rotateX(3deg) rotateY(-5deg) rotateZ(-1deg);
     }
 }
 

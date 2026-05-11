@@ -155,9 +155,11 @@
 }
 
 .catalog-card-visual-wrap {
-  flex: 1 1 auto;
-  min-height: 108px;
-  padding: 0.42rem 0.5rem;
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
+  padding: 0.28rem;
   border-radius: 10px;
   background: linear-gradient(180deg, #eef5ff 0%, #e6efff 100%);
   border: 1px solid #d5e4ff;
@@ -182,10 +184,10 @@
 
 .catalog-card-block-preview svg {
   display: block;
-  width: 100%;
-  max-width: 100%;
+  width: auto;
   height: auto;
-  max-height: 118px;
+  max-width: 92%;
+  max-height: 92%;
 }
 
 .catalog-card-block-preview svg .blocklyText,
@@ -194,7 +196,7 @@
 }
 
 .catalog-card-fallback {
-  font-size: clamp(2.35rem, 4.2vw, 2.85rem);
+  font-size: clamp(3.5rem, 18vmin, 5.75rem);
   line-height: 1;
 }
 
@@ -358,7 +360,7 @@
 }
 
 .catalog-card-feature-emoji {
-  font-size: clamp(2.65rem, 5.5vw, 3.35rem);
+  font-size: clamp(4.25rem, 22vmin, 6.75rem);
   line-height: 1;
   display: flex;
   align-items: center;
@@ -538,7 +540,7 @@
 }
 
 .lesson-block-focus-item {
-  padding: 0.1rem 0;
+  padding: 0.95rem 1rem;
 }
 
 .check-cta-btn {
@@ -651,7 +653,7 @@
 }
 
 .lesson-status-message {
-  margin: 0;
+  margin: 0.5rem 0 0.35rem;
   min-height: 1.25rem;
   color: #b45309;
   font-size: 0.88rem;
@@ -665,13 +667,15 @@
 .lesson-divider {
   border: 0;
   border-top: 1px solid #d8e4f2;
-  margin: 0.55rem 0 0.1rem;
+  margin: 0.85rem 0 0.35rem;
 }
 
 .lesson-takeaway {
   position: relative;
-  border-radius: 8px;
-  padding: 0.28rem 0.05rem;
+  margin-top: 1.15rem;
+  margin-bottom: 0.65rem;
+  padding: 0.95rem 1rem;
+  border-radius: 12px;
 }
 
 .lesson-takeaway h3 {
@@ -700,14 +704,17 @@
 
 .takeaway-lock {
   position: absolute;
-  right: 0.2rem;
-  top: 0;
-  padding: 0.32rem 0.72rem;
-  border-radius: 999px;
+  right: 0.55rem;
+  top: 0.55rem;
+  max-width: min(12.5rem, calc(100% - 10rem));
+  padding: 0.35rem 0.65rem;
+  border-radius: 10px;
   background: #fee2e2;
   color: #991b1b;
-  font-size: 0.92rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: right;
   border: 1px solid #fca5a5;
 }
 

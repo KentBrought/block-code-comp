@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import * as Blockly from 'blockly'
 import { javascriptGenerator } from 'blockly/javascript'
 import { buildLessonFlyoutToolbox, customTheme, initBlocks } from '../components/BlocklyEditor'
@@ -392,7 +393,7 @@ const LESSON_MEDIA = {
   )],
   l44: [localLessonMedia(
     '/lesson-media/photos/sticky-notes.jpg',
-    'Notes remind you of something important later. Variables are the machine version: store a value under a name, then get variable wherever that remembered detail should influence the next step.',
+    'Sticky notes remind you why you made a decision. Comments in code work the same way: they do not change what the turtle does, but they help you and anyone reading your code understand what that part is for.',
     { imageSize: 'medium' }
   )],
   l45: [
@@ -518,7 +519,7 @@ const LESSONS = [
     level: 0,
     title: 'Welcome - What Blocks and Coding Are',
     goal: 'Run your first tiny block program and see your turtle draw a line.',
-    intention: 'Coding means giving clear instructions that run from top to bottom.',
+    intention: 'Your turtle only follows what each block says, in order from top to bottom—clear steps make clear ink.',
     task: 'Snap move forward under when Run clicked, press Run, then Check Lesson.',
     steps: [
       'Drag move forward under when Run clicked.',
@@ -528,55 +529,55 @@ const LESSONS = [
     focusBlocks: ['when_run_clicked', 'move_forward'],
     rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true }
   },
-  { id: 'l1', level: 1, title: 'Run Your First Program', goal: 'Make the turtle do one action when you press Run.', intention: 'Programs need a start point.', task: 'Connect move forward under when Run clicked.', steps: ['Drag the green start block.', 'Snap one move block below it.', 'Press Check Lesson.'], toolbox: ['when_run_clicked', 'move_forward'], focusBlocks: ['when_run_clicked', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true } },
-  { id: 'l2', level: 1, title: 'Two Steps in Order', goal: 'Make your turtle do two actions in order.', intention: 'Computers follow instructions from top to bottom.', task: 'Use start, move, then turn.', steps: ['Place start block first.', 'Add move forward.', 'Add turn right after move.'], toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'turn_left'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'move_forward', 'turn_right'], requireStartLinked: true } },
-  { id: 'l3', level: 1, title: 'Pen Up, Pen Down', goal: 'Control when the turtle draws lines.', intention: 'Creators decide when to draw and when to move silently.', task: 'Use pen down before moving.', steps: ['Start your script.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'pen_down', 'pen_up', 'move_forward'], focusBlocks: ['pen_down', 'pen_up', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'pen_down', 'move_forward'], requireStartLinked: true } },
-  { id: 'l4', level: 1, title: 'Clear and Draw Again', goal: 'Reset the canvas before drawing.', intention: 'Clean tests help you understand what changed.', task: 'Use clear screen, then draw.', steps: ['Put clear screen under start.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'clear_screen', 'pen_down', 'move_forward'], focusBlocks: ['clear_screen', 'pen_down'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'move_forward'], requireStartLinked: true } },
-  { id: 'l5', level: 2, title: 'Your First Loop', goal: 'Use repeat instead of copying blocks.', intention: 'Loops make code shorter and stronger.', task: 'Use repeat with move inside.', steps: ['Drag repeat.', 'Put move in the repeat body.', 'Connect repeat to start.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'op_number'], focusBlocks: ['repeat_times', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward'], requireStartLinked: true } },
-  { id: 'l6', level: 2, title: 'Square Loop', goal: 'Draw a square using one loop.', intention: 'Shapes are repeated patterns.', task: 'Use repeat + move + turn right.', steps: ['Set repeat to 4.', 'Put move and turn inside.', 'Check your work.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
-  { id: 'l7', level: 2, title: 'Forever Animation', goal: 'Build a script that keeps moving.', intention: 'Animations often run continuously.', task: 'Use forever with move or turn.', steps: ['Drag forever.', 'Place one motion block inside.', 'Add wait so movement is visible.'], toolbox: ['when_run_clicked', 'forever_loop', 'move_forward', 'turn_right', 'wait_seconds', 'op_number'], focusBlocks: ['forever_loop', 'wait_seconds'], rules: { requiredTypes: ['when_run_clicked', 'forever_loop'], requireStartLinked: true } },
-  { id: 'l8', level: 2, title: 'Nested Pattern', goal: 'Use one repeat inside another repeat.', intention: 'Nested loops build big patterns from small loops.', task: 'Create nested loops with motion blocks.', steps: ['Drop repeat inside repeat.', 'Put move and turn in the inner loop.', 'Attach to start.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
-  { id: 'l9', level: 3, title: 'First If Rule', goal: 'Make code run only when a rule is true.', intention: 'Conditionals help programs make choices.', task: 'Use if + compare.', steps: ['Add if block.', 'Add compare in if hole.', 'Place move inside if body.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['if_condition', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], requireStartLinked: true } },
-  { id: 'l10', level: 3, title: 'Use Turtle X', goal: 'Use turtle position in a rule.', intention: 'Programs can react to where they are.', task: 'Use turtle x in compare block.', steps: ['Drag turtle x.', 'Connect to compare.', 'Use compare inside if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['get_x', 'op_compare', 'if_condition'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x'], requireStartLinked: true } },
-  { id: 'l11', level: 3, title: 'Logic And / Or', goal: 'Combine two rules in one condition.', intention: 'Big behavior grows from small rules.', task: 'Use logic block inside if.', steps: ['Drag and/or block.', 'Fill both sides with compare checks.', 'Place in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_logic', 'op_compare', 'get_x', 'get_y', 'op_number', 'move_forward'], focusBlocks: ['op_logic', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_logic'], requireStartLinked: true } },
-  { id: 'l12', level: 3, title: 'Logic Not', goal: 'Invert a condition using not.', intention: 'Not flips true and false.', task: 'Use not in if condition.', steps: ['Drag not block.', 'Put compare inside not.', 'Use it in if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_not', 'op_compare', 'op_number', 'get_y', 'move_forward'], focusBlocks: ['op_not', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_not'], requireStartLinked: true } },
-  { id: 'l13', level: 4, title: 'Create a Score Variable', goal: 'Make your first memory box.', intention: 'Variables store information over time.', task: 'Use set variable.', steps: ['Open variable blocks.', 'Set variable value.', 'Connect under start.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set'], rules: { requiredTypes: ['when_run_clicked', 'variables_set'], requireStartLinked: true } },
-  { id: 'l14', level: 4, title: 'Change a Variable', goal: 'Increase or decrease stored value.', intention: 'Games update score and lives constantly.', task: 'Use change variable block.', steps: ['Set a variable first.', 'Add change block.', 'Use number value.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'math_change'], requireStartLinked: true } },
-  { id: 'l15', level: 4, title: 'Read a Variable', goal: 'Use memory value in a rule.', intention: 'Reading state lets code make smart decisions.', task: 'Use get variable inside compare.', steps: ['Set a variable.', 'Use get variable.', 'Place in compare and if.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['variables_get', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'variables_get', 'if_condition'], requireStartLinked: true } },
-  { id: 'l16', level: 4, title: 'Loop + Score', goal: 'Update memory while repeating actions.', intention: 'State changes are often inside loops.', task: 'Use repeat and change variable together.', steps: ['Add repeat block.', 'Put change variable inside it.', 'Connect to start.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'op_number', 'move_forward'], focusBlocks: ['repeat_times', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'math_change'], requireStartLinked: true } },
-  { id: 'l17', level: 5, title: 'Use Turtle Y', goal: 'Sense vertical position.', intention: 'Sensors let your program react to movement.', task: 'Use turtle y in compare rule.', steps: ['Drag turtle y.', 'Connect to compare.', 'Use in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_y', 'op_number', 'turn_right'], focusBlocks: ['get_y', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_y', 'op_compare'], requireStartLinked: true } },
-  { id: 'l18', level: 5, title: 'Wait Until True', goal: 'Pause until a rule passes.', intention: 'Timing controls keep code in the right order.', task: 'Use wait until with compare.', steps: ['Place wait until.', 'Build compare condition.', 'Attach to start script.'], toolbox: ['when_run_clicked', 'wait_until', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['wait_until', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'wait_until', 'op_compare'], requireStartLinked: true } },
-  { id: 'l19', level: 5, title: 'Repeat Until', goal: 'Repeat until a condition is true.', intention: 'This loop stops on purpose when the condition succeeds.', task: 'Use repeat until with compare.', steps: ['Drop repeat until block.', 'Add compare condition.', 'Put motion inside loop body.'], toolbox: ['when_run_clicked', 'repeat_until', 'op_compare', 'get_x', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['repeat_until', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'repeat_until', 'op_compare'], requireStartLinked: true } },
-  { id: 'l20', level: 5, title: 'Heading Rule', goal: 'Use direction in a condition.', intention: 'Direction checks help control movement behavior.', task: 'Use turtle heading with compare.', steps: ['Get heading block.', 'Compare heading to number.', 'Use in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_heading', 'op_number', 'move_forward'], focusBlocks: ['get_heading', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_heading', 'op_compare'], requireStartLinked: true } },
-  { id: 'l21', level: 6, title: 'Setup Section', goal: 'Build a clean setup section.', intention: 'Setup helps your program start consistently.', task: 'Use clear, set color, and set pen size.', steps: ['Clear screen first.', 'Set color.', 'Set pen size before drawing.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'op_number', 'move_forward'], focusBlocks: ['clear_screen', 'set_color', 'set_pen_size'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'set_color', 'set_pen_size'], requireStartLinked: true } },
-  { id: 'l22', level: 6, title: 'Shape System: Circle', goal: 'Draw a circle in a full script.', intention: 'Systems combine style setup and actions.', task: 'Use setup blocks and draw circle.', steps: ['Use start and setup.', 'Add draw circle.', 'Check completion.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'draw_circle', 'op_number'], focusBlocks: ['draw_circle', 'set_color'], rules: { requiredTypes: ['when_run_clicked', 'draw_circle', 'set_color'], requireStartLinked: true } },
-  { id: 'l23', level: 6, title: 'Shape System: Polygon', goal: 'Use sides and length for polygons.', intention: 'One block can create many different shapes.', task: 'Use draw polygon in script.', steps: ['Add draw polygon.', 'Set sides and length.', 'Run and check.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_polygon', 'op_number', 'set_color', 'color_value'], focusBlocks: ['draw_polygon', 'op_number'], rules: { requiredTypes: ['when_run_clicked', 'draw_polygon'], requireStartLinked: true } },
-  { id: 'l24', level: 6, title: 'Multi-Part Program', goal: 'Combine setup, loop, and rule.', intention: 'Real projects are made from connected systems.', task: 'Use set color + repeat + if.', steps: ['Do setup first.', 'Add repeat block.', 'Add if rule in same script.'], toolbox: ['when_run_clicked', 'set_color', 'color_value', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'set_color'], rules: { requiredTypes: ['when_run_clicked', 'set_color', 'repeat_times', 'if_condition'], requireStartLinked: true } },
-  { id: 'l25', level: 7, title: 'Fix Missing Link', goal: 'Repair a broken connection.', intention: 'Many bugs are disconnected blocks.', task: 'Build start -> repeat -> move -> turn.', steps: ['Place start block.', 'Attach repeat below it.', 'Put move and turn in repeat body.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['when_run_clicked', 'repeat_times'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
-  { id: 'l26', level: 7, title: 'Fix Wrong Block Type', goal: 'Swap incorrect blocks for correct ones.', intention: 'Debugging means comparing expected and real behavior.', task: 'Use move and turn, not only move.', steps: ['Create repeat.', 'Put move in repeat.', 'Add turn to complete pattern.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
-  { id: 'l27', level: 7, title: 'Debug with Fast Tests', goal: 'Reset and rerun quickly while fixing.', intention: 'Fast cycles make debugging easier.', task: 'Use clear + wait + draw.', steps: ['Add clear screen first.', 'Add draw block.', 'Add wait to watch output.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds', 'op_number'], focusBlocks: ['clear_screen', 'wait_seconds', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds'], requireStartLinked: true } },
-  { id: 'l28', level: 8, title: 'Remix Starter', goal: 'Mix at least 5 different block types.', intention: 'Remixing helps you invent quickly.', task: 'Use 5 non-number blocks in one script.', steps: ['Start with green block.', 'Use at least five different block types.', 'Check completion.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'move_forward', 'turn_right', 'repeat_times', 'draw_circle', 'op_number'], focusBlocks: ['set_color', 'repeat_times', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked'], minNonNumberBlocks: 5, requireStartLinked: true } },
-  { id: 'l29', level: 8, title: 'Invent a Mini Tool', goal: 'Create your own drawing behavior.', intention: 'Invention means making your own rules.', task: 'Use loop + rule + shape together.', steps: ['Add repeat block.', 'Add if with compare.', 'Use circle or polygon.'], toolbox: ['when_run_clicked', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'draw_polygon'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition'], oneOfTypes: ['draw_circle', 'draw_polygon'], requireStartLinked: true } },
-  { id: 'l30', level: 8, title: 'Recursion Basics', goal: 'Build your first self-calling function.', intention: 'Recursion solves big tasks by repeating a smaller step until a stop rule is met.', task: 'Define a function that calls itself with a counter and a stop condition.', steps: ['Create a function named spiralStep.', 'Inside it, move and turn, then lower a counter.', 'Use if + compare to stop calling itself when the counter reaches 0.'], toolbox: ['when_run_clicked', '__PROCEDURES__', '__VARIABLES__', 'if_condition', 'op_compare', 'op_math', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['if_condition', 'op_compare', 'variables_set'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], oneOfTypes: ['procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } },
-  { id: 'l31', level: 8, title: 'Capstone Build', goal: 'Build a full mini project with systems.', intention: 'Capstones show how your ideas and code fit together.', task: 'Use start + loop + condition + variable + shape.', steps: ['Add setup under start.', 'Use variables for state.', 'Add loops, rules, and one shape block.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'set_color', 'color_value', 'move_forward', 'turn_right'], focusBlocks: ['variables_set', 'repeat_times', 'if_condition', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition', 'variables_set'], oneOfTypes: ['draw_circle', 'draw_polygon'], minNonNumberBlocks: 7, requireStartLinked: true } },
-  { id: 'l32', level: 9, title: 'Move Backward', goal: 'Control reverse movement.', intention: 'Good movement control includes forward and backward steps.', task: 'Use move backward under start.', steps: ['Place when Run clicked.', 'Add move backward.', 'Run and observe direction.'], toolbox: ['when_run_clicked', 'move_backward', 'op_number'], focusBlocks: ['move_backward'], rules: { requiredTypes: ['when_run_clicked', 'move_backward'], requireStartLinked: true } },
-  { id: 'l33', level: 9, title: 'Jump to Coordinates', goal: 'Place the turtle at a specific point.', intention: 'Coordinate placement is foundational for precise drawing.', task: 'Use jump to with x and y values.', steps: ['Drag jump to.', 'Set x and y values.', 'Connect under start.'], toolbox: ['when_run_clicked', 'jump_to', 'op_number'], focusBlocks: ['jump_to'], rules: { requiredTypes: ['when_run_clicked', 'jump_to'], requireStartLinked: true } },
-  { id: 'l34', level: 9, title: 'Return to Center', goal: 'Reset turtle location fast.', intention: 'Center resets simplify multi-part drawings.', task: 'Use go to center in your script.', steps: ['Place start block.', 'Add go to center.', 'Add one move block after it.'], toolbox: ['when_run_clicked', 'go_to_center', 'move_forward', 'op_number'], focusBlocks: ['go_to_center'], rules: { requiredTypes: ['when_run_clicked', 'go_to_center'], requireStartLinked: true } },
-  { id: 'l35', level: 9, title: 'Set Heading', goal: 'Point the turtle to an exact angle.', intention: 'Heading control makes movement predictable.', task: 'Set heading, then move forward.', steps: ['Add set heading.', 'Pick an angle value.', 'Move forward after heading.'], toolbox: ['when_run_clicked', 'set_heading', 'move_forward', 'op_number'], focusBlocks: ['set_heading'], rules: { requiredTypes: ['when_run_clicked', 'set_heading', 'move_forward'], requireStartLinked: true } },
-  { id: 'l36', level: 10, title: 'Random Color Fun', goal: 'Use random color changes in drawing.', intention: 'Randomization creates playful variation.', task: 'Use set random color before drawing.', steps: ['Add set random color.', 'Add move or shape block after it.', 'Run a few times and compare colors.'], toolbox: ['when_run_clicked', 'set_random_color', 'move_forward', 'op_number'], focusBlocks: ['set_random_color'], rules: { requiredTypes: ['when_run_clicked', 'set_random_color'], requireStartLinked: true } },
-  { id: 'l37', level: 10, title: 'Draw Line Block', goal: 'Create straight segments with one block.', intention: 'Primitive shape blocks speed up building.', task: 'Use draw line with a chosen length.', steps: ['Add draw line.', 'Set length value.', 'Run and compare results.'], toolbox: ['when_run_clicked', 'draw_line', 'op_number'], focusBlocks: ['draw_line'], rules: { requiredTypes: ['when_run_clicked', 'draw_line'], requireStartLinked: true } },
-  { id: 'l38', level: 10, title: 'Draw Rectangle Block', goal: 'Draw box shapes using width and height.', intention: 'Parameters let one block generate many forms.', task: 'Use draw rectangle with two values.', steps: ['Place draw rectangle.', 'Set width and height.', 'Run and inspect proportion changes.'], toolbox: ['when_run_clicked', 'draw_rectangle', 'op_number'], focusBlocks: ['draw_rectangle'], rules: { requiredTypes: ['when_run_clicked', 'draw_rectangle'], requireStartLinked: true } },
-  { id: 'l39', level: 11, title: 'Math Expressions', goal: 'Compute values with math operators.', intention: 'Calculated values make code dynamic.', task: 'Use an op math block to feed movement.', steps: ['Build a math expression.', 'Plug it into move or turn.', 'Run and test by changing operands.'], toolbox: ['when_run_clicked', 'move_forward', 'op_math', 'op_number'], focusBlocks: ['op_math'], rules: { requiredTypes: ['when_run_clicked', 'op_math'], requireStartLinked: true } },
-  { id: 'l40', level: 11, title: 'Boolean Values', goal: 'Use true/false directly.', intention: 'Boolean blocks help validate condition flow.', task: 'Use op boolean inside an if condition.', steps: ['Add if block.', 'Insert op boolean.', 'Place action inside if body.'], toolbox: ['when_run_clicked', 'if_condition', 'op_boolean', 'move_forward'], focusBlocks: ['op_boolean'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_boolean'], requireStartLinked: true } },
-  { id: 'l41', level: 11, title: 'String Values', goal: 'Create and use text values.', intention: 'Text values are important for names, keys, and events.', task: 'Use op string in a block input.', steps: ['Drag op string block.', 'Edit the text.', 'Use it with a compatible block.'], toolbox: ['when_run_clicked', 'op_string', 'note_comment'], focusBlocks: ['op_string'], rules: { requiredTypes: ['when_run_clicked', 'op_string'], requireStartLinked: true } },
-  { id: 'l42', level: 12, title: 'Lists: Create + Add + Get', goal: 'Store and read ordered data.', intention: 'Lists let you manage sequences of values.', task: 'Create a list, add an item, then read one item.', steps: ['Add make list block.', 'Add add item to list.', 'Use item of list block.'], toolbox: ['when_run_clicked', 'array_create', 'array_add_item', 'array_get', 'op_string', 'op_number'], focusBlocks: ['array_create', 'array_add_item', 'array_get'], rules: { requiredTypes: ['when_run_clicked', 'array_create', 'array_add_item', 'array_get'], requireStartLinked: true } },
-  { id: 'l43', level: 12, title: 'Objects: Set + Get', goal: 'Work with key-value data.', intention: 'Objects are useful for named properties and grouped state.', task: 'Create an object, set one key, then read it.', steps: ['Add make object block.', 'Add set key block.', 'Add get key block.'], toolbox: ['when_run_clicked', 'object_create', 'object_set', 'object_get', 'op_string', 'op_number'], focusBlocks: ['object_create', 'object_set', 'object_get'], rules: { requiredTypes: ['when_run_clicked', 'object_create', 'object_set', 'object_get'], requireStartLinked: true } },
-  { id: 'l44', level: 12, title: 'Comment Your Code', goal: 'Use notes to explain intent.', intention: 'Readable code is easier to debug and remix.', task: 'Add a note_comment block in your script.', steps: ['Drag note block.', 'Write a short note.', 'Keep it in your stack while testing.'], toolbox: ['when_run_clicked', 'note_comment', 'move_forward', 'op_number'], focusBlocks: ['note_comment'], rules: { requiredTypes: ['when_run_clicked', 'note_comment'], requireStartLinked: true } },
-  { id: 'l45', level: 13, title: 'Message Events', goal: 'Trigger code with named events.', intention: 'Events let scripts coordinate like teammates.', task: 'Use send event and on event with the same name.', steps: ['Create one sender stack.', 'Create one listener stack.', 'Send and verify listener runs.'], toolbox: ['when_run_clicked', 'send_event_message', 'on_event_message', 'move_forward', 'turn_right'], focusBlocks: ['send_event_message', 'on_event_message'], rules: { requiredTypes: ['send_event_message', 'on_event_message'], requireStartLinked: false } },
-  { id: 'l46', level: 13, title: 'Canvas Zoom Controls', goal: 'Control view scale while drawing.', intention: 'View controls help inspect and present work.', task: 'Use zoom in, zoom out, and reset zoom.', steps: ['Add zoom in block.', 'Add zoom out block.', 'Add reset zoom at the end.'], toolbox: ['when_run_clicked', 'canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom', 'op_number'], focusBlocks: ['canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom'], rules: { requiredTypes: ['when_run_clicked', 'canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom'], requireStartLinked: true } },
-  { id: 'l47', level: 13, title: 'Grid Visibility', goal: 'Use grid toggling intentionally.', intention: 'Grid overlays support measurement and alignment.', task: 'Toggle grid during a short script.', steps: ['Add toggle grid.', 'Add a movement or shape action.', 'Toggle again if desired.'], toolbox: ['when_run_clicked', 'canvas_toggle_grid', 'move_forward', 'op_number'], focusBlocks: ['canvas_toggle_grid'], rules: { requiredTypes: ['when_run_clicked', 'canvas_toggle_grid'], requireStartLinked: true } },
-  { id: 'l48', level: 13, title: 'Define a Function', goal: 'Create your own reusable block flow.', intention: 'Functions reduce duplication and organize ideas.', task: 'Add a function definition and include steps inside it.', steps: ['Create define function block.', 'Add 1-2 drawing steps in it.', 'Keep it in your workspace.'], toolbox: ['when_run_clicked', '__PROCEDURES__', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['procedures_defnoreturn'], rules: { requiredTypes: ['procedures_defnoreturn'], requireStartLinked: false } },
-  { id: 'l49', level: 13, title: 'Call a Function', goal: 'Run your custom function from main flow.', intention: 'Calling functions keeps main scripts clean.', task: 'Define a function and call it from when Run clicked.', steps: ['Create function definition.', 'Add call function block under start.', 'Run to verify the call executes.'], toolbox: ['when_run_clicked', '__PROCEDURES__', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['procedures_callnoreturn', 'procedures_defnoreturn'], rules: { requiredTypes: ['when_run_clicked', 'procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } }
+  { id: 'l1', level: 1, title: 'Run Your First Program', goal: 'Make the turtle do one action when you press Run.', intention: 'The turtle waits for a start block so your first move actually runs.', task: 'Connect move forward under when Run clicked.', steps: ['Drag the green start block.', 'Snap one move block below it.', 'Press Check Lesson.'], toolbox: ['when_run_clicked', 'move_forward'], focusBlocks: ['when_run_clicked', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'move_forward'], requireStartLinked: true } },
+  { id: 'l2', level: 1, title: 'Two Steps in Order', goal: 'Make your turtle do two actions in order.', intention: 'The turtle runs moves and turns in stack order, which changes the trail on the canvas.', task: 'Use start, move, then turn.', steps: ['Start is already there — make sure move forward is connected below it.', 'Add turn right after move forward in the stack.', 'Run and watch the turtle go forward and then turn.'], toolbox: ['when_run_clicked', 'move_forward', 'turn_right', 'turn_left'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'move_forward', 'turn_right'], requireStartLinked: true } },
+  { id: 'l3', level: 1, title: 'Pen Up, Pen Down', goal: 'Control when the turtle draws lines.', intention: 'Pen down leaves ink as the turtle moves. Pen up lifts the pen so the turtle can travel without drawing. Switching between them is how you make shapes with gaps.', task: 'Draw a line, lift the pen, move silently, then draw again to make a split line.', steps: ['Add pen down, then move forward to draw the first line.', 'Add pen up, then move forward to skip across without drawing.', 'Add pen down again and move forward to draw the second line.'], toolbox: ['when_run_clicked', 'pen_down', 'pen_up', 'move_forward'], focusBlocks: ['pen_down', 'pen_up', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'pen_down', 'move_forward'], requireStartLinked: true } },
+  { id: 'l4', level: 1, title: 'Clear and Draw Again', goal: 'Reset the canvas before drawing.', intention: 'Clearing wipes old ink so each run shows only what your turtle just did.', task: 'Use clear screen, then draw.', steps: ['Put clear screen under start.', 'Add pen down.', 'Add move forward.'], toolbox: ['when_run_clicked', 'clear_screen', 'pen_down', 'move_forward'], focusBlocks: ['clear_screen', 'pen_down'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'move_forward'], requireStartLinked: true } },
+  { id: 'l5', level: 2, title: 'Your First Loop', goal: 'Use repeat instead of copying blocks.', intention: 'Instead of dragging the same block five times, a repeat loop does it for you. Change one number and the turtle runs that same step as many times as you want.', task: 'Use repeat with move inside.', steps: ['Drag a repeat block and connect it under start.', 'Put a move forward block inside the repeat.', 'Set the repeat count to 4 and press Run.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'op_number'], focusBlocks: ['repeat_times', 'move_forward'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward'], requireStartLinked: true } },
+  { id: 'l6', level: 2, title: 'Square Loop', goal: 'Draw a square using one loop.', intention: 'A square on the canvas is the same corner move-and-turn pattern, looped four times.', task: 'Use repeat + move + turn right.', steps: ['Set repeat to 4.', 'Put move and turn inside.', 'Check your work.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
+  { id: 'l7', level: 2, title: 'Forever Animation', goal: 'Build a script that keeps moving.', intention: 'A forever loop keeps the turtle stepping so the picture keeps changing like a tiny animation.', task: 'Use forever with move or turn.', steps: ['Drag forever.', 'Place one motion block inside.', 'Add wait so movement is visible.'], toolbox: ['when_run_clicked', 'forever_loop', 'move_forward', 'turn_right', 'wait_seconds', 'op_number'], focusBlocks: ['forever_loop', 'wait_seconds'], rules: { requiredTypes: ['when_run_clicked', 'forever_loop'], requireStartLinked: true } },
+  { id: 'l8', level: 2, title: 'Nested Pattern', goal: 'Use one repeat inside another repeat.', intention: 'A nested loop is a loop inside a loop. The inner loop finishes all of its steps, then the outer loop runs again. This is how you build radiating patterns — one small shape repeated in a circle.', task: 'Create nested loops with motion blocks.', steps: ['Connect a repeat block under start.', 'Drag another repeat block inside the first one.', 'Put move forward and turn right inside the inner repeat.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
+  { id: 'l9', level: 3, title: 'First If Rule', goal: 'Make code run only when a rule is true.', intention: 'An if block decides whether the turtle takes a stroke or skips it.', task: 'Use if + compare.', steps: ['Drag an if block and connect it under start.', 'Drag a compare block into the diamond-shaped slot on the if block.', 'Put a move forward block inside the if block where it says "do".'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['if_condition', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], requireStartLinked: true } },
+  { id: 'l10', level: 3, title: 'Use Turtle X', goal: 'Use turtle position in a rule.', intention: 'Reading x lets the turtle change its path depending on where it sits on the grid.', task: 'Use turtle x in compare block.', steps: ['Drag turtle x.', 'Connect to compare.', 'Use compare inside if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['get_x', 'op_compare', 'if_condition'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x'], requireStartLinked: true } },
+  { id: 'l11', level: 3, title: 'Logic And / Or', goal: 'Combine two rules in one condition.', intention: 'AND/OR combines simple turtle checks into richer “should I draw?� decisions.', task: 'Use logic block inside if.', steps: ['Drag and/or block.', 'Fill both sides with compare checks.', 'Place in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_logic', 'op_compare', 'get_x', 'get_y', 'op_number', 'move_forward'], focusBlocks: ['op_logic', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_logic'], requireStartLinked: true } },
+  { id: 'l12', level: 3, title: 'Logic Not', goal: 'Invert a condition using not.', intention: 'NOT flips a turtle rule so the opposite case gets the ink.', task: 'Use not in if condition.', steps: ['Drag not block.', 'Put compare inside not.', 'Use it in if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_not', 'op_compare', 'op_number', 'get_y', 'move_forward'], focusBlocks: ['op_not', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_not'], requireStartLinked: true } },
+  { id: 'l13', level: 4, title: 'Create a Score Variable', goal: 'Make your first memory box.', intention: 'A variable is scratch memory your turtle script can read on the next step.', task: 'Use set variable.', steps: ['Click on the Variables section in the block panel on the left.', 'Drag a set variable block and connect it under start.', 'Set the value to a number, like 0.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set'], rules: { requiredTypes: ['when_run_clicked', 'variables_set'], requireStartLinked: true } },
+  { id: 'l14', level: 4, title: 'Change a Variable', goal: 'Increase or decrease stored value.', intention: 'Changing a stored number lets the turtle react differently as the run progresses.', task: 'Use change variable block.', steps: ['Set a variable first.', 'Add change block.', 'Use number value.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'math_change'], requireStartLinked: true } },
+  { id: 'l15', level: 4, title: 'Read a Variable', goal: 'Use memory value in a rule.', intention: 'Reading that stored value lets the turtle pick moves based on its own history.', task: 'Use get variable inside compare.', steps: ['Set a variable.', 'Use get variable.', 'Place in compare and if.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['variables_get', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'variables_get', 'if_condition'], requireStartLinked: true } },
+  { id: 'l16', level: 4, title: 'Loop + Score', goal: 'Update memory while repeating actions.', intention: 'Every time a loop runs, you can also update a variable. This is like counting laps — each time around, the counter goes up by one. By the end, your variable holds a record of how many times the loop ran.', task: 'Use repeat and change variable together.', steps: ['Set a variable to 0 under start.', 'Add a repeat block after it.', 'Put change variable by 1 inside the repeat.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'op_number', 'move_forward'], focusBlocks: ['repeat_times', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'math_change'], requireStartLinked: true } },
+  { id: 'l17', level: 5, title: 'Use Turtle Y', goal: 'Sense vertical position.', intention: 'Turtle y tells your program how high or low the turtle is on the canvas. You can use it in a rule to change what the turtle does depending on whether it is near the top or the bottom.', task: 'Use turtle y in compare rule.', steps: ['Drag the turtle y block into a compare block.', 'Set the compare to check if y is greater than 0.', 'Put the compare inside an if block so the turtle reacts when it is above center.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_y', 'op_number', 'turn_right'], focusBlocks: ['get_y', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_y', 'op_compare'], requireStartLinked: true } },
+  { id: 'l18', level: 5, title: 'Wait Until True', goal: 'Pause until a rule passes.', intention: 'Wait until pauses the turtle right where it is and does nothing until a condition becomes true — like waiting at a red light. Once the condition passes, the next blocks run.', task: 'Use wait until with compare.', steps: ['Add move forward under start to make the turtle move.', 'Add wait until after it, with a compare block checking turtle x.', 'Add one more move forward after the wait to see it resume.'], toolbox: ['when_run_clicked', 'wait_until', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['wait_until', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'wait_until', 'op_compare'], requireStartLinked: true } },
+  { id: 'l19', level: 5, title: 'Repeat Until', goal: 'Repeat until a condition is true.', intention: 'Repeat-until keeps the turtle stepping until a sensor says the goal is reached.', task: 'Use repeat until with compare.', steps: ['Drag a repeat until block and connect it under start.', 'Add a compare block into the condition slot of the repeat until.', 'Put a move forward block inside the repeat until where it says "do".'], toolbox: ['when_run_clicked', 'repeat_until', 'op_compare', 'get_x', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['repeat_until', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'repeat_until', 'op_compare'], requireStartLinked: true } },
+  { id: 'l20', level: 5, title: 'Heading Rule', goal: 'Use direction in a condition.', intention: 'Turtle heading is the angle the turtle is facing — 0 is right, 90 is down, 180 is left. Reading heading lets your program make different decisions depending on which way the turtle is pointing.', task: 'Use turtle heading with compare.', steps: ['Drag the turtle heading block into a compare block.', 'Set the compare to check if heading equals 90.', 'Place the compare inside an if block and add a move inside.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_heading', 'op_number', 'move_forward'], focusBlocks: ['get_heading', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'get_heading', 'op_compare'], requireStartLinked: true } },
+  { id: 'l21', level: 6, title: 'Setup Section', goal: 'Set up your turtle before you start drawing.', intention: 'Setup blocks tune color and pen before the turtle lays down the real picture.', task: 'Use clear, set color, and set pen size.', steps: ['Clear screen first.', 'Set color.', 'Set pen size before drawing.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'op_number', 'move_forward'], focusBlocks: ['clear_screen', 'set_color', 'set_pen_size'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'set_color', 'set_pen_size'], requireStartLinked: true } },
+  { id: 'l22', level: 6, title: 'Shape System: Circle', goal: 'Draw a circle in a full script.', intention: 'Style setup plus one circle block gives a polished round trace fast.', task: 'Use setup blocks and draw circle.', steps: ['Add when Run clicked, then clear screen, then set color.', 'Add draw circle after the setup.', 'Run — the circle should match the dashed guide.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'draw_circle', 'op_number'], focusBlocks: ['draw_circle', 'set_color'], rules: { requiredTypes: ['when_run_clicked', 'draw_circle', 'set_color'], requireStartLinked: true } },
+  { id: 'l23', level: 6, title: 'Shape System: Polygon', goal: 'Use sides and length for polygons.', intention: 'Polygon parameters let the turtle hop through many regular shapes with one block.', task: 'Use draw polygon in script.', steps: ['Add draw polygon.', 'Set sides and length.', 'Run and check.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_polygon', 'op_number', 'set_color', 'color_value'], focusBlocks: ['draw_polygon', 'op_number'], rules: { requiredTypes: ['when_run_clicked', 'draw_polygon'], requireStartLinked: true } },
+  { id: 'l24', level: 6, title: 'Multi-Part Program', goal: 'Combine setup, loop, and rule.', intention: 'Layering setup, loops, and ifs mirrors how bigger turtle sketches stay organized.', task: 'Use set color + repeat + if.', steps: ['Do setup first.', 'Add repeat block.', 'Add if rule in same script.'], toolbox: ['when_run_clicked', 'set_color', 'color_value', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'set_color'], rules: { requiredTypes: ['when_run_clicked', 'set_color', 'repeat_times', 'if_condition'], requireStartLinked: true } },
+  { id: 'l25', level: 7, title: 'Fix Missing Link', goal: 'Repair a broken connection.', intention: 'Blocks only run when they are connected in a chain from the start block. A block floating on its own will never do anything — the turtle never sees it. This lesson is about finding and fixing that kind of break.', task: 'Build start -> repeat -> move -> turn.', steps: ['Place the start block and snap repeat directly below it.', 'Drag move forward inside the repeat block.', 'Add turn right after move forward, inside the repeat.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['when_run_clicked', 'repeat_times'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
+  { id: 'l26', level: 7, title: 'Fix Wrong Block Type', goal: 'Swap incorrect blocks for correct ones.', intention: 'If your drawing does not match the dashed guide, the right fix is often swapping one block for a different kind. Adding a turn makes the turtle change direction at each corner — without it, the turtle just goes straight.', task: 'Use move and turn, not only move.', steps: ['Add a repeat block with move forward inside.', 'Run it and notice the turtle only draws a straight line.', 'Add turn right after move forward inside the repeat, then run again to see the square form.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
+  { id: 'l27', level: 7, title: 'Debug with Fast Tests', goal: 'Reset and rerun quickly while fixing.', intention: 'Good debugging means running your code, seeing what changed, adjusting one thing, and running again. Clear screen wipes previous marks so you can compare runs, and wait gives you time to see what happened.', task: 'Use clear + wait + draw.', steps: ['Add clear screen right after start so old marks disappear on each run.', 'Add draw circle after the clear.', 'Add wait seconds after the draw so you can see the result before the run ends.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds', 'op_number'], focusBlocks: ['clear_screen', 'wait_seconds', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds'], requireStartLinked: true } },
+  { id: 'l28', level: 8, title: 'Remix Starter', goal: 'Mix at least 5 different block types.', intention: 'Remixing motion, color, and shape blocks surfaces new turtle doodles fast.', task: 'Use 5 non-number blocks in one script.', steps: ['Start with when Run clicked.', 'Add at least five different block types — try mixing move, color, repeat, circle, and clear screen.', 'Run and check — keep adjusting until it passes.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'move_forward', 'turn_right', 'repeat_times', 'draw_circle', 'op_number'], focusBlocks: ['set_color', 'repeat_times', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked'], minNonNumberBlocks: 5, requireStartLinked: true } },
+  { id: 'l29', level: 8, title: 'Invent a Mini Tool', goal: 'Create your own drawing behavior.', intention: 'Your own if + loop + shape combo becomes a tiny turtle “tool� you can reuse.', task: 'Use loop + rule + shape together.', steps: ['Add repeat block.', 'Add if with compare.', 'Use circle or polygon.'], toolbox: ['when_run_clicked', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'draw_polygon'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition'], oneOfTypes: ['draw_circle', 'draw_polygon'], requireStartLinked: true } },
+  { id: 'l30', level: 8, title: 'Recursion Basics', goal: 'Build your first self-calling function.', intention: 'A function that calls itself can spiral the turtle outward if each call shrinks the job and stops cleanly.', task: 'Define a function that calls itself with a counter and a stop condition.', steps: ['Create a function named spiralStep — define it with a variable as a counter.', 'Inside it, add move forward, turn right, then change the counter variable by -1.', 'Add an if block inside the function: if counter > 0, call spiralStep again — this stops the chain when counter reaches 0.'], toolbox: ['when_run_clicked', '__PROCEDURES__', '__VARIABLES__', 'if_condition', 'op_compare', 'op_math', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['if_condition', 'op_compare', 'variables_set'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], oneOfTypes: ['procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } },
+  { id: 'l31', level: 8, title: 'Capstone Build', goal: 'Build a full mini project with systems.', intention: 'A capstone turtle scene ties color, motion, variables, and rules into one coherent drawing.', task: 'Use start + loop + condition + variable + shape.', steps: ['Add setup blocks under start: clear screen, set color, set pen size.', 'Create at least one variable and give it a starting value.', 'Add a repeat block with an if rule inside, and use a shape block like draw circle or draw polygon.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'set_color', 'color_value', 'move_forward', 'turn_right'], focusBlocks: ['variables_set', 'repeat_times', 'if_condition', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition', 'variables_set'], oneOfTypes: ['draw_circle', 'draw_polygon'], minNonNumberBlocks: 7, requireStartLinked: true } },
+  { id: 'l32', level: 9, title: 'Move Backward', goal: 'Control reverse movement.', intention: 'Move backward makes the turtle step in reverse without turning around. It is useful for creating symmetry, retracing a path, or navigating tight spaces where spinning the turtle would go out of bounds.', task: 'Use move backward under start.', steps: ['Place when Run clicked.', 'Add move backward below it.', 'Run and notice the turtle moves backward but still faces the same direction.'], toolbox: ['when_run_clicked', 'move_backward', 'op_number'], focusBlocks: ['move_backward'], rules: { requiredTypes: ['when_run_clicked', 'move_backward'], requireStartLinked: true } },
+  { id: 'l33', level: 9, title: 'Jump to Coordinates', goal: 'Place the turtle at a specific point.', intention: 'Jump-to teleports the turtle so the next line starts exactly where you planned on the grid.', task: 'Use jump to with x and y values.', steps: ['Drag jump to.', 'Set x and y values.', 'Connect under start.'], toolbox: ['when_run_clicked', 'jump_to', 'op_number'], focusBlocks: ['jump_to'], rules: { requiredTypes: ['when_run_clicked', 'jump_to'], requireStartLinked: true } },
+  { id: 'l34', level: 9, title: 'Return to Center', goal: 'Reset turtle location fast.', intention: 'Snapping back to center gives every section of a doodle the same anchor.', task: 'Use go to center in your script.', steps: ['Place start block.', 'Add go to center.', 'Add one move block after it.'], toolbox: ['when_run_clicked', 'go_to_center', 'move_forward', 'op_number'], focusBlocks: ['go_to_center'], rules: { requiredTypes: ['when_run_clicked', 'go_to_center'], requireStartLinked: true } },
+  { id: 'l35', level: 9, title: 'Set Heading', goal: 'Point the turtle to an exact angle.', intention: 'Locking heading first makes the next forward stroke land at a known compass angle.', task: 'Set heading, then move forward.', steps: ['Add set heading under start and set the angle to 0 (facing right).', 'Add move forward after it.', 'Try changing the angle to 90, 180, or 270 and run each time to see which direction the turtle goes.'], toolbox: ['when_run_clicked', 'set_heading', 'move_forward', 'op_number'], focusBlocks: ['set_heading'], rules: { requiredTypes: ['when_run_clicked', 'set_heading', 'move_forward'], requireStartLinked: true } },
+  { id: 'l36', level: 10, title: 'Random Color Fun', goal: 'Use random color changes in drawing.', intention: 'Random ink keeps the turtle’s same path feeling fresh on every run.', task: 'Use set random color before drawing.', steps: ['Add set random color.', 'Add move or shape block after it.', 'Run a few times and compare colors.'], toolbox: ['when_run_clicked', 'set_random_color', 'move_forward', 'op_number'], focusBlocks: ['set_random_color'], rules: { requiredTypes: ['when_run_clicked', 'set_random_color'], requireStartLinked: true } },
+  { id: 'l37', level: 10, title: 'Draw Line Block', goal: 'Draw a precise line in one step.', intention: 'Instead of using a move forward block, the draw line block draws a straight segment of an exact length in one go. It is faster when you just need one clean stroke without any turning.', task: 'Use draw line with a chosen length.', steps: ['Add draw line under start.', 'Set the length number — try 100.', 'Run and then try different lengths to see how the line changes.'], toolbox: ['when_run_clicked', 'draw_line', 'op_number'], focusBlocks: ['draw_line'], rules: { requiredTypes: ['when_run_clicked', 'draw_line'], requireStartLinked: true } },
+  { id: 'l38', level: 10, title: 'Draw Rectangle Block', goal: 'Draw box shapes using width and height.', intention: 'Instead of drawing four separate sides with move and turn, the draw rectangle block does it all in one go. You set a width and a height, and it builds the whole box for you.', task: 'Use draw rectangle with two values.', steps: ['Add draw rectangle under start.', 'Set the width to 80 and the height to 40.', 'Run, then try swapping the numbers to see how the proportions change.'], toolbox: ['when_run_clicked', 'draw_rectangle', 'op_number'], focusBlocks: ['draw_rectangle'], rules: { requiredTypes: ['when_run_clicked', 'draw_rectangle'], requireStartLinked: true } },
+  { id: 'l39', level: 11, title: 'Math Expressions', goal: 'Compute values with math operators.', intention: 'Instead of typing a fixed number into move forward, you can use a math block to calculate the number on the fly. For example, 50 + 30 gives you 80 — and if you change the 30 to 10, the line shortens automatically.', task: 'Use an op math block to feed movement.', steps: ['Drag a math operator block and set it to addition.', 'Put two number blocks on each side.', 'Plug the math block into the move forward distance slot and run.'], toolbox: ['when_run_clicked', 'move_forward', 'op_math', 'op_number'], focusBlocks: ['op_math'], rules: { requiredTypes: ['when_run_clicked', 'op_math'], requireStartLinked: true } },
+  { id: 'l40', level: 11, title: 'Boolean Values', goal: 'Use true/false directly.', intention: 'A true/false block is the simplest possible condition. Putting true inside an if block means that if will always run. Putting false means it will never run. This is useful for testing — you can lock a branch open or closed while you figure out the rest.', task: 'Use op boolean inside an if condition.', steps: ['Add an if block under start.', 'Drag a true/false block into the if condition slot.', 'Put a move forward inside the if block, then try switching true to false and run again.'], toolbox: ['when_run_clicked', 'if_condition', 'op_boolean', 'move_forward'], focusBlocks: ['op_boolean'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_boolean'], requireStartLinked: true } },
+  { id: 'l41', level: 11, title: 'String Values', goal: 'Create and use text values.', intention: 'A text block holds a word or sentence. In programming, a piece of text is called a string. You use strings to label events, give names to things, and write notes that the computer can read.', task: 'Use op string in a block input.', steps: ['Drag a text block into your workspace.', 'Click it and type a word, like "hello".', 'Connect it to a note block or an event name block.'], toolbox: ['when_run_clicked', 'op_string', 'note_comment'], focusBlocks: ['op_string'], rules: { requiredTypes: ['when_run_clicked', 'op_string'], requireStartLinked: true } },
+  { id: 'l42', level: 12, title: 'Lists: Create + Add + Get', goal: 'Keep a list of values and use them one by one.', intention: 'A list stores many values in order, like a playlist or a shopping list. You can add items to the end, and then read them back by their position number — the first item is at position 1, the second at position 2, and so on.', task: 'Create a list, add an item, then read one item.', steps: ['Add a make list block and give it a name.', 'Add an add to list block and connect a number or text to it.', 'Add a list item block, set the position to 1, and connect it to a note block to see the value.'], toolbox: ['when_run_clicked', 'array_create', 'array_add_item', 'array_get', 'op_string', 'op_number'], focusBlocks: ['array_create', 'array_add_item', 'array_get'], rules: { requiredTypes: ['when_run_clicked', 'array_create', 'array_add_item', 'array_get'], requireStartLinked: true } },
+  { id: 'l43', level: 12, title: 'Objects: Set + Get', goal: 'Store named information in one place.', intention: 'An object is like a labeled card that holds several pieces of information. Each piece has a name (the key) and a value — like "color: red" or "score: 10". This lets your program keep related data organized together.', task: 'Create an object, set one key, then read it.', steps: ['Add a make object block and give it a name.', 'Add a set object key block — set the key to "color" and the value to a text block saying "red".', 'Add a get object key block, use the same object name and key "color", and connect it to a note block.'], toolbox: ['when_run_clicked', 'object_create', 'object_set', 'object_get', 'op_string', 'op_number'], focusBlocks: ['object_create', 'object_set', 'object_get'], rules: { requiredTypes: ['when_run_clicked', 'object_create', 'object_set', 'object_get'], requireStartLinked: true } },
+  { id: 'l44', level: 12, title: 'Comment Your Code', goal: 'Use notes to explain your code.', intention: 'A note block is a comment — it does not change what the turtle does at all. But it reminds you (or a friend reading your code later) what that part is supposed to do. Good programmers comment their code so it stays understandable even weeks later.', task: 'Add a note_comment block in your script.', steps: ['Add move forward under start.', 'Drag a note block and place it near the move block.', 'Click the note and write a short sentence explaining what the move does.'], toolbox: ['when_run_clicked', 'note_comment', 'move_forward', 'op_number'], focusBlocks: ['note_comment'], rules: { requiredTypes: ['when_run_clicked', 'note_comment'], requireStartLinked: true } },
+  { id: 'l45', level: 13, title: 'Message Events', goal: 'Trigger code with named events.', intention: 'Events let one turtle stack nudge another stack after a named signal fires.', task: 'Use send event and on event with the same name.', steps: ['Start a new stack: drag when Run clicked, add send event, and type the name "go".', 'Start a second separate stack: drag on event, set its name to "go", then add move forward inside it.', 'Press Run — the first stack fires, the second stack catches it and moves the turtle.'], toolbox: ['when_run_clicked', 'send_event_message', 'on_event_message', 'move_forward', 'turn_right'], focusBlocks: ['send_event_message', 'on_event_message'], rules: { requiredTypes: ['send_event_message', 'on_event_message'], requireStartLinked: false } },
+  { id: 'l46', level: 13, title: 'Canvas Zoom Controls', goal: 'Control view scale while drawing.', intention: 'Zooming in and out changes what you see, not what the turtle drew. Zoom in to inspect small details up close, zoom out to see the full picture, and reset zoom to return to the default view. The drawing itself does not change.', task: 'Use zoom in, zoom out, and reset zoom.', steps: ['Add zoom in under start.', 'Add zoom out after it.', 'Add reset zoom at the end so the view goes back to normal after the run.'], toolbox: ['when_run_clicked', 'canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom', 'op_number'], focusBlocks: ['canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom'], rules: { requiredTypes: ['when_run_clicked', 'canvas_zoom_in', 'canvas_zoom_out', 'canvas_reset_zoom'], requireStartLinked: true } },
+  { id: 'l47', level: 13, title: 'Grid Visibility', goal: 'Use grid toggling intentionally.', intention: 'Toggling the grid helps line up turtle jumps and counts squares before you draw.', task: 'Toggle grid during a short script.', steps: ['Add toggle grid right after start to turn the grid on.', 'Add a movement or shape block so you can see the turtle against the grid.', 'Add toggle grid again at the end to turn the grid back off.'], toolbox: ['when_run_clicked', 'canvas_toggle_grid', 'move_forward', 'op_number'], focusBlocks: ['canvas_toggle_grid'], rules: { requiredTypes: ['when_run_clicked', 'canvas_toggle_grid'], requireStartLinked: true } },
+  { id: 'l48', level: 13, title: 'Define a Function', goal: 'Create your own reusable block flow.', intention: 'A function is like your own custom block. You give it a name, put steps inside it, and then you can use that name anywhere to run all those steps at once. This lesson is just about defining one — the next lesson covers calling it.', task: 'Add a function definition and include steps inside it.', steps: ['Drag a define function block and give your function a name, like drawShape.', 'Put move forward and turn right inside the function definition.', 'Leave the function block in your workspace — you will call it in the next lesson.'], toolbox: ['when_run_clicked', '__PROCEDURES__', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['procedures_defnoreturn'], rules: { requiredTypes: ['procedures_defnoreturn'], requireStartLinked: false } },
+  { id: 'l49', level: 13, title: 'Call a Function', goal: 'Run your custom function from main flow.', intention: 'Calling a function runs all the steps you defined in it, from wherever you placed the call block. This keeps your main script short and clean — the top stays readable while the function handles the details.', task: 'Define a function and call it from when Run clicked.', steps: ['Create function definition.', 'Add call function block under start.', 'Run to verify the call executes.'], toolbox: ['when_run_clicked', '__PROCEDURES__', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['procedures_callnoreturn', 'procedures_defnoreturn'], rules: { requiredTypes: ['when_run_clicked', 'procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } }
 ]
 
 const LESSONS_WITH_NUMBERS = LESSONS.map((lesson, index) => ({
@@ -655,33 +656,42 @@ function getLessonBlueprint(lessonNumber, level) {
     `
   }
 
-  const lineGhost = { lines: [{ points: [{ x: -95, y: 0 }, { x: 95, y: 0 }] }] }
-  const cornerGhost = { lines: [{ points: [{ x: -75, y: 45 }, { x: 20, y: 45 }, { x: 20, y: -45 }] }] }
+  // Ghost (x, y) uses the same mapping as the dashed preview: canvasX = w/2 + x, canvasY = h/2 - y.
+  // move_forward(50) from center with heading 0 draws 50px to the right on the canvas �' (0,0)-(50,0) here.
+  const lineGhostShort = { lines: [{ points: [{ x: 0, y: 0 }, { x: 50, y: 0 }] }] }
+  const lineGhostRepeat4 = { lines: [{ points: [{ x: 0, y: 0 }, { x: 200, y: 0 }] }] }
+  const cornerGhost = {
+    lines: [{ points: [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 50, y: -50 }] }]
+  }
   const splitLineGhost = {
     lines: [
-      { points: [{ x: -95, y: 15 }, { x: -20, y: 15 }] },
-      { points: [{ x: 20, y: -15 }, { x: 95, y: -15 }] }
+      { points: [{ x: -45, y: 0 }, { x: -8, y: 0 }] },
+      { points: [{ x: 8, y: 0 }, { x: 45, y: 0 }] }
     ]
   }
   const squareGhost = {
-    lines: [{ points: [{ x: -70, y: 60 }, { x: 70, y: 60 }, { x: 70, y: -60 }, { x: -70, y: -60 }], close: true }]
+    lines: [{ points: [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 50, y: -50 }, { x: 0, y: -50 }], close: true }]
   }
-  const circleGhost = { circles: [{ x: 0, y: 0, r: 58 }] }
+  const circleGhost = { circles: [{ x: 0, y: 0, r: 50 }] }
   const triangleGhost = {
-    lines: [{ points: [{ x: 0, y: 72 }, { x: 70, y: -52 }, { x: -70, y: -52 }], close: true }]
+    lines: [{ points: [{ x: 0, y: 40 }, { x: 40, y: -30 }, { x: -40, y: -30 }], close: true }]
   }
   const pentagonGhost = {
-    lines: [{ points: [{ x: 0, y: 72 }, { x: 70, y: 22 }, { x: 42, y: -62 }, { x: -42, y: -62 }, { x: -70, y: 22 }], close: true }]
+    lines: [{ points: [{ x: 0, y: 45 }, { x: 43, y: 14 }, { x: 26, y: -37 }, { x: -26, y: -37 }, { x: -43, y: 14 }], close: true }]
   }
 
   const byLesson = {
+    0: {
+      starterXml: STARTER_XML.basic,
+      ghostPreview: lineGhostShort
+    },
     1: {
       starterXml: `
         <xml xmlns="https://developers.google.com/blockly/xml">
           <block type="when_run_clicked" x="30" y="24"></block>
         </xml>
       `,
-      ghostPreview: lineGhost
+      ghostPreview: lineGhostShort
     },
     2: {
       starterXml: `
@@ -717,7 +727,7 @@ function getLessonBlueprint(lessonNumber, level) {
           </block>
         </xml>
       `,
-      ghostPreview: lineGhost
+      ghostPreview: lineGhostShort
     },
     5: {
       starterXml: `
@@ -731,7 +741,7 @@ function getLessonBlueprint(lessonNumber, level) {
           </block>
         </xml>
       `,
-      ghostPreview: lineGhost
+      ghostPreview: lineGhostRepeat4
     },
     6: {
       starterXml: `
@@ -872,7 +882,7 @@ function getLessonBlueprint(lessonNumber, level) {
           </block>
         </xml>
       `,
-      ghostPreview: squareGhost
+      ghostPreview: lineGhostRepeat4
     },
     26: { starterXml: STARTER_XML.moveTurn, ghostPreview: squareGhost },
     27: {
@@ -1186,15 +1196,25 @@ function blockUsagePrompt(type) {
 function lessonFallbackVisual(level) {
   const byLevel = {
     1: '🚀',
-    2: '🔁',
+    2: '�',
     3: '🧠',
     4: '📦',
     5: '🧭',
-    6: '🛠️',
-    7: '🐞',
+    6: '🛠�',
+    7: '�',
     8: '🎨'
   }
   return byLevel[level] || '✨'
+}
+
+function lessonOpeningLeadIn(lesson, isIntro) {
+  if (isIntro) {
+    return 'This is your turtle’s first program: a short stack of blocks, a press of Run, and one line of ink so you can see cause and effect right away.'
+  }
+  const ghostHint = lesson.ghostPreview
+    ? ' When you use Run + Check Lesson, your turtle’s ink should line up with the dashed guide on the canvas.'
+    : ''
+  return `${lesson.goal}${ghostHint}`
 }
 
 function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onPrev, canPrev, canNext }) {
@@ -1208,6 +1228,9 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
   const [stopSequence, setStopSequence] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false)
+  const ghostPassRef = useRef(false)
+  const runFinishResolverRef = useRef(null)
+  const awaitingRunFinishRef = useRef(false)
   const isIntroLesson = lesson.id === 'l0'
   const lessonMedia = LESSON_MEDIA[lesson.id] || []
   const lessonContext = LESSON_REAL_WORLD_CONTEXT[lesson.id] || null
@@ -1288,22 +1311,73 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
     setShowCompletionOverlay(false)
     setRunSequence(0)
     setStopSequence(0)
+    ghostPassRef.current = false
+    awaitingRunFinishRef.current = false
+    runFinishResolverRef.current = null
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [lesson.id])
 
+  const handleCanvasRunStateChange = (running) => {
+    setIsRunning(running)
+    if (!running && awaitingRunFinishRef.current && runFinishResolverRef.current) {
+      awaitingRunFinishRef.current = false
+      const resolve = runFinishResolverRef.current
+      runFinishResolverRef.current = null
+      resolve()
+    }
+  }
+
+  const handleGhostScore = (result) => {
+    ghostPassRef.current = !!(result && result.pass)
+  }
+
   const handleRunAndCheck = async () => {
     if (!workspaceRef.current || checking) return
+    ghostPassRef.current = false
+    awaitingRunFinishRef.current = true
+    const runFinished = new Promise((resolve) => {
+      runFinishResolverRef.current = resolve
+    })
     setStopSequence((n) => n + 1)
     setRunSequence((n) => n + 1)
     setChecking(true)
     setMessage('')
-    await new Promise((resolve) => setTimeout(resolve, 700))
-    const passed = isLessonComplete(workspaceRef.current, lesson)
+    let runTimedOut = false
+    await Promise.race([
+      runFinished,
+      new Promise((resolve) => {
+        setTimeout(() => {
+          runTimedOut = true
+          resolve()
+        }, 45000)
+      })
+    ])
+
+    awaitingRunFinishRef.current = false
+    if (runFinishResolverRef.current) {
+      runFinishResolverRef.current = null
+    }
+
+    if (runTimedOut) {
+      setMessage('That run took too long. If you used forever, add a wait or shorten the loop, then try Run + Check again.')
+      setChecking(false)
+      return
+    }
+
+    const blocksOk = isLessonComplete(workspaceRef.current, lesson)
+    const needsGhostMatch = !!lesson.ghostPreview
+    const ghostOk = !needsGhostMatch || ghostPassRef.current
+    const passed = blocksOk && ghostOk
+
     if (passed) {
       setMessage('')
       setShowCompletionOverlay(true)
       window.setTimeout(() => setShowCompletionOverlay(false), 1800)
       onComplete(lesson.id)
+    } else if (!blocksOk) {
+      setMessage('Nice try. Follow the mission and steps, then check again.')
+    } else if (needsGhostMatch && !ghostOk) {
+      setMessage('Blocks look good, but your turtle’s drawing does not match the dashed guide yet. Run again and adjust distances, turns, or pen until the ink lines up.')
     } else {
       setMessage('Nice try. Follow the mission and steps, then check again.')
     }
@@ -1319,72 +1393,95 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
       <p className='lesson-level-label'>Level {lesson.level}: {LEVEL_TITLES[lesson.level]}</p>
       <h2>Lesson {lesson.lessonNumber}: {lesson.title}</h2>
 
+      {/* l0 only: brief explainers before anything else */}
       {isIntroLesson && (
         <>
           <h3 className='lesson-mini-title'>What Are Blocks?</h3>
           <p className='lesson-long-text'>
-            Blocks are visual pieces of code. Each block gives one instruction, and snapping blocks together creates
-            a program.
+            Blocks are visual pieces of code. Each block gives one instruction, and snapping blocks
+            together creates a program.
           </p>
           <h3 className='lesson-mini-title'>What Is Coding?</h3>
           <p className='lesson-long-text'>
-            Coding means giving clear instructions to a computer. In this lesson, your program starts at the top
-            block and runs down.
+            Coding means giving clear instructions to a computer. Your program starts at the top block
+            and runs down, one step at a time.
           </p>
+        </>
+      )}
+
+      {/* Opening sentence */}
+      <p className='lesson-think-prompt'>
+        {lessonOpeningLeadIn(lesson, isIntroLesson)}
+      </p>
+
+      {/* Block focus grid � show tools before introducing concepts */}
+      <section className='lesson-block-focus-grid'>
+        {lesson.focusBlocks.map((type) => (
+          <article key={type} className='lesson-block-focus-item lesson-focus-card'>
+            <InlineBlockToken type={type} svg={blockPreviews[type]} />
+            <p className='lesson-long-text'>
+              {BLOCK_TEACHING[type] || 'Use this block as part of your solution in this lesson.'}{' '}
+              {blockUsagePrompt(type)}
+            </p>
+          </article>
+        ))}
+      </section>
+
+      {/* l0: what you will accomplish */}
+      {isIntroLesson && (
+        <section className='lesson-focus-card'>
+          <h3 className='lesson-mini-title'>Lesson Goal</h3>
           <p className='lesson-long-text'>
-            By the end of this lesson, you will make your drawing character move forward and draw its first line.
+            By the end of this lesson you will run your very first block program and watch your turtle
+            draw a line on the canvas.
           </p>
-        </>
+          <ul className='lesson-steps'>
+            <li>Blocks are pieces of code you snap together.</li>
+            <li>A program runs from the top block down to the bottom.</li>
+            <li>Small changes to your blocks change what appears on the canvas.</li>
+          </ul>
+        </section>
       )}
 
-      {isIntroLesson ? (
-        <>
-          <p className='lesson-think-prompt'>
-            Turtle Journey theme: in every lesson, you are guiding one turtle artist with clearer and clearer instructions.
-          </p>
-          <section className='lesson-focus-card'>
-            <h3 className='lesson-mini-title'>Lesson Goal</h3>
-            <p className='lesson-long-text'>In this lesson, you will run your first tiny block program.</p>
-            <ul className='lesson-steps'>
-              <li>Blocks are pieces of code you can snap together.</li>
-              <li>Coding means giving clear instructions to a computer.</li>
-              <li>A program runs from the top block down.</li>
-              <li>Small changes in code can change what appears on the canvas.</li>
-            </ul>
-          </section>
-          <section className='lesson-focus-card lesson-focus-card--mission'>
-            <h3 className='lesson-mini-title lesson-think-prompt'>Mission</h3>
-            <p className='lesson-long-text'>
-              Build this tiny program: <strong>when Run clicked</strong> then <strong>move forward</strong>.
-            </p>
-            <p className='lesson-long-text'>
-              Press Run and your character should move forward and draw a line.
-            </p>
-          </section>
-        </>
-      ) : (
-        <>
-          <p className='lesson-think-prompt'>
-            Turtle Journey theme: this mission teaches your turtle a new drawing skill you will reuse in later lessons.
-          </p>
-          <section className='lesson-focus-card'>
-            <h3 className='lesson-mini-title'>Why This Matters</h3>
-            <p className='lesson-long-text'>
-              In this lesson, your goal is to <strong>{lesson.goal.toLowerCase()}</strong>.
-            </p>
-            <p className='lesson-long-text'>
-              {lesson.intention}
-            </p>
-          </section>
-          <section className='lesson-focus-card lesson-focus-card--mission'>
-            <h3 className='lesson-mini-title lesson-think-prompt'>Mission</h3>
-            <p className='lesson-long-text'>
-              <strong>{lesson.task}</strong>
-            </p>
-          </section>
-        </>
+      {/* Non-intro: what you will learn (goal already shown above) */}
+      {!isIntroLesson && (
+        <section className='lesson-focus-card'>
+          <h3 className='lesson-mini-title'>What You'll Learn</h3>
+          <p className='lesson-long-text'>{lesson.intention}</p>
+        </section>
       )}
 
+      {/* Word Help � vocabulary before the task */}
+      {LESSON_WORD_HELP[lesson.id] && (
+        <section className='lesson-focus-card'>
+          <h3 className='lesson-mini-title'>Word Help</h3>
+          <ul className='lesson-steps'>
+            {LESSON_WORD_HELP[lesson.id].map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Mission � right before the studio so it is fresh when they start building */}
+      <section className='lesson-focus-card lesson-focus-card--mission'>
+        <h3 className='lesson-mini-title lesson-think-prompt'>Your Mission</h3>
+        {isIntroLesson ? (
+          <>
+            <p className='lesson-long-text'>
+              Build this tiny program: snap <strong>move forward</strong> under{' '}
+              <strong>when Run clicked</strong>, then press Run.
+            </p>
+            <p className='lesson-long-text'>
+              Your turtle should move forward and draw its first line.
+            </p>
+          </>
+        ) : (
+          <p className='lesson-long-text'>{lesson.task}</p>
+        )}
+      </section>
+
+      {/* Media gallery � reference images near the task */}
       {lessonMedia.length > 0 && (
         <div className={`lesson-photo-gallery ${lessonMedia.length > 1 ? 'is-multi' : 'is-single'}`}>
           {lessonMedia.map((media) => (
@@ -1407,97 +1504,28 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         </div>
       )}
 
-      {lessonContext && (
-        <section className='lesson-focus-card lesson-focus-card--context'>
-          <h3 className='lesson-mini-title'>Why Programmers Use This</h3>
-          <p className='lesson-long-text'><strong>Relevance:</strong> {lessonContext.relevance}</p>
-          <p className='lesson-long-text'><strong>Utility:</strong> {lessonContext.utility}</p>
-        </section>
-      )}
-
-      {LESSON_WORD_HELP[lesson.id] && (
-        <section className='lesson-focus-card'>
-          <h3 className='lesson-mini-title'>Word Help</h3>
-          <ul className='lesson-steps'>
-            {LESSON_WORD_HELP[lesson.id].map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {isIntroLesson && (
-        <>
-          <section className='lesson-mini-section'>
-            <h3 className='lesson-mini-title'>Mini Studio 1: Run Your First Program</h3>
-          </section>
-          <div className='studio-shell'>
-            <div className='studio-toolbar'>
-              <p><strong>Interactive Mini Studio:</strong> start here and run your first block program.</p>
-              <button type='button' className='check-cta-btn' onClick={handleRunAndCheck} disabled={checking}>
-                {checking ? 'Running + Checking...' : 'Run + Check Lesson'}
-              </button>
-            </div>
-            <div className='studio-mission'>
-              <p><strong>Build target:</strong> {getBuildTargetText(lesson)}</p>
-              <ol className='lesson-steps'>
-                {getInstructionSteps(lesson).map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </div>
-            <div className='studio-pane'>
-              <div ref={mountRef} className='lesson-blockly-mount' />
-            </div>
-          <div className='studio-pane'>
-            <div className='lesson-mini-canvas'>
-                <DrawingCanvas
-                  commands={commands}
-                  runSequence={runSequence}
-                  stopSequence={stopSequence}
-                  onHighlight={() => {}}
-                  onRunStateChange={setIsRunning}
-                  ghostPreview={lesson.ghostPreview}
-                  defaultPointerStyle='turtle'
-                />
-            </div>
-          </div>
-          {showCompletionOverlay && (
-            <div className='studio-success-overlay' role='status' aria-live='polite'>
-              Awesome work. Lesson complete.
-            </div>
-          )}
-        </div>
-      </>
-      )}
-
-      <section className='lesson-block-focus-grid'>
-        {lesson.focusBlocks.map((type) => (
-          <article key={type} className='lesson-block-focus-item lesson-focus-card'>
-            <InlineBlockToken type={type} svg={blockPreviews[type]} />
-            <p className='lesson-long-text'>
-              {BLOCK_TEACHING[type] || 'Use this block as part of your solution in this lesson.'}{' '}
-              {blockUsagePrompt(type)}
-            </p>
-          </article>
-        ))}
-      </section>
-
+      {/* l0 only: debugging tips before the studio */}
       {isIntroLesson && (
         <section className='lesson-mini-section lesson-focus-card'>
-          <h3 className='lesson-mini-title'>Debugging Help</h3>
+          <h3 className='lesson-mini-title'>If Something Looks Wrong</h3>
           <ul className='lesson-steps'>
-            <li>Make sure move forward is snapped under when Run clicked.</li>
-            <li>Press Run after making changes.</li>
-            <li>If the line is tiny, increase the move number.</li>
-            <li>If move forward is missing, drag it from the block menu again.</li>
+            <li>Make sure move forward is snapped directly under when Run clicked.</li>
+            <li>Press Run again after making any changes.</li>
+            <li>If the line is too short, increase the number on the move block.</li>
+            <li>If the turtle did not move at all, drag move forward from the block menu and try again.</li>
           </ul>
         </section>
       )}
 
-      {!isIntroLesson && <div className='studio-shell'>
+      {/* Unified studio for all lessons */}
+      <div className='studio-shell'>
         <div className='studio-toolbar'>
-          <p><strong>Interactive Mini Studio:</strong> drag blocks, snap them, run, and watch the canvas update.</p>
+          <p>
+            <strong>Mini Studio:</strong>{' '}
+            {lesson.ghostPreview
+              ? 'Build your program, run it, and make your turtle\'s ink line up with the dashed guide. Then hit Run + Check Lesson.'
+              : 'Build your program, run it, and watch the turtle. When it does what the mission asks, hit Run + Check Lesson.'}
+          </p>
           <button type='button' className='check-cta-btn' onClick={handleRunAndCheck} disabled={checking}>
             {checking ? 'Running + Checking...' : 'Run + Check Lesson'}
           </button>
@@ -1520,8 +1548,10 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
               runSequence={runSequence}
               stopSequence={stopSequence}
               onHighlight={() => {}}
-              onRunStateChange={setIsRunning}
+              onRunStateChange={handleCanvasRunStateChange}
+              onChallengeScore={handleGhostScore}
               ghostPreview={lesson.ghostPreview}
+              scoreGhostPreview={lesson.ghostPreview}
               defaultPointerStyle='turtle'
             />
           </div>
@@ -1531,17 +1561,33 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
             Awesome work. Lesson complete.
           </div>
         )}
-      </div>}
+      </div>
+
       <p className={`lesson-status-message ${isDone ? 'done' : ''}`}>{message}</p>
+
       <section className='lesson-focus-card lesson-focus-card--try'>
         <h3 className='lesson-mini-title lesson-think-prompt'>Try This Next</h3>
         <p className='lesson-long-text'>{lessonChallengeText(lesson)}</p>
       </section>
+
       <hr className='lesson-divider' />
+
+      {/* Real-world context � after building, as reflection */}
+      {lessonContext && (
+        <section className='lesson-focus-card lesson-focus-card--context'>
+          <h3 className='lesson-mini-title'>Why Programmers Use This</h3>
+          <p className='lesson-long-text'><strong>Relevance:</strong> {lessonContext.relevance}</p>
+          <p className='lesson-long-text'><strong>Utility:</strong> {lessonContext.utility}</p>
+        </section>
+      )}
 
       <section className='lesson-takeaway lesson-focus-card lesson-focus-card--recap'>
         <h3>After-Lesson Takeaways</h3>
-        {!isDone && <div className='takeaway-lock'>[Locked]</div>}
+        {!isDone && (
+          <div className='takeaway-lock' title='Pass the mini studio with Run + Check Lesson first.'>
+            Locked until you pass the mini studio above (Run + Check Lesson).
+          </div>
+        )}
         {isDone ? (
           <>
             <p>{(LESSON_TAKEAWAYS[lesson.id] && LESSON_TAKEAWAYS[lesson.id].summary) || 'You completed this lesson and reached its mission goal.'}</p>
@@ -1552,7 +1598,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
             </ul>
           </>
         ) : (
-          <p>This section unlocks after you complete the lesson.</p>
+          <p>Finish the mini studio and hit Run + Check Lesson so it turns green � then this recap unlocks.</p>
         )}
       </section>
 
@@ -1569,8 +1615,11 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
 }
 
 export default function LessonsPage({ onBack }) {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const lessonPathMatch = pathname.match(/^\/lessons\/(l\d+)$/)
+  const selectedLessonIdFromUrl = lessonPathMatch ? lessonPathMatch[1] : null
   const [completed, setCompleted] = useState(getCompletedFromStorage)
-  const [selectedLessonId, setSelectedLessonId] = useState(null)
   const [catalogVisuals, setCatalogVisuals] = useState({})
 
   useEffect(() => {
@@ -1627,8 +1676,21 @@ export default function LessonsPage({ onBack }) {
   const completedCount = completed.length
   const completedSet = useMemo(() => new Set(completed), [completed])
   const progressPercent = Math.round((completedCount / LESSONS_ORDERED.length) * 100)
-  const selectedIndex = LESSONS_ORDERED.findIndex((lesson) => lesson.id === selectedLessonId)
-  const selectedLesson = selectedIndex >= 0 ? LESSONS_ORDERED[selectedIndex] : null
+  const selectedLesson = useMemo(() => {
+    if (!selectedLessonIdFromUrl) return null
+    return LESSONS_ORDERED.find((lesson) => lesson.id === selectedLessonIdFromUrl) || null
+  }, [selectedLessonIdFromUrl])
+
+  useEffect(() => {
+    if (!lessonPathMatch) return
+    if (!LESSONS_ORDERED.some((lesson) => lesson.id === lessonPathMatch[1])) {
+      navigate('/lessons', { replace: true })
+    }
+  }, [lessonPathMatch, navigate])
+
+  const selectedIndex = selectedLesson
+    ? LESSONS_ORDERED.findIndex((lesson) => lesson.id === selectedLesson.id)
+    : -1
 
   const featuredLessonIcons = {
     l0: '🐢',
@@ -1673,7 +1735,7 @@ export default function LessonsPage({ onBack }) {
               ← Back to Home
             </button>
             {selectedLesson && (
-              <button type='button' className='catalog-back-btn' onClick={() => setSelectedLessonId(null)}>
+              <button type='button' className='catalog-back-btn' onClick={() => navigate('/lessons')}>
                 ← Back to All {LESSONS_ORDERED.length} Lessons
               </button>
             )}
@@ -1698,7 +1760,7 @@ export default function LessonsPage({ onBack }) {
                     key={lesson.id}
                     type='button'
                     className={'catalog-card level-' + lesson.level + (done ? ' is-done' : '')}
-                    onClick={() => setSelectedLessonId(lesson.id)}
+                    onClick={() => navigate(`/lessons/${lesson.id}`)}
                   >
                     <div className='catalog-card-top'>
                       <span className='catalog-lesson-index'>Lesson {lesson.lessonNumber}</span>
@@ -1737,13 +1799,13 @@ export default function LessonsPage({ onBack }) {
             lesson={selectedLesson}
             isDone={completedSet.has(selectedLesson.id)}
             onComplete={handleComplete}
-            onBackToCatalog={() => setSelectedLessonId(null)}
+            onBackToCatalog={() => navigate('/lessons')}
             onPrev={() => {
-              if (selectedIndex > 0) setSelectedLessonId(LESSONS_ORDERED[selectedIndex - 1].id)
+              if (selectedIndex > 0) navigate(`/lessons/${LESSONS_ORDERED[selectedIndex - 1].id}`)
             }}
             onNext={() => {
               if (selectedIndex < LESSONS_ORDERED.length - 1) {
-                setSelectedLessonId(LESSONS_ORDERED[selectedIndex + 1].id)
+                navigate(`/lessons/${LESSONS_ORDERED[selectedIndex + 1].id}`)
               }
             }}
             canPrev={selectedIndex > 0}

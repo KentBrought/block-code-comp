@@ -264,8 +264,12 @@ const DrawingCanvas = ({
 
     if (image) {
       const size = 26
+      // Twemoji art is padded vs the pen tip: shift slightly back along heading and up in sprite space.
+      const twemojiBackAlongHeading = 2.5
+      const twemojiSpriteOffsetY = -4
+      ctx.translate(-twemojiBackAlongHeading, 0)
       ctx.scale(-1, 1)
-      ctx.drawImage(image, -size / 2, -size / 2, size, size)
+      ctx.drawImage(image, -size / 2, -size / 2 + twemojiSpriteOffsetY, size, size)
     } else {
       ctx.fillStyle = '#e63946'
       ctx.strokeStyle = '#fff'

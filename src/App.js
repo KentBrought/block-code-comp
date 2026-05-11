@@ -523,6 +523,14 @@ function AppInner() {
     return <LessonsPage onBack={() => navigate('/')} />
   }
 
+  if (/^\/lessons\/l\d+$/.test(currentPath)) {
+    return <LessonsPage onBack={() => navigate('/')} />
+  }
+
+  if (currentPath.startsWith('/lessons/')) {
+    return <Navigate to='/lessons' replace />
+  }
+
   if (!['/play', '/challenge', '/game'].includes(currentPath)) {
     return <Navigate to='/' replace />
   }
