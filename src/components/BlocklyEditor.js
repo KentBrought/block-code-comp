@@ -6,6 +6,7 @@ import { FieldColour, registerFieldColour } from '@blockly/field-colour'
 import {
   registerContinuousToolbox
 } from '@blockly/continuous-toolbox'
+import { buildWorkspaceLlmContext } from '../utils/buildWorkspaceLlmContext'
 
 registerFieldColour()
 Blockly.Msg.PROCEDURES_DEFNORETURN_DO = ''
@@ -990,7 +991,7 @@ export const defaultToolbox = {
   ]
 }
 
-const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml }) => {
+const BlocklyEditor = ({ onCodeChange, onWorkspaceContext, highlightBlockId, resetKey, initialXml }) => {
   const blocklyDiv = useRef(null)
   const workspace = useRef(null)
 
@@ -1051,14 +1052,22 @@ const BlocklyEditor = ({ onCodeChange, highlightBlockId, resetKey, initialXml })
     Blockly.Xml.domToWorkspace(startXml, workspace.current)
     ensureProcedureNames(workspace.current)
 
+    const pushWorkspaceContext = () => {
+      if (typeof onWorkspaceContext === 'function') {
+        onWorkspaceContext(buildWorkspaceLlmContext(workspace.current))
+      }
+    }
+
     workspace.current.addChangeListener(() => {
       ensureProcedureNames(workspace.current)
       onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
+      pushWorkspaceContext()
     })
     onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
+    pushWorkspaceContext()
 
     return () => workspace.current && workspace.current.dispose()
-  }, [onCodeChange, resetKey, initialXml])
+  }, [onCodeChange, onWorkspaceContext, resetKey, initialXml])
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>

@@ -17,6 +17,8 @@ import './App.css'
 
 const GAME_DURATION = 15 * 60
 
+const EMPTY_WORKSPACE_LLM = { xml: '', blockCounts: '', code: '', stackOutline: '' }
+
 const TOUR_STEPS = [
   {
     selector: '.word-badge',
@@ -72,6 +74,7 @@ function AppInner() {
   const [timeUp, setTimeUp] = useState(false)
 
   const [commands, setCommands] = useState('')
+  const [workspaceLlmContext, setWorkspaceLlmContext] = useState(EMPTY_WORKSPACE_LLM)
   const [runSequence, setRunSequence] = useState(0)
   const [stopSequence, setStopSequence] = useState(0)
   const [runCount, setRunCount] = useState(0)
@@ -82,6 +85,7 @@ function AppInner() {
   const [guessedSuccessfully, setGuessedSuccessfully] = useState(false)
   const [challengeComplete, setChallengeComplete] = useState(false)
   const [challengeHintIndex, setChallengeHintIndex] = useState(0)
+  const [pendingChallengeHintFlush, setPendingChallengeHintFlush] = useState(false)
   const [aiModelStatus, setAiModelStatus] = useState('idle')
   const [queuedRunAfterModelReady, setQueuedRunAfterModelReady] = useState(false)
 
@@ -185,9 +189,11 @@ function AppInner() {
     setGuessRound(0)
     setGuessedSuccessfully(false)
     setChallengeHintIndex(0)
+    setPendingChallengeHintFlush(false)
     setChatMessages([])
     setGhostAssistEnabled(false)
     setClassicGhostPreview(null)
+    setWorkspaceLlmContext({ ...EMPTY_WORKSPACE_LLM })
     navigate('/game')
     setEditorResetKey((k) => k + 1)
 
@@ -213,9 +219,11 @@ function AppInner() {
     setGuessedSuccessfully(false)
     setChallengeComplete(false)
     setChallengeHintIndex(0)
+    setPendingChallengeHintFlush(false)
     setChatMessages([])
     setGhostAssistEnabled(true)
     setClassicGhostPreview(null)
+    setWorkspaceLlmContext({ ...EMPTY_WORKSPACE_LLM })
     setEditorResetKey((k) => k + 1)
     navigate('/game')
   }
@@ -236,12 +244,14 @@ function AppInner() {
     setGuessedSuccessfully(false)
     setChallengeComplete(false)
     setChallengeHintIndex(0)
+    setPendingChallengeHintFlush(false)
     setChatMessages(defaultChat())
     setTourOpen(false)
     setStartTourAfterWordSelect(false)
     setGameMode('classic')
     setGhostAssistEnabled(false)
     setClassicGhostPreview(null)
+    setWorkspaceLlmContext({ ...EMPTY_WORKSPACE_LLM })
     navigate('/')
   }, [defaultChat, navigate, setTourOpen])
 
@@ -313,6 +323,8 @@ function AppInner() {
     setSelectedChallenge(null)
     setChallengeComplete(false)
     setChallengeHintIndex(0)
+    setPendingChallengeHintFlush(false)
+    setWorkspaceLlmContext({ ...EMPTY_WORKSPACE_LLM })
     setEditorResetKey((k) => k + 1)
     navigate('/challenge')
   }, [navigate])
@@ -326,31 +338,37 @@ function AppInner() {
     if (guessedSuccessfully) return
     if (challengeComplete) return
 
+    // Challenge hints go through the same chat UI as the LLM — wait until the
+    // model is ready so a "🤖 Bot" hint never appears above "Loading AI...".
     if (gameMode === 'challenge') {
-      const challengeHints = selectedChallenge
-        ? [
-            selectedChallenge.hint,
-            'Tip: compare where your lines start and end against the gray outline.',
-            'Tip: adjust repeat counts and turn angles in small steps.'
-          ].filter(Boolean)
-        : []
+      if (aiModelStatus === 'ready') {
+        const challengeHints = selectedChallenge
+          ? [
+              selectedChallenge.hint,
+              'Tip: compare where your lines start and end against the gray outline.',
+              'Tip: adjust repeat counts and turn angles in small steps.'
+            ].filter(Boolean)
+          : []
 
-      if (challengeHints.length === 0) {
-        setChatMessages((prev) => [
-          ...prev,
-          { user: 'BCD AI Bot', text: 'All hints are used.' }
-        ])
-      } else if (challengeHintIndex < challengeHints.length) {
-        setChatMessages((prev) => [
-          ...prev,
-          { user: 'BCD AI Bot', text: challengeHints[challengeHintIndex] }
-        ])
-        setChallengeHintIndex((n) => n + 1)
-      } else {
-        setChatMessages((prev) => [
-          ...prev,
-          { user: 'BCD AI Bot', text: 'All hints are used.' }
-        ])
+        if (challengeHints.length === 0) {
+          setChatMessages((prev) => [
+            ...prev,
+            { user: 'BCD AI Bot', text: 'All hints are used.' }
+          ])
+        } else if (challengeHintIndex < challengeHints.length) {
+          setChatMessages((prev) => [
+            ...prev,
+            { user: 'BCD AI Bot', text: challengeHints[challengeHintIndex] }
+          ])
+          setChallengeHintIndex((n) => n + 1)
+        } else {
+          setChatMessages((prev) => [
+            ...prev,
+            { user: 'BCD AI Bot', text: 'All hints are used.' }
+          ])
+        }
+      } else if (selectedChallenge && !challengeComplete) {
+        setPendingChallengeHintFlush(true)
       }
     }
 
@@ -372,6 +390,39 @@ function AppInner() {
     setRunCount((c) => c + 1)
   }, [queuedRunAfterModelReady, aiModelStatus, gameMode, isRunning, guessedSuccessfully, challengeComplete])
 
+  // If the player ran while the model was still loading, we skipped posting hints.
+  // Flush the next queued hint once the model is ready so they still see it.
+  useEffect(() => {
+    if (aiModelStatus !== 'ready') return
+    if (gameMode !== 'challenge') return
+    if (challengeComplete) return
+    if (!pendingChallengeHintFlush) return
+    if (!selectedChallenge) return
+
+    const challengeHints = [
+      selectedChallenge.hint,
+      'Tip: compare where your lines start and end against the gray outline.',
+      'Tip: adjust repeat counts and turn angles in small steps.'
+    ].filter(Boolean)
+
+    setPendingChallengeHintFlush(false)
+
+    if (challengeHints.length === 0) return
+
+    setChallengeHintIndex((idx) => {
+      if (idx >= challengeHints.length) return idx
+      const text = challengeHints[idx]
+      setChatMessages((prev) => [...prev, { user: 'BCD AI Bot', text }])
+      return idx + 1
+    })
+  }, [
+    aiModelStatus,
+    gameMode,
+    challengeComplete,
+    pendingChallengeHintFlush,
+    selectedChallenge
+  ])
+
   const handleStop = () => {
     setIsRunning(false)
     setStopSequence((s) => s + 1)
@@ -389,6 +440,7 @@ function AppInner() {
     setGuessRound(0)
     setGuessedSuccessfully(false)
     setChatMessages(defaultChat())
+    setWorkspaceLlmContext({ ...EMPTY_WORKSPACE_LLM })
     setEditorResetKey((k) => k + 1)
     setTimeLeft(GAME_DURATION)
     setTimeUp(false)
@@ -657,6 +709,7 @@ function AppInner() {
         <section className='editor-section'>
           <BlocklyEditor
             onCodeChange={setCommands}
+            onWorkspaceContext={setWorkspaceLlmContext}
             highlightBlockId={highlightBlockId}
             resetKey={editorResetKey}
             initialXml={selectedChallenge ? selectedChallenge.starterXml : null}
@@ -683,11 +736,13 @@ function AppInner() {
               chatContext={{
                 mode: gameMode,
                 selectedWord,
+                challengeId: selectedChallenge?.id || '',
                 challengeTitle: selectedChallenge?.title || '',
                 challengeHint: selectedChallenge?.hint || '',
                 timerEnabled,
                 ghostAssistEnabled,
-                runCount
+                runCount,
+                workspaceLlm: workspaceLlmContext
               }}
               onSend={(text, meta) =>
                 setChatMessages((prev) => [

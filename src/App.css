@@ -498,6 +498,106 @@ body {
   color: rgba(255, 255, 255, 0.92);
 }
 
+/* Markdown inside chat bubbles (react-markdown) */
+.chat-markdown {
+  font-size: inherit;
+  line-height: 1.45;
+}
+
+.chat-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.chat-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.chat-markdown p {
+  margin: 0 0 0.45em;
+}
+
+.chat-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-markdown strong {
+  font-weight: 700;
+}
+
+.chat-markdown ul,
+.chat-markdown ol {
+  margin: 0.35em 0 0.5em;
+  padding-left: 1.2em;
+}
+
+.chat-markdown li {
+  margin: 0.15em 0;
+}
+
+.chat-markdown h1,
+.chat-markdown h2,
+.chat-markdown h3 {
+  font-size: 0.95em;
+  margin: 0.5em 0 0.25em;
+  font-weight: 700;
+}
+
+.chat-markdown hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin: 0.5em 0;
+}
+
+.chat-markdown code {
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.chat-markdown .chat-md-pre {
+  margin: 0.45em 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chat-markdown .chat-md-pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.chat-markdown a {
+  color: #3651d4;
+  text-decoration: underline;
+}
+
+.chat-markdown--user code {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chat-markdown--user .chat-md-pre {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.chat-markdown--user .chat-md-pre code {
+  color: inherit;
+}
+
+.chat-markdown--user a {
+  color: #dbe4ff;
+}
+
+.chat-markdown--user hr {
+  border-top-color: rgba(255, 255, 255, 0.25);
+}
+
 /* Animated typing indicator */
 .chat-typing {
   display: flex;

@@ -177,7 +177,10 @@ export const CHALLENGES = [
           ],
           close: true
         }
-      ]
+      ],
+      // Require ink near every edge of the closed shape (default scoring is too
+      // lenient for thick ghost bands when one whole side is missing).
+      edgeCoverage: { minHitRatio: 0.82, samplesPerEdge: 14 }
     }
   },
   {
