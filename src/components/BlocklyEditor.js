@@ -1145,21 +1145,17 @@ export function buildLessonFlyoutToolbox(allowedTypes = []) {
   allowedTypes.forEach((type) => {
     if (type === '__VARIABLES__') {
       contents.push(
-        { kind: 'label', text: 'Variables' },
         { kind: 'block', type: 'variables_set' },
         { kind: 'block', type: 'math_change' },
-        { kind: 'block', type: 'variables_get' },
-        { kind: 'sep', gap: '8' }
+        { kind: 'block', type: 'variables_get' }
       )
       return
     }
 
     if (type === '__PROCEDURES__') {
       contents.push(
-        { kind: 'label', text: 'Functions' },
         { kind: 'block', type: 'procedures_defnoreturn', fields: { NAME: 'my_function' } },
-        { kind: 'block', type: 'procedures_callnoreturn', extraState: { name: 'my_function' } },
-        { kind: 'sep', gap: '8' }
+        { kind: 'block', type: 'procedures_callnoreturn', extraState: { name: 'my_function' } }
       )
       return
     }

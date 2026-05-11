@@ -144,7 +144,7 @@ const localLessonMedia = (src, caption, options = {}) => {
 const LESSON_MEDIA = {
   l0: [localLessonMedia(
     '/lesson-media/photos/kid-coding.jpg',
-    'A welcoming desk setup with a screen and space to try things. In this first lesson it stands for the same idea as your blocks: one clear place to press Run and see the turtle respond right away.',
+    'A desk with coding books and a screen — the same kind of workspace you are sitting at right now. Every programmer starts here: one idea, one first step.',
     { imageSize: 'medium' }
   )],
   l2: [localLessonMedia(
@@ -262,11 +262,7 @@ const LESSON_MEDIA = {
     'The needle shows which way is forward. turtle heading is the angle your artist faces; reading it lets the program branch or adjust when the turtle points a certain direction.',
     { imageSize: 'medium' }
   )],
-  l21: [localLessonMedia(
-    '/lesson-media/photos/setup-workspace.jpg',
-    'Tools laid out before the main build are like the first blocks in a script: color, pen size, or starting position. Separating setup from the main loop keeps long programs easier to read and change.',
-    { imageSize: 'medium' }
-  )],
+  l21: [],
   l22: [localLessonMedia(
     '/lesson-media/custom/circle-simple.svg',
     'A circle from one radius is a single call in many graphics systems. draw circle in your lesson packages that idea: one block with a size parameter instead of many tiny segments.',
@@ -539,7 +535,7 @@ const LESSONS = [
   { id: 'l8', level: 2, title: 'Nested Pattern', goal: 'Use one repeat inside another repeat.', intention: 'A nested loop is a loop inside a loop. The inner loop finishes all of its steps, then the outer loop runs again. This is how you build radiating patterns — one small shape repeated in a circle.', task: 'Create nested loops with motion blocks.', steps: ['Connect a repeat block under start.', 'Drag another repeat block inside the first one.', 'Put move forward and turn right inside the inner repeat.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['repeat_times', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
   { id: 'l9', level: 3, title: 'First If Rule', goal: 'Make code run only when a rule is true.', intention: 'An if block decides whether the turtle takes a stroke or skips it.', task: 'Use if + compare.', steps: ['Drag an if block and connect it under start.', 'Drag a compare block into the diamond-shaped slot on the if block.', 'Put a move forward block inside the if block where it says "do".'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'op_number', 'move_forward'], focusBlocks: ['if_condition', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], requireStartLinked: true } },
   { id: 'l10', level: 3, title: 'Use Turtle X', goal: 'Use turtle position in a rule.', intention: 'Reading x lets the turtle change its path depending on where it sits on the grid.', task: 'Use turtle x in compare block.', steps: ['Drag turtle x.', 'Connect to compare.', 'Use compare inside if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x', 'op_number', 'move_forward'], focusBlocks: ['get_x', 'op_compare', 'if_condition'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare', 'get_x'], requireStartLinked: true } },
-  { id: 'l11', level: 3, title: 'Logic And / Or', goal: 'Combine two rules in one condition.', intention: 'AND/OR combines simple turtle checks into richer “should I draw?� decisions.', task: 'Use logic block inside if.', steps: ['Drag and/or block.', 'Fill both sides with compare checks.', 'Place in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_logic', 'op_compare', 'get_x', 'get_y', 'op_number', 'move_forward'], focusBlocks: ['op_logic', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_logic'], requireStartLinked: true } },
+  { id: 'l11', level: 3, title: 'Logic And / Or', goal: 'Combine two rules in one condition.', intention: 'AND/OR combines simple turtle checks into richer “should I draw?" decisions.', task: 'Use logic block inside if.', steps: ['Drag and/or block.', 'Fill both sides with compare checks.', 'Place in if condition.'], toolbox: ['when_run_clicked', 'if_condition', 'op_logic', 'op_compare', 'get_x', 'get_y', 'op_number', 'move_forward'], focusBlocks: ['op_logic', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_logic'], requireStartLinked: true } },
   { id: 'l12', level: 3, title: 'Logic Not', goal: 'Invert a condition using not.', intention: 'NOT flips a turtle rule so the opposite case gets the ink.', task: 'Use not in if condition.', steps: ['Drag not block.', 'Put compare inside not.', 'Use it in if.'], toolbox: ['when_run_clicked', 'if_condition', 'op_not', 'op_compare', 'op_number', 'get_y', 'move_forward'], focusBlocks: ['op_not', 'op_compare'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_not'], requireStartLinked: true } },
   { id: 'l13', level: 4, title: 'Create a Score Variable', goal: 'Make your first memory box.', intention: 'A variable is scratch memory your turtle script can read on the next step.', task: 'Use set variable.', steps: ['Click on the Variables section in the block panel on the left.', 'Drag a set variable block and connect it under start.', 'Set the value to a number, like 0.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set'], rules: { requiredTypes: ['when_run_clicked', 'variables_set'], requireStartLinked: true } },
   { id: 'l14', level: 4, title: 'Change a Variable', goal: 'Increase or decrease stored value.', intention: 'Changing a stored number lets the turtle react differently as the run progresses.', task: 'Use change variable block.', steps: ['Set a variable first.', 'Add change block.', 'Use number value.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'op_number'], focusBlocks: ['variables_set', 'math_change'], rules: { requiredTypes: ['when_run_clicked', 'variables_set', 'math_change'], requireStartLinked: true } },
@@ -557,7 +553,7 @@ const LESSONS = [
   { id: 'l26', level: 7, title: 'Fix Wrong Block Type', goal: 'Swap incorrect blocks for correct ones.', intention: 'If your drawing does not match the dashed guide, the right fix is often swapping one block for a different kind. Adding a turn makes the turtle change direction at each corner — without it, the turtle just goes straight.', task: 'Use move and turn, not only move.', steps: ['Add a repeat block with move forward inside.', 'Run it and notice the turtle only draws a straight line.', 'Add turn right after move forward inside the repeat, then run again to see the square form.'], toolbox: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right', 'op_number'], focusBlocks: ['move_forward', 'turn_right'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'move_forward', 'turn_right'], requireStartLinked: true } },
   { id: 'l27', level: 7, title: 'Debug with Fast Tests', goal: 'Reset and rerun quickly while fixing.', intention: 'Good debugging means running your code, seeing what changed, adjusting one thing, and running again. Clear screen wipes previous marks so you can compare runs, and wait gives you time to see what happened.', task: 'Use clear + wait + draw.', steps: ['Add clear screen right after start so old marks disappear on each run.', 'Add draw circle after the clear.', 'Add wait seconds after the draw so you can see the result before the run ends.'], toolbox: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds', 'op_number'], focusBlocks: ['clear_screen', 'wait_seconds', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'clear_screen', 'draw_circle', 'wait_seconds'], requireStartLinked: true } },
   { id: 'l28', level: 8, title: 'Remix Starter', goal: 'Mix at least 5 different block types.', intention: 'Remixing motion, color, and shape blocks surfaces new turtle doodles fast.', task: 'Use 5 non-number blocks in one script.', steps: ['Start with when Run clicked.', 'Add at least five different block types — try mixing move, color, repeat, circle, and clear screen.', 'Run and check — keep adjusting until it passes.'], toolbox: ['when_run_clicked', 'clear_screen', 'set_color', 'color_value', 'set_pen_size', 'move_forward', 'turn_right', 'repeat_times', 'draw_circle', 'op_number'], focusBlocks: ['set_color', 'repeat_times', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked'], minNonNumberBlocks: 5, requireStartLinked: true } },
-  { id: 'l29', level: 8, title: 'Invent a Mini Tool', goal: 'Create your own drawing behavior.', intention: 'Your own if + loop + shape combo becomes a tiny turtle “tool� you can reuse.', task: 'Use loop + rule + shape together.', steps: ['Add repeat block.', 'Add if with compare.', 'Use circle or polygon.'], toolbox: ['when_run_clicked', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'draw_polygon'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition'], oneOfTypes: ['draw_circle', 'draw_polygon'], requireStartLinked: true } },
+  { id: 'l29', level: 8, title: 'Invent a Mini Tool', goal: 'Create your own drawing behavior.', intention: 'Your own if + loop + shape combo becomes a tiny turtle "tool" you can reuse.', task: 'Use loop + rule + shape together.', steps: ['Add repeat block.', 'Add if with compare.', 'Use circle or polygon.'], toolbox: ['when_run_clicked', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'move_forward', 'turn_right'], focusBlocks: ['repeat_times', 'if_condition', 'draw_polygon'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition'], oneOfTypes: ['draw_circle', 'draw_polygon'], requireStartLinked: true } },
   { id: 'l30', level: 8, title: 'Recursion Basics', goal: 'Build your first self-calling function.', intention: 'A function that calls itself can spiral the turtle outward if each call shrinks the job and stops cleanly.', task: 'Define a function that calls itself with a counter and a stop condition.', steps: ['Create a function named spiralStep — define it with a variable as a counter.', 'Inside it, add move forward, turn right, then change the counter variable by -1.', 'Add an if block inside the function: if counter > 0, call spiralStep again — this stops the chain when counter reaches 0.'], toolbox: ['when_run_clicked', '__PROCEDURES__', '__VARIABLES__', 'if_condition', 'op_compare', 'op_math', 'op_number', 'move_forward', 'turn_right'], focusBlocks: ['if_condition', 'op_compare', 'variables_set'], rules: { requiredTypes: ['when_run_clicked', 'if_condition', 'op_compare'], oneOfTypes: ['procedures_defnoreturn', 'procedures_callnoreturn'], requireStartLinked: true } },
   { id: 'l31', level: 8, title: 'Capstone Build', goal: 'Build a full mini project with systems.', intention: 'A capstone turtle scene ties color, motion, variables, and rules into one coherent drawing.', task: 'Use start + loop + condition + variable + shape.', steps: ['Add setup blocks under start: clear screen, set color, set pen size.', 'Create at least one variable and give it a starting value.', 'Add a repeat block with an if rule inside, and use a shape block like draw circle or draw polygon.'], toolbox: ['when_run_clicked', '__VARIABLES__', 'repeat_times', 'if_condition', 'op_compare', 'op_number', 'draw_circle', 'draw_polygon', 'set_color', 'color_value', 'move_forward', 'turn_right'], focusBlocks: ['variables_set', 'repeat_times', 'if_condition', 'draw_circle'], rules: { requiredTypes: ['when_run_clicked', 'repeat_times', 'if_condition', 'variables_set'], oneOfTypes: ['draw_circle', 'draw_polygon'], minNonNumberBlocks: 7, requireStartLinked: true } },
   { id: 'l32', level: 9, title: 'Move Backward', goal: 'Control reverse movement.', intention: 'Move backward makes the turtle step in reverse without turning around. It is useful for creating symmetry, retracing a path, or navigating tight spaces where spinning the turtle would go out of bounds.', task: 'Use move backward under start.', steps: ['Place when Run clicked.', 'Add move backward below it.', 'Run and notice the turtle moves backward but still faces the same direction.'], toolbox: ['when_run_clicked', 'move_backward', 'op_number'], focusBlocks: ['move_backward'], rules: { requiredTypes: ['when_run_clicked', 'move_backward'], requireStartLinked: true } },
@@ -657,7 +653,7 @@ function getLessonBlueprint(lessonNumber, level) {
   }
 
   // Ghost (x, y) uses the same mapping as the dashed preview: canvasX = w/2 + x, canvasY = h/2 - y.
-  // move_forward(50) from center with heading 0 draws 50px to the right on the canvas �' (0,0)-(50,0) here.
+    // move_forward(50) from center with heading 0 draws 50px to the right on the canvas: (0,0)-(50,0).
   const lineGhostShort = { lines: [{ points: [{ x: 0, y: 0 }, { x: 50, y: 0 }] }] }
   const lineGhostRepeat4 = { lines: [{ points: [{ x: 0, y: 0 }, { x: 200, y: 0 }] }] }
   const cornerGhost = {
@@ -1196,12 +1192,12 @@ function blockUsagePrompt(type) {
 function lessonFallbackVisual(level) {
   const byLevel = {
     1: '🚀',
-    2: '�',
+    2: '🔄',
     3: '🧠',
     4: '📦',
     5: '🧭',
-    6: '🛠�',
-    7: '�',
+    6: '🛠️',
+    7: '🐛',
     8: '🎨'
   }
   return byLevel[level] || '✨'
@@ -1231,6 +1227,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
   const ghostPassRef = useRef(false)
   const runFinishResolverRef = useRef(null)
   const awaitingRunFinishRef = useRef(false)
+  const runStartedDuringCheckRef = useRef(false)
   const isIntroLesson = lesson.id === 'l0'
   const lessonMedia = LESSON_MEDIA[lesson.id] || []
   const lessonContext = LESSON_REAL_WORLD_CONTEXT[lesson.id] || null
@@ -1313,13 +1310,18 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
     setStopSequence(0)
     ghostPassRef.current = false
     awaitingRunFinishRef.current = false
+    runStartedDuringCheckRef.current = false
     runFinishResolverRef.current = null
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [lesson.id])
 
   const handleCanvasRunStateChange = (running) => {
     setIsRunning(running)
+    if (running && awaitingRunFinishRef.current) {
+      runStartedDuringCheckRef.current = true
+    }
     if (!running && awaitingRunFinishRef.current && runFinishResolverRef.current) {
+      if (!runStartedDuringCheckRef.current) return
       awaitingRunFinishRef.current = false
       const resolve = runFinishResolverRef.current
       runFinishResolverRef.current = null
@@ -1335,6 +1337,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
     if (!workspaceRef.current || checking) return
     ghostPassRef.current = false
     awaitingRunFinishRef.current = true
+    runStartedDuringCheckRef.current = false
     const runFinished = new Promise((resolve) => {
       runFinishResolverRef.current = resolve
     })
@@ -1354,6 +1357,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
     ])
 
     awaitingRunFinishRef.current = false
+    runStartedDuringCheckRef.current = false
     if (runFinishResolverRef.current) {
       runFinishResolverRef.current = null
     }
@@ -1406,6 +1410,15 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
             Coding means giving clear instructions to a computer. Your program starts at the top block
             and runs down, one step at a time.
           </p>
+          <h3 className='lesson-mini-title'>What Is the Turtle?</h3>
+          <p className='lesson-long-text'>
+            The turtle is your drawing cursor on the canvas. It starts in the center and leaves a line
+            wherever it walks — like dragging a marker across paper. You control it entirely through
+            blocks: tell it to move forward a certain distance, turn left or right by a number of
+            degrees, lift its pen so it stops drawing, or put the pen back down to start marking again.
+            Every line on the canvas comes from the turtle following your instructions, one block at a
+            time.
+          </p>
         </>
       )}
 
@@ -1414,7 +1427,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         {lessonOpeningLeadIn(lesson, isIntroLesson)}
       </p>
 
-      {/* Block focus grid � show tools before introducing concepts */}
+      {/* Block focus grid — show tools before introducing concepts */}
       <section className='lesson-block-focus-grid'>
         {lesson.focusBlocks.map((type) => (
           <article key={type} className='lesson-block-focus-item lesson-focus-card'>
@@ -1427,31 +1440,24 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         ))}
       </section>
 
-      {/* l0: what you will accomplish */}
-      {isIntroLesson && (
-        <section className='lesson-focus-card'>
-          <h3 className='lesson-mini-title'>Lesson Goal</h3>
-          <p className='lesson-long-text'>
-            By the end of this lesson you will run your very first block program and watch your turtle
-            draw a line on the canvas.
-          </p>
-          <ul className='lesson-steps'>
-            <li>Blocks are pieces of code you snap together.</li>
-            <li>A program runs from the top block down to the bottom.</li>
-            <li>Small changes to your blocks change what appears on the canvas.</li>
-          </ul>
+      {/* Real-world context shown right after the blocks are introduced */}
+      {lessonContext && (
+        <section className='lesson-focus-card lesson-focus-card--context'>
+          <h3 className='lesson-mini-title'>Why Programmers Use This</h3>
+          <p className='lesson-long-text'><strong>Relevance:</strong> {lessonContext.relevance}</p>
+          <p className='lesson-long-text'><strong>Utility:</strong> {lessonContext.utility}</p>
         </section>
       )}
 
-      {/* Non-intro: what you will learn (goal already shown above) */}
+      {/* Non-intro: main point of this lesson */}
       {!isIntroLesson && (
         <section className='lesson-focus-card'>
-          <h3 className='lesson-mini-title'>What You'll Learn</h3>
+          <h3 className='lesson-mini-title'>The Main Point</h3>
           <p className='lesson-long-text'>{lesson.intention}</p>
         </section>
       )}
 
-      {/* Word Help � vocabulary before the task */}
+      {/* Word Help — vocabulary before the task */}
       {LESSON_WORD_HELP[lesson.id] && (
         <section className='lesson-focus-card'>
           <h3 className='lesson-mini-title'>Word Help</h3>
@@ -1463,25 +1469,9 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         </section>
       )}
 
-      {/* Mission � right before the studio so it is fresh when they start building */}
-      <section className='lesson-focus-card lesson-focus-card--mission'>
-        <h3 className='lesson-mini-title lesson-think-prompt'>Your Mission</h3>
-        {isIntroLesson ? (
-          <>
-            <p className='lesson-long-text'>
-              Build this tiny program: snap <strong>move forward</strong> under{' '}
-              <strong>when Run clicked</strong>, then press Run.
-            </p>
-            <p className='lesson-long-text'>
-              Your turtle should move forward and draw its first line.
-            </p>
-          </>
-        ) : (
-          <p className='lesson-long-text'>{lesson.task}</p>
-        )}
-      </section>
-
-      {/* Media gallery � reference images near the task */}
+      {/* Media gallery first so the image provides visual context before the mission */}
+      {/* Mission — right before the studio so it is fresh when they start building */}
+      {/* Media gallery — reference images near the task */}
       {lessonMedia.length > 0 && (
         <div className={`lesson-photo-gallery ${lessonMedia.length > 1 ? 'is-multi' : 'is-single'}`}>
           {lessonMedia.map((media) => (
@@ -1504,18 +1494,23 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         </div>
       )}
 
-      {/* l0 only: debugging tips before the studio */}
-      {isIntroLesson && (
-        <section className='lesson-mini-section lesson-focus-card'>
-          <h3 className='lesson-mini-title'>If Something Looks Wrong</h3>
-          <ul className='lesson-steps'>
-            <li>Make sure move forward is snapped directly under when Run clicked.</li>
-            <li>Press Run again after making any changes.</li>
-            <li>If the line is too short, increase the number on the move block.</li>
-            <li>If the turtle did not move at all, drag move forward from the block menu and try again.</li>
-          </ul>
-        </section>
-      )}
+      {/* Mission */}
+      <section className='lesson-focus-card lesson-focus-card--mission'>
+        <h3 className='lesson-mini-title lesson-think-prompt'>Your Mission</h3>
+        {isIntroLesson ? (
+          <>
+            <p className='lesson-long-text'>
+              Build this tiny program: snap <strong>move forward</strong> under{' '}
+              <strong>when Run clicked</strong>, then press Run.
+            </p>
+            <p className='lesson-long-text'>
+              Your turtle should move forward and draw its first line.
+            </p>
+          </>
+        ) : (
+          <p className='lesson-long-text'>{lesson.task}</p>
+        )}
+      </section>
 
       {/* Unified studio for all lessons */}
       <div className='studio-shell'>
@@ -1563,29 +1558,37 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
         )}
       </div>
 
+      {/* l0 only: debugging tips — shown after the studio so the user has already tried running */}
+      {isIntroLesson && (
+        <section className='lesson-mini-section lesson-focus-card'>
+          <h3 className='lesson-mini-title'>If Something Looks Wrong</h3>
+          <ul className='lesson-steps'>
+            <li>Make sure move forward is snapped directly under when Run clicked.</li>
+            <li>Press Run again after making any changes.</li>
+            <li>If the line is too short, increase the number on the move block.</li>
+            <li>If the turtle did not move at all, drag move forward from the block menu and try again.</li>
+          </ul>
+        </section>
+      )}
+
       <p className={`lesson-status-message ${isDone ? 'done' : ''}`}>{message}</p>
 
       <section className='lesson-focus-card lesson-focus-card--try'>
         <h3 className='lesson-mini-title lesson-think-prompt'>Try This Next</h3>
-        <p className='lesson-long-text'>{lessonChallengeText(lesson)}</p>
+        {!isDone ? (
+          <div className='takeaway-lock'>Finish the lesson first.</div>
+        ) : (
+          <p className='lesson-long-text'>{lessonChallengeText(lesson)}</p>
+        )}
       </section>
 
       <hr className='lesson-divider' />
 
-      {/* Real-world context � after building, as reflection */}
-      {lessonContext && (
-        <section className='lesson-focus-card lesson-focus-card--context'>
-          <h3 className='lesson-mini-title'>Why Programmers Use This</h3>
-          <p className='lesson-long-text'><strong>Relevance:</strong> {lessonContext.relevance}</p>
-          <p className='lesson-long-text'><strong>Utility:</strong> {lessonContext.utility}</p>
-        </section>
-      )}
-
       <section className='lesson-takeaway lesson-focus-card lesson-focus-card--recap'>
         <h3>After-Lesson Takeaways</h3>
         {!isDone && (
-          <div className='takeaway-lock' title='Pass the mini studio with Run + Check Lesson first.'>
-            Locked until you pass the mini studio above (Run + Check Lesson).
+          <div className='takeaway-lock' title='Hit Run + Check Lesson to unlock.'>
+            Finish the lesson first.
           </div>
         )}
         {isDone ? (
@@ -1598,7 +1601,7 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
             </ul>
           </>
         ) : (
-          <p>Finish the mini studio and hit Run + Check Lesson so it turns green � then this recap unlocks.</p>
+          <p>Complete the mini studio above to unlock this recap.</p>
         )}
       </section>
 

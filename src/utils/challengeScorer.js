@@ -5,11 +5,16 @@ const TOLERANCE_PX = 20
 // Fraction of user's drawn pixels that must fall inside the tolerance zone.
 const SCORE_THRESHOLD = 0.65
 // Fraction of ghost target pixels that must be covered by user drawing.
-const GHOST_COVERAGE_THRESHOLD = 0.55
+// Note: ghost is rendered with a wide tolerance band (20px), while the
+// turtle's default pen is much thinner (3px). A perfect thin stroke only
+// covers a small fraction of that wide target band, so this threshold must
+// be calibrated accordingly.
+const GHOST_COVERAGE_THRESHOLD = 0.12
 
-// Minimum drawn pixels before we attempt scoring (avoids divide-by-zero
-// and trivial wins from a single dot inside the ghost zone).
-const MIN_USER_PIXELS = 300
+// Minimum drawn pixels before we attempt scoring (avoids divide-by-zero).
+// Ghost coverage threshold already prevents trivial dot-wins, so this just
+// needs to be above a literal single-pixel tap.
+const MIN_USER_PIXELS = 50
 
 /**
  * Scores the user's drawing against the ghost preview shape.
