@@ -138,7 +138,7 @@ function ChatWindow({ messages: externalMessages = null, onSend = null, onModelS
   const messagesRef = useRef(null)
   const challengeTipSentForIdRef = useRef('')
   const prevChallengeIdRef = useRef('')
-  const { status, loadProgress, generate } = useTextGeneration()
+  const { status, loadProgress, generate, reload } = useTextGeneration()
 
   const usingExternalMessages = Array.isArray(externalMessages)
   const displayedMessages = usingExternalMessages ? externalMessages : messages
@@ -279,7 +279,13 @@ function ChatWindow({ messages: externalMessages = null, onSend = null, onModelS
   }
 
   const isReady = status === 'ready'
+  const isUnavailable = status === 'error'
   const statusLabel = STATUS_LABEL[status]
+  const inputPlaceholder = isReady
+    ? 'Give me a hint...'
+    : isUnavailable
+      ? 'AI helper unavailable'
+      : 'Loading AI helper...'
 
   return (
     <div className='chat-window'>
@@ -325,6 +331,23 @@ function ChatWindow({ messages: externalMessages = null, onSend = null, onModelS
           </div>
         )}
 
+        {status === 'error' && (
+          <div className='chat-bubble chat-bubble--assistant'>
+            <span className='chat-bubble-label'>🤖 Bot</span>
+            <p>
+              I couldn&apos;t load the helper model. Drawing guesses still work when you press Run.
+              {' '}
+              <button
+                type='button'
+                onClick={reload}
+                style={{ marginLeft: '0.35rem', textDecoration: 'underline', cursor: 'pointer' }}
+              >
+                Try again
+              </button>
+            </p>
+          </div>
+        )}
+
         {(status === 'generating' || introTyping || streamingText) && (
           <div className='chat-bubble chat-bubble--assistant'>
             <span className='chat-bubble-label'>🤖 Bot</span>
@@ -348,7 +371,7 @@ function ChatWindow({ messages: externalMessages = null, onSend = null, onModelS
           type='text'
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isReady ? 'Give me a hint...' : 'Loading AI helper...'}
+          placeholder={inputPlaceholder}
           disabled={!isReady}
         />
         <button type='submit' disabled={!isReady || !input.trim()}>

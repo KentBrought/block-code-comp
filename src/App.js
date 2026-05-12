@@ -87,7 +87,6 @@ function AppInner() {
   const [challengeHintIndex, setChallengeHintIndex] = useState(0)
   const [pendingChallengeHintFlush, setPendingChallengeHintFlush] = useState(false)
   const [aiModelStatus, setAiModelStatus] = useState('idle')
-  const [queuedRunAfterModelReady, setQueuedRunAfterModelReady] = useState(false)
 
   const [editorResetKey, setEditorResetKey] = useState(0)
   const [startTourAfterWordSelect, setStartTourAfterWordSelect] = useState(false)
@@ -330,10 +329,6 @@ function AppInner() {
   }, [navigate])
 
   const handleRun = () => {
-    if (gameMode === 'classic' && aiModelStatus !== 'ready') {
-      setQueuedRunAfterModelReady(true)
-      return
-    }
     if (isRunning) return
     if (guessedSuccessfully) return
     if (challengeComplete) return
@@ -375,20 +370,6 @@ function AppInner() {
     setRunSequence((s) => s + 1)
     setRunCount((c) => c + 1)
   }
-
-  useEffect(() => {
-    if (!queuedRunAfterModelReady) return
-    if (gameMode !== 'classic') {
-      setQueuedRunAfterModelReady(false)
-      return
-    }
-    if (aiModelStatus !== 'ready') return
-    if (isRunning || guessedSuccessfully || challengeComplete) return
-
-    setQueuedRunAfterModelReady(false)
-    setRunSequence((s) => s + 1)
-    setRunCount((c) => c + 1)
-  }, [queuedRunAfterModelReady, aiModelStatus, gameMode, isRunning, guessedSuccessfully, challengeComplete])
 
   // If the player ran while the model was still loading, we skipped posting hints.
   // Flush the next queued hint once the model is ready so they still see it.
@@ -483,18 +464,32 @@ function AppInner() {
   }
 
   const handleGuessComplete = useCallback(
-    async ({ categories }) => {
+    async ({ categories, error, emptyDrawing }) => {
       if (gameMode !== 'classic') return
       if (!selectedWord) return
       if (guessedSuccessfully) return
 
-      const allCategories = Array.isArray(categories) ? categories : []
-      if (allCategories.length === 0) {
+      if (emptyDrawing) {
         setChatMessages((prev) => [
           ...prev,
           {
             user: 'BCD AI Bot',
-            text: "Hmm, I couldn't read that drawing. Please redraw it and click Run again."
+            text: "I don't see a drawing yet. Try using the blocks to draw something, then click Run again."
+          }
+        ])
+        return
+      }
+
+      const allCategories = Array.isArray(categories) ? categories : []
+      if (allCategories.length === 0) {
+        const message = error
+          ? `I couldn't analyze that drawing (${error}). Please try Run again.`
+          : "Hmm, I couldn't read that drawing. Please redraw it and click Run again."
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            user: 'BCD AI Bot',
+            text: message
           }
         ])
         return
@@ -666,8 +661,7 @@ function AppInner() {
             <button
               className='run-button'
               onClick={handleRun}
-              disabled={gameMode === 'classic' && aiModelStatus !== 'ready'}
-              title={gameMode === 'classic' && aiModelStatus !== 'ready' ? 'Loading AI model...' : 'Run program'}
+              title='Run program'
             >
               <span className='run-icon'>&gt;</span> Run
             </button>
@@ -723,8 +717,10 @@ function AppInner() {
               runSequence={runSequence}
               stopSequence={stopSequence}
               onHighlight={setHighlightBlockId}
+              onGuessComplete={handleGuessComplete}
               onChallengeScore={handleChallengeScore}
               onRunStateChange={setIsRunning}
+              showClassification={gameMode === 'classic'}
               ghostPreview={ghostAssistEnabled ? activeGhostPreview : null}
               scoreGhostPreview={ghostAssistEnabled ? activeGhostPreview : null}
             />

@@ -7,6 +7,10 @@ import {
   registerContinuousToolbox
 } from '@blockly/continuous-toolbox'
 import { buildWorkspaceLlmContext } from '../utils/buildWorkspaceLlmContext'
+import {
+  syncWorkspaceRunState,
+  workspaceToExecutableCode
+} from '../utils/workspaceExecutableCode'
 
 registerFieldColour()
 Blockly.Msg.PROCEDURES_DEFNORETURN_DO = ''
@@ -1038,7 +1042,8 @@ const BlocklyEditor = ({ onCodeChange, onWorkspaceContext, highlightBlockId, res
         metricsManager: 'ContinuousMetrics'
       },
       move: { scrollbars: true, drag: true, wheel: true },
-      zoom: { controls: true, wheel: true, startScale: 1, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
+      zoom: { controls: true, wheel: true, startScale: 1, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 },
+      disable: true
     })
 
     const startXmlText =
@@ -1058,12 +1063,15 @@ const BlocklyEditor = ({ onCodeChange, onWorkspaceContext, highlightBlockId, res
       }
     }
 
-    workspace.current.addChangeListener(() => {
+    const pushGeneratedCode = () => {
       ensureProcedureNames(workspace.current)
-      onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
+      syncWorkspaceRunState(workspace.current)
+      onCodeChange(workspaceToExecutableCode(workspace.current))
       pushWorkspaceContext()
-    })
-    onCodeChange(javascriptGenerator.workspaceToCode(workspace.current))
+    }
+
+    workspace.current.addChangeListener(pushGeneratedCode)
+    pushGeneratedCode()
     pushWorkspaceContext()
 
     return () => workspace.current && workspace.current.dispose()

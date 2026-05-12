@@ -1,8 +1,11 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import * as Blockly from 'blockly'
-import { javascriptGenerator } from 'blockly/javascript'
 import { buildLessonFlyoutToolbox, customTheme, initBlocks } from '../components/BlocklyEditor'
+import {
+  syncWorkspaceRunState,
+  workspaceToExecutableCode
+} from '../utils/workspaceExecutableCode'
 import DrawingCanvas from '../components/DrawingCanvas'
 import './LessonsPage.css'
 
@@ -678,7 +681,11 @@ function getLessonBlueprint(lessonNumber, level) {
 
   const byLesson = {
     0: {
-      starterXml: STARTER_XML.basic,
+      starterXml: `
+        <xml xmlns="https://developers.google.com/blockly/xml">
+          <block type="when_run_clicked" x="30" y="24"></block>
+        </xml>
+      `,
       ghostPreview: lineGhostShort
     },
     1: {
@@ -1267,16 +1274,20 @@ function LessonDetail({ lesson, isDone, onComplete, onBackToCatalog, onNext, onP
       toolbox: buildLessonFlyoutToolbox(lesson.toolbox),
       trashcan: true,
       move: { scrollbars: false, drag: true, wheel: false },
-      zoom: { controls: false, wheel: false, startScale: 0.95, maxScale: 1.6, minScale: 0.6, scaleSpeed: 1.1 }
+      zoom: { controls: false, wheel: false, startScale: 0.95, maxScale: 1.6, minScale: 0.6, scaleSpeed: 1.1 },
+      disable: true
     })
     Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(starterXml), workspaceRef.current)
     ensureNumberInputs(workspaceRef.current)
     ensureProcedureNames(workspaceRef.current)
-    workspaceRef.current.addChangeListener(() => {
+    const pushGeneratedCode = () => {
       ensureProcedureNames(workspaceRef.current)
-      setCommands(javascriptGenerator.workspaceToCode(workspaceRef.current))
-    })
-    setCommands(javascriptGenerator.workspaceToCode(workspaceRef.current))
+      syncWorkspaceRunState(workspaceRef.current)
+      setCommands(workspaceToExecutableCode(workspaceRef.current))
+    }
+
+    workspaceRef.current.addChangeListener(pushGeneratedCode)
+    pushGeneratedCode()
 
     const previewMap = {}
     lesson.focusBlocks.forEach((type) => {

@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect } from 'react'
+import { canvasHasDrawing, classifyCanvas } from '../utils/imageClassifier'
 import { scoreDrawingAgainstGhost } from '../utils/challengeScorer'
 
 const TWEMOJI_BASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg'
@@ -22,10 +23,12 @@ const DrawingCanvas = ({
   runSequence,
   stopSequence,
   onHighlight,
+  onGuessComplete,
   onChallengeScore,
   onRunStateChange,
   ghostPreview,
   scoreGhostPreview,
+  showClassification = false,
   defaultPointerStyle = 'arrow'
 }) => {
   const bgCanvasRef = useRef(null)
@@ -36,8 +39,10 @@ const DrawingCanvas = ({
   const executedRunSequenceRef = useRef(0)
   const commandsRef = useRef(commands)
   const onHighlightRef = useRef(onHighlight)
+  const onGuessCompleteRef = useRef(onGuessComplete)
   const onChallengeScoreRef = useRef(onChallengeScore)
   const onRunStateChangeRef = useRef(onRunStateChange)
+  const showClassificationRef = useRef(showClassification)
   const ghostPreviewRef = useRef(ghostPreview)
   const scoreGhostPreviewRef = useRef(scoreGhostPreview)
   const gridVisibleRef = useRef(true)
@@ -48,11 +53,13 @@ const DrawingCanvas = ({
   useEffect(() => {
     commandsRef.current = commands
     onHighlightRef.current = onHighlight
+    onGuessCompleteRef.current = onGuessComplete
     onChallengeScoreRef.current = onChallengeScore
     onRunStateChangeRef.current = onRunStateChange
+    showClassificationRef.current = showClassification
     ghostPreviewRef.current = ghostPreview
     scoreGhostPreviewRef.current = scoreGhostPreview
-  }, [commands, onHighlight, onChallengeScore, onRunStateChange, ghostPreview, scoreGhostPreview])
+  }, [commands, onHighlight, onGuessComplete, onChallengeScore, onRunStateChange, showClassification, ghostPreview, scoreGhostPreview])
 
   useEffect(() => {
     runIdRef.current += 1
@@ -794,6 +801,37 @@ const DrawingCanvas = ({
       if (!isStale() && onChallengeScoreRef.current && scoreGhostPreviewRef.current && drawingCanvas) {
         const ghostScore = scoreDrawingAgainstGhost(drawingCanvas, scoreGhostPreviewRef.current)
         onChallengeScoreRef.current(ghostScore)
+      }
+
+      if (!isStale() && showClassificationRef.current) {
+        try {
+          assertActive()
+          const canvasForClassification = drawingCanvas || bgCanvas
+          if (!canvasForClassification) {
+            if (onGuessCompleteRef.current) {
+              onGuessCompleteRef.current({ categories: [], emptyDrawing: true })
+            }
+          } else if (!canvasHasDrawing(canvasForClassification)) {
+            if (onGuessCompleteRef.current) {
+              onGuessCompleteRef.current({ categories: [], emptyDrawing: true })
+            }
+          } else {
+            const result = await classifyCanvas(canvasForClassification)
+            const categories =
+              result?.classifications?.[0]?.categories || null
+
+            if (onGuessCompleteRef.current) {
+              onGuessCompleteRef.current({ categories: categories || [] })
+            }
+          }
+        } catch (err) {
+          if (!isStale() && onGuessCompleteRef.current) {
+            onGuessCompleteRef.current({
+              categories: [],
+              error: err?.message || 'Failed to classify drawing.'
+            })
+          }
+        }
       }
 
       } catch (err) {

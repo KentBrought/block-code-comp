@@ -45,8 +45,10 @@ async function generate({ messages, options = {} }) {
 self.onmessage = async ({ data }) => {
   try {
     if (data.type === 'LOAD') await loadModel();
-    if (data.type === 'GENERATE') await generate(data.payload);
+    else if (data.type === 'GENERATE') await generate(data.payload);
   } catch (err) {
-    self.postMessage({ type: 'ERROR', payload: err.message });
+    const message = err?.message || String(err);
+    const type = data.type === 'GENERATE' ? 'GENERATE_ERROR' : 'LOAD_ERROR';
+    self.postMessage({ type, payload: message });
   }
 };
